@@ -4,14 +4,13 @@ go 1.24
 
 require (
 	cloud.google.com/go/compute/metadata v0.6.0
-	entgo.io/ent v0.14.2
+	entgo.io/ent v0.14.4
 	github.com/AppsFlyer/go-sundheit v0.6.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/beevik/etree v1.5.1
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/dexidp/dex/api/v2 v2.3.0
-	github.com/fsnotify/fsnotify v1.8.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/go-ldap/ldap/v3 v3.4.11
