@@ -209,7 +209,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "connector_id", Type: field.TypeString},
-		{Name: "federated_user_id", Type: field.TypeString},
+		{Name: "connector_subject", Type: field.TypeString},
 		{Name: "platform_user_federated_identities", Type: field.TypeInt},
 	}
 	// PlatformFederatedIdentitiesTable holds the schema information for the "platform_federated_identities" table.
@@ -227,7 +227,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "platformfederatedidentity_connector_id_federated_user_id",
+				Name:    "platformfederatedidentity_connector_id_connector_subject",
 				Unique:  true,
 				Columns: []*schema.Column{PlatformFederatedIdentitiesColumns[3], PlatformFederatedIdentitiesColumns[4]},
 			},
@@ -289,7 +289,7 @@ var (
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "platform_app_role_tokens", Type: field.TypeInt},
-		{Name: "platform_user_created_tokens", Type: field.TypeInt},
+		{Name: "owner_id", Type: field.TypeInt},
 	}
 	// PlatformTokensTable holds the schema information for the "platform_tokens" table.
 	PlatformTokensTable = &schema.Table{
@@ -312,7 +312,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "platformtoken_platform_user_created_tokens",
+				Name:    "platformtoken_owner_id",
 				Unique:  false,
 				Columns: []*schema.Column{PlatformTokensColumns[8]},
 			},

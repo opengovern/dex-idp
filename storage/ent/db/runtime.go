@@ -272,10 +272,10 @@ func init() {
 	platformfederatedidentityDescConnectorID := platformfederatedidentityFields[0].Descriptor()
 	// platformfederatedidentity.ConnectorIDValidator is a validator for the "connector_id" field. It is called by the builders before save.
 	platformfederatedidentity.ConnectorIDValidator = platformfederatedidentityDescConnectorID.Validators[0].(func(string) error)
-	// platformfederatedidentityDescFederatedUserID is the schema descriptor for federated_user_id field.
-	platformfederatedidentityDescFederatedUserID := platformfederatedidentityFields[1].Descriptor()
-	// platformfederatedidentity.FederatedUserIDValidator is a validator for the "federated_user_id" field. It is called by the builders before save.
-	platformfederatedidentity.FederatedUserIDValidator = platformfederatedidentityDescFederatedUserID.Validators[0].(func(string) error)
+	// platformfederatedidentityDescConnectorSubject is the schema descriptor for connector_subject field.
+	platformfederatedidentityDescConnectorSubject := platformfederatedidentityFields[1].Descriptor()
+	// platformfederatedidentity.ConnectorSubjectValidator is a validator for the "connector_subject" field. It is called by the builders before save.
+	platformfederatedidentity.ConnectorSubjectValidator = platformfederatedidentityDescConnectorSubject.Validators[0].(func(string) error)
 	platformidentityroleassignmentMixin := schema.PlatformIdentityRoleAssignment{}.Mixin()
 	platformidentityroleassignmentMixinFields0 := platformidentityroleassignmentMixin[0].Fields()
 	_ = platformidentityroleassignmentMixinFields0
@@ -311,15 +311,15 @@ func init() {
 	// platformtoken.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	platformtoken.UpdateDefaultUpdateTime = platformtokenDescUpdateTime.UpdateDefault.(func() time.Time)
 	// platformtokenDescPublicID is the schema descriptor for public_id field.
-	platformtokenDescPublicID := platformtokenFields[0].Descriptor()
+	platformtokenDescPublicID := platformtokenFields[1].Descriptor()
 	// platformtoken.PublicIDValidator is a validator for the "public_id" field. It is called by the builders before save.
 	platformtoken.PublicIDValidator = platformtokenDescPublicID.Validators[0].(func(string) error)
 	// platformtokenDescSecretHash is the schema descriptor for secret_hash field.
-	platformtokenDescSecretHash := platformtokenFields[1].Descriptor()
+	platformtokenDescSecretHash := platformtokenFields[2].Descriptor()
 	// platformtoken.SecretHashValidator is a validator for the "secret_hash" field. It is called by the builders before save.
 	platformtoken.SecretHashValidator = platformtokenDescSecretHash.Validators[0].(func(string) error)
 	// platformtokenDescIsActive is the schema descriptor for is_active field.
-	platformtokenDescIsActive := platformtokenFields[2].Descriptor()
+	platformtokenDescIsActive := platformtokenFields[3].Descriptor()
 	// platformtoken.DefaultIsActive holds the default value on creation for the is_active field.
 	platformtoken.DefaultIsActive = platformtokenDescIsActive.Default.(bool)
 	platformuserMixin := schema.PlatformUser{}.Mixin()

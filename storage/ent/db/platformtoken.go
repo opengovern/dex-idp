@@ -23,6 +23,8 @@ type PlatformToken struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// OwnerID holds the value of the "owner_id" field.
+	OwnerID int `json:"owner_id,omitempty"`
 	// Unique, publicly visible identifier or prefix for the token (safe for logging).
 	PublicID string `json:"public_id,omitempty"`
 	// Strong cryptographic hash (e.g., Argon2id) of the actual token secret.
@@ -33,16 +35,15 @@ type PlatformToken struct {
 	ExpiresAt *time.Time `json:"expires_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlatformTokenQuery when eager-loading is set.
-	Edges                        PlatformTokenEdges `json:"edges"`
-	platform_app_role_tokens     *int
-	platform_user_created_tokens *int
-	selectValues                 sql.SelectValues
+	Edges                    PlatformTokenEdges `json:"edges"`
+	platform_app_role_tokens *int
+	selectValues             sql.SelectValues
 }
 
 // PlatformTokenEdges holds the relations/edges for other nodes in the graph.
 type PlatformTokenEdges struct {
-	// Creator holds the value of the creator edge.
-	Creator *PlatformUser `json:"creator,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *PlatformUser `json:"owner,omitempty"`
 	// Role holds the value of the role edge.
 	Role *PlatformAppRole `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -50,15 +51,15 @@ type PlatformTokenEdges struct {
 	loadedTypes [2]bool
 }
 
-// CreatorOrErr returns the Creator value or an error if the edge
+// OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PlatformTokenEdges) CreatorOrErr() (*PlatformUser, error) {
-	if e.Creator != nil {
-		return e.Creator, nil
+func (e PlatformTokenEdges) OwnerOrErr() (*PlatformUser, error) {
+	if e.Owner != nil {
+		return e.Owner, nil
 	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: platformuser.Label}
 	}
-	return nil, &NotLoadedError{edge: "creator"}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // RoleOrErr returns the Role value or an error if the edge
@@ -79,15 +80,13 @@ func (*PlatformToken) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case platformtoken.FieldIsActive:
 			values[i] = new(sql.NullBool)
-		case platformtoken.FieldID:
+		case platformtoken.FieldID, platformtoken.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
 		case platformtoken.FieldPublicID, platformtoken.FieldSecretHash:
 			values[i] = new(sql.NullString)
 		case platformtoken.FieldCreateTime, platformtoken.FieldUpdateTime, platformtoken.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case platformtoken.ForeignKeys[0]: // platform_app_role_tokens
-			values[i] = new(sql.NullInt64)
-		case platformtoken.ForeignKeys[1]: // platform_user_created_tokens
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -122,6 +121,12 @@ func (pt *PlatformToken) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pt.UpdateTime = value.Time
 			}
+		case platformtoken.FieldOwnerID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
+			} else if value.Valid {
+				pt.OwnerID = int(value.Int64)
+			}
 		case platformtoken.FieldPublicID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field public_id", values[i])
@@ -154,13 +159,6 @@ func (pt *PlatformToken) assignValues(columns []string, values []any) error {
 				pt.platform_app_role_tokens = new(int)
 				*pt.platform_app_role_tokens = int(value.Int64)
 			}
-		case platformtoken.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field platform_user_created_tokens", value)
-			} else if value.Valid {
-				pt.platform_user_created_tokens = new(int)
-				*pt.platform_user_created_tokens = int(value.Int64)
-			}
 		default:
 			pt.selectValues.Set(columns[i], values[i])
 		}
@@ -174,9 +172,9 @@ func (pt *PlatformToken) Value(name string) (ent.Value, error) {
 	return pt.selectValues.Get(name)
 }
 
-// QueryCreator queries the "creator" edge of the PlatformToken entity.
-func (pt *PlatformToken) QueryCreator() *PlatformUserQuery {
-	return NewPlatformTokenClient(pt.config).QueryCreator(pt)
+// QueryOwner queries the "owner" edge of the PlatformToken entity.
+func (pt *PlatformToken) QueryOwner() *PlatformUserQuery {
+	return NewPlatformTokenClient(pt.config).QueryOwner(pt)
 }
 
 // QueryRole queries the "role" edge of the PlatformToken entity.
@@ -212,6 +210,9 @@ func (pt *PlatformToken) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
 	builder.WriteString(pt.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("owner_id=")
+	builder.WriteString(fmt.Sprintf("%v", pt.OwnerID))
 	builder.WriteString(", ")
 	builder.WriteString("public_id=")
 	builder.WriteString(pt.PublicID)

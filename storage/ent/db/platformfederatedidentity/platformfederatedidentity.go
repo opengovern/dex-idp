@@ -20,8 +20,8 @@ const (
 	FieldUpdateTime = "update_time"
 	// FieldConnectorID holds the string denoting the connector_id field in the database.
 	FieldConnectorID = "connector_id"
-	// FieldFederatedUserID holds the string denoting the federated_user_id field in the database.
-	FieldFederatedUserID = "federated_user_id"
+	// FieldConnectorSubject holds the string denoting the connector_subject field in the database.
+	FieldConnectorSubject = "connector_subject"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeRoleAssignments holds the string denoting the role_assignments edge name in mutations.
@@ -50,7 +50,7 @@ var Columns = []string{
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldConnectorID,
-	FieldFederatedUserID,
+	FieldConnectorSubject,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "platform_federated_identities"
@@ -83,8 +83,8 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// ConnectorIDValidator is a validator for the "connector_id" field. It is called by the builders before save.
 	ConnectorIDValidator func(string) error
-	// FederatedUserIDValidator is a validator for the "federated_user_id" field. It is called by the builders before save.
-	FederatedUserIDValidator func(string) error
+	// ConnectorSubjectValidator is a validator for the "connector_subject" field. It is called by the builders before save.
+	ConnectorSubjectValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the PlatformFederatedIdentity queries.
@@ -110,9 +110,9 @@ func ByConnectorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldConnectorID, opts...).ToFunc()
 }
 
-// ByFederatedUserID orders the results by the federated_user_id field.
-func ByFederatedUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFederatedUserID, opts...).ToFunc()
+// ByConnectorSubject orders the results by the connector_subject field.
+func ByConnectorSubject(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldConnectorSubject, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

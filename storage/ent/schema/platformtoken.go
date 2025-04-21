@@ -9,7 +9,7 @@ import (
 )
 
 // PlatformToken holds the schema definition for the PlatformToken entity.
-// Stores API tokens or service account tokens, each linked to one creator and one app role.
+// Stores API tokens or service account tokens, each linked to one owner user and one app role.
 type PlatformToken struct {
 	ent.Schema
 }
@@ -17,8 +17,11 @@ type PlatformToken struct {
 // Fields of the PlatformToken.
 func (PlatformToken) Fields() []ent.Field {
 	return []ent.Field{
-		// creator_id defined implicitly via the 'creator' edge
-		// app_role_id defined implicitly via the 'role' edge
+		// --- FIELD ADDED TO MATCH EDGE DIRECTIVE ---
+		field.Int("owner_id"), // Stores the foreign key for the required 'owner' edge
+		// --- END FIELD ADDITION ---
+
+		// app_role_id defined implicitly via the 'role' edge unless .Field() is used on that edge too
 
 		field.String("public_id").
 			NotEmpty().
@@ -52,38 +55,35 @@ func (PlatformToken) Mixin() []ent.Mixin {
 // Edges of the PlatformToken.
 func (PlatformToken) Edges() []ent.Edge {
 	return []ent.Edge{
-		// M-to-1 edge back to the PlatformUser who created the token.
-		// Defines the 'creator_id' column.
-		edge.From("creator", PlatformUser.Type).
+		// M-to-1 edge back to the PlatformUser who owns (created) the token.
+		// Defines the 'owner_id' column.
+		edge.From("owner", PlatformUser.Type).
 			Ref("created_tokens"). // Matches edge name in PlatformUser schema
-			// Field("creator_id"). // Inferred by Ent
-			Unique().   // Each token has exactly one creator
-			Required(), // creator_id cannot be NULL
+			Field("owner_id").     // Links to the owner_id field defined above
+			Unique().              // Each token has exactly one owner
+			Required(),            // owner_id cannot be NULL
 
 		// M-to-1 edge back to the PlatformAppRole defining the token's permissions.
 		// Defines the 'app_role_id' column.
 		edge.From("role", PlatformAppRole.Type).
 			Ref("tokens"). // Matches edge name in PlatformAppRole schema
-			// Field("app_role_id"). // Inferred by Ent
+			// Field("app_role_id"). // Field is implicitly created by Ent as role_id is not defined above
 			Unique().   // Each token currently has exactly one role
 			Required(), // app_role_id cannot be NULL
-
-		// O2M edge to join table removed as token links directly to one role.
-		// edge.To("role_assignments", PlatformTokenRoleAssignment.Type),
 	}
 }
 
 // Indexes of the PlatformToken.
 func (PlatformToken) Indexes() []ent.Index {
 	return []ent.Index{
-		// CORRECTED: Index foreign keys using edge names
-		index.Edges("creator"), // Index for the creator_id column
-		index.Edges("role"),    // Index for the app_role_id column
+		// Index foreign keys. Use field name if defined via .Field(), otherwise use edge name.
+		index.Fields("owner_id"), // Index the explicit FK field
+		index.Edges("role"),      // Index the implicit FK field for the 'role' edge
 
 		// Other useful indexes
 		index.Fields("is_active"),
 		index.Fields("expires_at"),
 		// Note: Unique index on public_id is created by the field definition's Unique()
-		// Note: Unique index on {creator_id, app_role_id} if needed would be index.Edges("creator", "role").Unique()
+		// Note: Unique index on {owner_id, app_role_id} if needed would be index.Fields("owner_id").Edges("role").Unique()
 	}
 }

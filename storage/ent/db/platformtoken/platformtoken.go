@@ -18,6 +18,8 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
+	// FieldOwnerID holds the string denoting the owner_id field in the database.
+	FieldOwnerID = "owner_id"
 	// FieldPublicID holds the string denoting the public_id field in the database.
 	FieldPublicID = "public_id"
 	// FieldSecretHash holds the string denoting the secret_hash field in the database.
@@ -26,19 +28,19 @@ const (
 	FieldIsActive = "is_active"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
-	// EdgeCreator holds the string denoting the creator edge name in mutations.
-	EdgeCreator = "creator"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
 	// Table holds the table name of the platformtoken in the database.
 	Table = "platform_tokens"
-	// CreatorTable is the table that holds the creator relation/edge.
-	CreatorTable = "platform_tokens"
-	// CreatorInverseTable is the table name for the PlatformUser entity.
+	// OwnerTable is the table that holds the owner relation/edge.
+	OwnerTable = "platform_tokens"
+	// OwnerInverseTable is the table name for the PlatformUser entity.
 	// It exists in this package in order to avoid circular dependency with the "platformuser" package.
-	CreatorInverseTable = "platform_users"
-	// CreatorColumn is the table column denoting the creator relation/edge.
-	CreatorColumn = "platform_user_created_tokens"
+	OwnerInverseTable = "platform_users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "owner_id"
 	// RoleTable is the table that holds the role relation/edge.
 	RoleTable = "platform_tokens"
 	// RoleInverseTable is the table name for the PlatformAppRole entity.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
+	FieldOwnerID,
 	FieldPublicID,
 	FieldSecretHash,
 	FieldIsActive,
@@ -63,7 +66,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"platform_app_role_tokens",
-	"platform_user_created_tokens",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -114,6 +116,11 @@ func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
 }
 
+// ByOwnerID orders the results by the owner_id field.
+func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerID, opts...).ToFunc()
+}
+
 // ByPublicID orders the results by the public_id field.
 func ByPublicID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublicID, opts...).ToFunc()
@@ -134,10 +141,10 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }
 
-// ByCreatorField orders the results by creator field.
-func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByOwnerField orders the results by owner field.
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCreatorStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -147,11 +154,11 @@ func ByRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRoleStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newCreatorStep() *sqlgraph.Step {
+func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CreatorInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, CreatorTable, CreatorColumn),
+		sqlgraph.To(OwnerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 	)
 }
 func newRoleStep() *sqlgraph.Step {

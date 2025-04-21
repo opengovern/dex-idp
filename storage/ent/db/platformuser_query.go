@@ -568,6 +568,9 @@ func (puq *PlatformUserQuery) loadCreatedTokens(ctx context.Context, query *Plat
 		}
 	}
 	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(platformtoken.FieldOwnerID)
+	}
 	query.Where(predicate.PlatformToken(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(platformuser.CreatedTokensColumn), fks...))
 	}))
@@ -576,13 +579,10 @@ func (puq *PlatformUserQuery) loadCreatedTokens(ctx context.Context, query *Plat
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.platform_user_created_tokens
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "platform_user_created_tokens" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.OwnerID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "platform_user_created_tokens" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

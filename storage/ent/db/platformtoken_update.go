@@ -36,6 +36,20 @@ func (ptu *PlatformTokenUpdate) SetUpdateTime(t time.Time) *PlatformTokenUpdate 
 	return ptu
 }
 
+// SetOwnerID sets the "owner_id" field.
+func (ptu *PlatformTokenUpdate) SetOwnerID(i int) *PlatformTokenUpdate {
+	ptu.mutation.SetOwnerID(i)
+	return ptu
+}
+
+// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
+func (ptu *PlatformTokenUpdate) SetNillableOwnerID(i *int) *PlatformTokenUpdate {
+	if i != nil {
+		ptu.SetOwnerID(*i)
+	}
+	return ptu
+}
+
 // SetPublicID sets the "public_id" field.
 func (ptu *PlatformTokenUpdate) SetPublicID(s string) *PlatformTokenUpdate {
 	ptu.mutation.SetPublicID(s)
@@ -98,15 +112,9 @@ func (ptu *PlatformTokenUpdate) ClearExpiresAt() *PlatformTokenUpdate {
 	return ptu
 }
 
-// SetCreatorID sets the "creator" edge to the PlatformUser entity by ID.
-func (ptu *PlatformTokenUpdate) SetCreatorID(id int) *PlatformTokenUpdate {
-	ptu.mutation.SetCreatorID(id)
-	return ptu
-}
-
-// SetCreator sets the "creator" edge to the PlatformUser entity.
-func (ptu *PlatformTokenUpdate) SetCreator(p *PlatformUser) *PlatformTokenUpdate {
-	return ptu.SetCreatorID(p.ID)
+// SetOwner sets the "owner" edge to the PlatformUser entity.
+func (ptu *PlatformTokenUpdate) SetOwner(p *PlatformUser) *PlatformTokenUpdate {
+	return ptu.SetOwnerID(p.ID)
 }
 
 // SetRoleID sets the "role" edge to the PlatformAppRole entity by ID.
@@ -125,9 +133,9 @@ func (ptu *PlatformTokenUpdate) Mutation() *PlatformTokenMutation {
 	return ptu.mutation
 }
 
-// ClearCreator clears the "creator" edge to the PlatformUser entity.
-func (ptu *PlatformTokenUpdate) ClearCreator() *PlatformTokenUpdate {
-	ptu.mutation.ClearCreator()
+// ClearOwner clears the "owner" edge to the PlatformUser entity.
+func (ptu *PlatformTokenUpdate) ClearOwner() *PlatformTokenUpdate {
+	ptu.mutation.ClearOwner()
 	return ptu
 }
 
@@ -185,8 +193,8 @@ func (ptu *PlatformTokenUpdate) check() error {
 			return &ValidationError{Name: "secret_hash", err: fmt.Errorf(`db: validator failed for field "PlatformToken.secret_hash": %w`, err)}
 		}
 	}
-	if ptu.mutation.CreatorCleared() && len(ptu.mutation.CreatorIDs()) > 0 {
-		return errors.New(`db: clearing a required unique edge "PlatformToken.creator"`)
+	if ptu.mutation.OwnerCleared() && len(ptu.mutation.OwnerIDs()) > 0 {
+		return errors.New(`db: clearing a required unique edge "PlatformToken.owner"`)
 	}
 	if ptu.mutation.RoleCleared() && len(ptu.mutation.RoleIDs()) > 0 {
 		return errors.New(`db: clearing a required unique edge "PlatformToken.role"`)
@@ -224,12 +232,12 @@ func (ptu *PlatformTokenUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if ptu.mutation.ExpiresAtCleared() {
 		_spec.ClearField(platformtoken.FieldExpiresAt, field.TypeTime)
 	}
-	if ptu.mutation.CreatorCleared() {
+	if ptu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   platformtoken.CreatorTable,
-			Columns: []string{platformtoken.CreatorColumn},
+			Table:   platformtoken.OwnerTable,
+			Columns: []string{platformtoken.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(platformuser.FieldID, field.TypeInt),
@@ -237,12 +245,12 @@ func (ptu *PlatformTokenUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ptu.mutation.CreatorIDs(); len(nodes) > 0 {
+	if nodes := ptu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   platformtoken.CreatorTable,
-			Columns: []string{platformtoken.CreatorColumn},
+			Table:   platformtoken.OwnerTable,
+			Columns: []string{platformtoken.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(platformuser.FieldID, field.TypeInt),
@@ -308,6 +316,20 @@ func (ptuo *PlatformTokenUpdateOne) SetUpdateTime(t time.Time) *PlatformTokenUpd
 	return ptuo
 }
 
+// SetOwnerID sets the "owner_id" field.
+func (ptuo *PlatformTokenUpdateOne) SetOwnerID(i int) *PlatformTokenUpdateOne {
+	ptuo.mutation.SetOwnerID(i)
+	return ptuo
+}
+
+// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
+func (ptuo *PlatformTokenUpdateOne) SetNillableOwnerID(i *int) *PlatformTokenUpdateOne {
+	if i != nil {
+		ptuo.SetOwnerID(*i)
+	}
+	return ptuo
+}
+
 // SetPublicID sets the "public_id" field.
 func (ptuo *PlatformTokenUpdateOne) SetPublicID(s string) *PlatformTokenUpdateOne {
 	ptuo.mutation.SetPublicID(s)
@@ -370,15 +392,9 @@ func (ptuo *PlatformTokenUpdateOne) ClearExpiresAt() *PlatformTokenUpdateOne {
 	return ptuo
 }
 
-// SetCreatorID sets the "creator" edge to the PlatformUser entity by ID.
-func (ptuo *PlatformTokenUpdateOne) SetCreatorID(id int) *PlatformTokenUpdateOne {
-	ptuo.mutation.SetCreatorID(id)
-	return ptuo
-}
-
-// SetCreator sets the "creator" edge to the PlatformUser entity.
-func (ptuo *PlatformTokenUpdateOne) SetCreator(p *PlatformUser) *PlatformTokenUpdateOne {
-	return ptuo.SetCreatorID(p.ID)
+// SetOwner sets the "owner" edge to the PlatformUser entity.
+func (ptuo *PlatformTokenUpdateOne) SetOwner(p *PlatformUser) *PlatformTokenUpdateOne {
+	return ptuo.SetOwnerID(p.ID)
 }
 
 // SetRoleID sets the "role" edge to the PlatformAppRole entity by ID.
@@ -397,9 +413,9 @@ func (ptuo *PlatformTokenUpdateOne) Mutation() *PlatformTokenMutation {
 	return ptuo.mutation
 }
 
-// ClearCreator clears the "creator" edge to the PlatformUser entity.
-func (ptuo *PlatformTokenUpdateOne) ClearCreator() *PlatformTokenUpdateOne {
-	ptuo.mutation.ClearCreator()
+// ClearOwner clears the "owner" edge to the PlatformUser entity.
+func (ptuo *PlatformTokenUpdateOne) ClearOwner() *PlatformTokenUpdateOne {
+	ptuo.mutation.ClearOwner()
 	return ptuo
 }
 
@@ -470,8 +486,8 @@ func (ptuo *PlatformTokenUpdateOne) check() error {
 			return &ValidationError{Name: "secret_hash", err: fmt.Errorf(`db: validator failed for field "PlatformToken.secret_hash": %w`, err)}
 		}
 	}
-	if ptuo.mutation.CreatorCleared() && len(ptuo.mutation.CreatorIDs()) > 0 {
-		return errors.New(`db: clearing a required unique edge "PlatformToken.creator"`)
+	if ptuo.mutation.OwnerCleared() && len(ptuo.mutation.OwnerIDs()) > 0 {
+		return errors.New(`db: clearing a required unique edge "PlatformToken.owner"`)
 	}
 	if ptuo.mutation.RoleCleared() && len(ptuo.mutation.RoleIDs()) > 0 {
 		return errors.New(`db: clearing a required unique edge "PlatformToken.role"`)
@@ -526,12 +542,12 @@ func (ptuo *PlatformTokenUpdateOne) sqlSave(ctx context.Context) (_node *Platfor
 	if ptuo.mutation.ExpiresAtCleared() {
 		_spec.ClearField(platformtoken.FieldExpiresAt, field.TypeTime)
 	}
-	if ptuo.mutation.CreatorCleared() {
+	if ptuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   platformtoken.CreatorTable,
-			Columns: []string{platformtoken.CreatorColumn},
+			Table:   platformtoken.OwnerTable,
+			Columns: []string{platformtoken.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(platformuser.FieldID, field.TypeInt),
@@ -539,12 +555,12 @@ func (ptuo *PlatformTokenUpdateOne) sqlSave(ctx context.Context) (_node *Platfor
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ptuo.mutation.CreatorIDs(); len(nodes) > 0 {
+	if nodes := ptuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   platformtoken.CreatorTable,
-			Columns: []string{platformtoken.CreatorColumn},
+			Table:   platformtoken.OwnerTable,
+			Columns: []string{platformtoken.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(platformuser.FieldID, field.TypeInt),

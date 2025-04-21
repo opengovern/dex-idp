@@ -6,8 +6,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
-	// Import the join table schema type
-	// "github.com/dexidp/dex/storage/ent/schema/platformidentityroleassignment" // Adjust if needed
 )
 
 // PlatformFederatedIdentity holds the schema definition for the PlatformFederatedIdentity entity.
@@ -25,9 +23,11 @@ func (PlatformFederatedIdentity) Fields() []ent.Field {
 			NotEmpty().
 			Comment("Identifier of the Dex connector used for authentication."),
 
-		field.String("federated_user_id").
-			NotEmpty().
-			Comment("The unique User ID provided by the specific external connector (e.g., subject ID, username)."),
+		// --- RENAMED FOR RESILIENCE ---
+		field.String("connector_subject"). // *** RENAMED from "federated_user_id" ***
+							NotEmpty().
+							Comment("The unique subject identifier provided by the external connector (e.g., OIDC 'sub', SAML NameID, LDAP DN/uid)."),
+		// --- END RENAME ---
 	}
 }
 
@@ -48,7 +48,7 @@ func (PlatformFederatedIdentity) Edges() []ent.Edge {
 			Unique().
 			Required(),
 
-		// ADDED O2M edge to the join table assigning roles to this specific identity.
+		// O2M edge to the join table assigning roles to this specific identity.
 		edge.To("role_assignments", PlatformIdentityRoleAssignment.Type).
 			Comment("Holds the individual application role assignments specific to this federated identity."),
 	}
@@ -57,11 +57,13 @@ func (PlatformFederatedIdentity) Edges() []ent.Edge {
 // Indexes of the PlatformFederatedIdentity.
 func (PlatformFederatedIdentity) Indexes() []ent.Index {
 	return []ent.Index{
-		// Enforce uniqueness on the combination of connector and the user ID from that connector.
-		index.Fields("connector_id", "federated_user_id").
-			Unique(),
+		// Enforce uniqueness on the combination of connector and the subject from that connector.
+		// --- UPDATED FIELD NAME ---
+		index.Fields("connector_id", "connector_subject"). // *** UPDATED from "federated_user_id" ***
+									Unique(),
+		// --- END UPDATE ---
 
-		// CORRECTED: Index the foreign key edge for efficient lookups of identities by user.
+		// Index the foreign key edge for efficient lookups of identities by user.
 		index.Edges("user"), // Use index.Edges() for edge-defined FKs
 	}
 }

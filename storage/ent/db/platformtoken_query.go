@@ -20,13 +20,13 @@ import (
 // PlatformTokenQuery is the builder for querying PlatformToken entities.
 type PlatformTokenQuery struct {
 	config
-	ctx         *QueryContext
-	order       []platformtoken.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.PlatformToken
-	withCreator *PlatformUserQuery
-	withRole    *PlatformAppRoleQuery
-	withFKs     bool
+	ctx        *QueryContext
+	order      []platformtoken.OrderOption
+	inters     []Interceptor
+	predicates []predicate.PlatformToken
+	withOwner  *PlatformUserQuery
+	withRole   *PlatformAppRoleQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,8 +63,8 @@ func (ptq *PlatformTokenQuery) Order(o ...platformtoken.OrderOption) *PlatformTo
 	return ptq
 }
 
-// QueryCreator chains the current query on the "creator" edge.
-func (ptq *PlatformTokenQuery) QueryCreator() *PlatformUserQuery {
+// QueryOwner chains the current query on the "owner" edge.
+func (ptq *PlatformTokenQuery) QueryOwner() *PlatformUserQuery {
 	query := (&PlatformUserClient{config: ptq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ptq.prepareQuery(ctx); err != nil {
@@ -77,7 +77,7 @@ func (ptq *PlatformTokenQuery) QueryCreator() *PlatformUserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(platformtoken.Table, platformtoken.FieldID, selector),
 			sqlgraph.To(platformuser.Table, platformuser.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.CreatorTable, platformtoken.CreatorColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.OwnerTable, platformtoken.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ptq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,27 +294,27 @@ func (ptq *PlatformTokenQuery) Clone() *PlatformTokenQuery {
 		return nil
 	}
 	return &PlatformTokenQuery{
-		config:      ptq.config,
-		ctx:         ptq.ctx.Clone(),
-		order:       append([]platformtoken.OrderOption{}, ptq.order...),
-		inters:      append([]Interceptor{}, ptq.inters...),
-		predicates:  append([]predicate.PlatformToken{}, ptq.predicates...),
-		withCreator: ptq.withCreator.Clone(),
-		withRole:    ptq.withRole.Clone(),
+		config:     ptq.config,
+		ctx:        ptq.ctx.Clone(),
+		order:      append([]platformtoken.OrderOption{}, ptq.order...),
+		inters:     append([]Interceptor{}, ptq.inters...),
+		predicates: append([]predicate.PlatformToken{}, ptq.predicates...),
+		withOwner:  ptq.withOwner.Clone(),
+		withRole:   ptq.withRole.Clone(),
 		// clone intermediate query.
 		sql:  ptq.sql.Clone(),
 		path: ptq.path,
 	}
 }
 
-// WithCreator tells the query-builder to eager-load the nodes that are connected to
-// the "creator" edge. The optional arguments are used to configure the query builder of the edge.
-func (ptq *PlatformTokenQuery) WithCreator(opts ...func(*PlatformUserQuery)) *PlatformTokenQuery {
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (ptq *PlatformTokenQuery) WithOwner(opts ...func(*PlatformUserQuery)) *PlatformTokenQuery {
 	query := (&PlatformUserClient{config: ptq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ptq.withCreator = query
+	ptq.withOwner = query
 	return ptq
 }
 
@@ -409,11 +409,11 @@ func (ptq *PlatformTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		withFKs     = ptq.withFKs
 		_spec       = ptq.querySpec()
 		loadedTypes = [2]bool{
-			ptq.withCreator != nil,
+			ptq.withOwner != nil,
 			ptq.withRole != nil,
 		}
 	)
-	if ptq.withCreator != nil || ptq.withRole != nil {
+	if ptq.withRole != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -437,9 +437,9 @@ func (ptq *PlatformTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := ptq.withCreator; query != nil {
-		if err := ptq.loadCreator(ctx, query, nodes, nil,
-			func(n *PlatformToken, e *PlatformUser) { n.Edges.Creator = e }); err != nil {
+	if query := ptq.withOwner; query != nil {
+		if err := ptq.loadOwner(ctx, query, nodes, nil,
+			func(n *PlatformToken, e *PlatformUser) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -452,14 +452,11 @@ func (ptq *PlatformTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	return nodes, nil
 }
 
-func (ptq *PlatformTokenQuery) loadCreator(ctx context.Context, query *PlatformUserQuery, nodes []*PlatformToken, init func(*PlatformToken), assign func(*PlatformToken, *PlatformUser)) error {
+func (ptq *PlatformTokenQuery) loadOwner(ctx context.Context, query *PlatformUserQuery, nodes []*PlatformToken, init func(*PlatformToken), assign func(*PlatformToken, *PlatformUser)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PlatformToken)
 	for i := range nodes {
-		if nodes[i].platform_user_created_tokens == nil {
-			continue
-		}
-		fk := *nodes[i].platform_user_created_tokens
+		fk := nodes[i].OwnerID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -476,7 +473,7 @@ func (ptq *PlatformTokenQuery) loadCreator(ctx context.Context, query *PlatformU
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "platform_user_created_tokens" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -541,6 +538,9 @@ func (ptq *PlatformTokenQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != platformtoken.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if ptq.withOwner != nil {
+			_spec.Node.AddColumnOnce(platformtoken.FieldOwnerID)
 		}
 	}
 	if ps := ptq.predicates; len(ps) > 0 {

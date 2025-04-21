@@ -65,6 +65,11 @@ func UpdateTime(v time.Time) predicate.PlatformToken {
 	return predicate.PlatformToken(sql.FieldEQ(FieldUpdateTime, v))
 }
 
+// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
+func OwnerID(v int) predicate.PlatformToken {
+	return predicate.PlatformToken(sql.FieldEQ(FieldOwnerID, v))
+}
+
 // PublicID applies equality check predicate on the "public_id" field. It's identical to PublicIDEQ.
 func PublicID(v string) predicate.PlatformToken {
 	return predicate.PlatformToken(sql.FieldEQ(FieldPublicID, v))
@@ -163,6 +168,26 @@ func UpdateTimeLT(v time.Time) predicate.PlatformToken {
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.PlatformToken {
 	return predicate.PlatformToken(sql.FieldLTE(FieldUpdateTime, v))
+}
+
+// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
+func OwnerIDEQ(v int) predicate.PlatformToken {
+	return predicate.PlatformToken(sql.FieldEQ(FieldOwnerID, v))
+}
+
+// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
+func OwnerIDNEQ(v int) predicate.PlatformToken {
+	return predicate.PlatformToken(sql.FieldNEQ(FieldOwnerID, v))
+}
+
+// OwnerIDIn applies the In predicate on the "owner_id" field.
+func OwnerIDIn(vs ...int) predicate.PlatformToken {
+	return predicate.PlatformToken(sql.FieldIn(FieldOwnerID, vs...))
+}
+
+// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
+func OwnerIDNotIn(vs ...int) predicate.PlatformToken {
+	return predicate.PlatformToken(sql.FieldNotIn(FieldOwnerID, vs...))
 }
 
 // PublicIDEQ applies the EQ predicate on the "public_id" field.
@@ -355,21 +380,21 @@ func ExpiresAtNotNil() predicate.PlatformToken {
 	return predicate.PlatformToken(sql.FieldNotNull(FieldExpiresAt))
 }
 
-// HasCreator applies the HasEdge predicate on the "creator" edge.
-func HasCreator() predicate.PlatformToken {
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.PlatformToken {
 	return predicate.PlatformToken(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CreatorTable, CreatorColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCreatorWith applies the HasEdge predicate on the "creator" edge with a given conditions (other predicates).
-func HasCreatorWith(preds ...predicate.PlatformUser) predicate.PlatformToken {
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.PlatformUser) predicate.PlatformToken {
 	return predicate.PlatformToken(func(s *sql.Selector) {
-		step := newCreatorStep()
+		step := newOwnerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

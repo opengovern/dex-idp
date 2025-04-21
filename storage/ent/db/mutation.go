@@ -7787,7 +7787,7 @@ type PlatformFederatedIdentityMutation struct {
 	create_time             *time.Time
 	update_time             *time.Time
 	connector_id            *string
-	federated_user_id       *string
+	connector_subject       *string
 	clearedFields           map[string]struct{}
 	user                    *int
 	cleareduser             bool
@@ -8005,40 +8005,40 @@ func (m *PlatformFederatedIdentityMutation) ResetConnectorID() {
 	m.connector_id = nil
 }
 
-// SetFederatedUserID sets the "federated_user_id" field.
-func (m *PlatformFederatedIdentityMutation) SetFederatedUserID(s string) {
-	m.federated_user_id = &s
+// SetConnectorSubject sets the "connector_subject" field.
+func (m *PlatformFederatedIdentityMutation) SetConnectorSubject(s string) {
+	m.connector_subject = &s
 }
 
-// FederatedUserID returns the value of the "federated_user_id" field in the mutation.
-func (m *PlatformFederatedIdentityMutation) FederatedUserID() (r string, exists bool) {
-	v := m.federated_user_id
+// ConnectorSubject returns the value of the "connector_subject" field in the mutation.
+func (m *PlatformFederatedIdentityMutation) ConnectorSubject() (r string, exists bool) {
+	v := m.connector_subject
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFederatedUserID returns the old "federated_user_id" field's value of the PlatformFederatedIdentity entity.
+// OldConnectorSubject returns the old "connector_subject" field's value of the PlatformFederatedIdentity entity.
 // If the PlatformFederatedIdentity object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlatformFederatedIdentityMutation) OldFederatedUserID(ctx context.Context) (v string, err error) {
+func (m *PlatformFederatedIdentityMutation) OldConnectorSubject(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFederatedUserID is only allowed on UpdateOne operations")
+		return v, errors.New("OldConnectorSubject is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFederatedUserID requires an ID field in the mutation")
+		return v, errors.New("OldConnectorSubject requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFederatedUserID: %w", err)
+		return v, fmt.Errorf("querying old value for OldConnectorSubject: %w", err)
 	}
-	return oldValue.FederatedUserID, nil
+	return oldValue.ConnectorSubject, nil
 }
 
-// ResetFederatedUserID resets all changes to the "federated_user_id" field.
-func (m *PlatformFederatedIdentityMutation) ResetFederatedUserID() {
-	m.federated_user_id = nil
+// ResetConnectorSubject resets all changes to the "connector_subject" field.
+func (m *PlatformFederatedIdentityMutation) ResetConnectorSubject() {
+	m.connector_subject = nil
 }
 
 // SetUserID sets the "user" edge to the PlatformUser entity by id.
@@ -8178,8 +8178,8 @@ func (m *PlatformFederatedIdentityMutation) Fields() []string {
 	if m.connector_id != nil {
 		fields = append(fields, platformfederatedidentity.FieldConnectorID)
 	}
-	if m.federated_user_id != nil {
-		fields = append(fields, platformfederatedidentity.FieldFederatedUserID)
+	if m.connector_subject != nil {
+		fields = append(fields, platformfederatedidentity.FieldConnectorSubject)
 	}
 	return fields
 }
@@ -8195,8 +8195,8 @@ func (m *PlatformFederatedIdentityMutation) Field(name string) (ent.Value, bool)
 		return m.UpdateTime()
 	case platformfederatedidentity.FieldConnectorID:
 		return m.ConnectorID()
-	case platformfederatedidentity.FieldFederatedUserID:
-		return m.FederatedUserID()
+	case platformfederatedidentity.FieldConnectorSubject:
+		return m.ConnectorSubject()
 	}
 	return nil, false
 }
@@ -8212,8 +8212,8 @@ func (m *PlatformFederatedIdentityMutation) OldField(ctx context.Context, name s
 		return m.OldUpdateTime(ctx)
 	case platformfederatedidentity.FieldConnectorID:
 		return m.OldConnectorID(ctx)
-	case platformfederatedidentity.FieldFederatedUserID:
-		return m.OldFederatedUserID(ctx)
+	case platformfederatedidentity.FieldConnectorSubject:
+		return m.OldConnectorSubject(ctx)
 	}
 	return nil, fmt.Errorf("unknown PlatformFederatedIdentity field %s", name)
 }
@@ -8244,12 +8244,12 @@ func (m *PlatformFederatedIdentityMutation) SetField(name string, value ent.Valu
 		}
 		m.SetConnectorID(v)
 		return nil
-	case platformfederatedidentity.FieldFederatedUserID:
+	case platformfederatedidentity.FieldConnectorSubject:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFederatedUserID(v)
+		m.SetConnectorSubject(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PlatformFederatedIdentity field %s", name)
@@ -8309,8 +8309,8 @@ func (m *PlatformFederatedIdentityMutation) ResetField(name string) error {
 	case platformfederatedidentity.FieldConnectorID:
 		m.ResetConnectorID()
 		return nil
-	case platformfederatedidentity.FieldFederatedUserID:
-		m.ResetFederatedUserID()
+	case platformfederatedidentity.FieldConnectorSubject:
+		m.ResetConnectorSubject()
 		return nil
 	}
 	return fmt.Errorf("unknown PlatformFederatedIdentity field %s", name)
@@ -8981,23 +8981,23 @@ func (m *PlatformIdentityRoleAssignmentMutation) ResetEdge(name string) error {
 // PlatformTokenMutation represents an operation that mutates the PlatformToken nodes in the graph.
 type PlatformTokenMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	create_time    *time.Time
-	update_time    *time.Time
-	public_id      *string
-	secret_hash    *string
-	is_active      *bool
-	expires_at     *time.Time
-	clearedFields  map[string]struct{}
-	creator        *int
-	clearedcreator bool
-	role           *int
-	clearedrole    bool
-	done           bool
-	oldValue       func(context.Context) (*PlatformToken, error)
-	predicates     []predicate.PlatformToken
+	op            Op
+	typ           string
+	id            *int
+	create_time   *time.Time
+	update_time   *time.Time
+	public_id     *string
+	secret_hash   *string
+	is_active     *bool
+	expires_at    *time.Time
+	clearedFields map[string]struct{}
+	owner         *int
+	clearedowner  bool
+	role          *int
+	clearedrole   bool
+	done          bool
+	oldValue      func(context.Context) (*PlatformToken, error)
+	predicates    []predicate.PlatformToken
 }
 
 var _ ent.Mutation = (*PlatformTokenMutation)(nil)
@@ -9170,6 +9170,42 @@ func (m *PlatformTokenMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
 
+// SetOwnerID sets the "owner_id" field.
+func (m *PlatformTokenMutation) SetOwnerID(i int) {
+	m.owner = &i
+}
+
+// OwnerID returns the value of the "owner_id" field in the mutation.
+func (m *PlatformTokenMutation) OwnerID() (r int, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerID returns the old "owner_id" field's value of the PlatformToken entity.
+// If the PlatformToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformTokenMutation) OldOwnerID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerID: %w", err)
+	}
+	return oldValue.OwnerID, nil
+}
+
+// ResetOwnerID resets all changes to the "owner_id" field.
+func (m *PlatformTokenMutation) ResetOwnerID() {
+	m.owner = nil
+}
+
 // SetPublicID sets the "public_id" field.
 func (m *PlatformTokenMutation) SetPublicID(s string) {
 	m.public_id = &s
@@ -9327,43 +9363,31 @@ func (m *PlatformTokenMutation) ResetExpiresAt() {
 	delete(m.clearedFields, platformtoken.FieldExpiresAt)
 }
 
-// SetCreatorID sets the "creator" edge to the PlatformUser entity by id.
-func (m *PlatformTokenMutation) SetCreatorID(id int) {
-	m.creator = &id
+// ClearOwner clears the "owner" edge to the PlatformUser entity.
+func (m *PlatformTokenMutation) ClearOwner() {
+	m.clearedowner = true
+	m.clearedFields[platformtoken.FieldOwnerID] = struct{}{}
 }
 
-// ClearCreator clears the "creator" edge to the PlatformUser entity.
-func (m *PlatformTokenMutation) ClearCreator() {
-	m.clearedcreator = true
+// OwnerCleared reports if the "owner" edge to the PlatformUser entity was cleared.
+func (m *PlatformTokenMutation) OwnerCleared() bool {
+	return m.clearedowner
 }
 
-// CreatorCleared reports if the "creator" edge to the PlatformUser entity was cleared.
-func (m *PlatformTokenMutation) CreatorCleared() bool {
-	return m.clearedcreator
-}
-
-// CreatorID returns the "creator" edge ID in the mutation.
-func (m *PlatformTokenMutation) CreatorID() (id int, exists bool) {
-	if m.creator != nil {
-		return *m.creator, true
-	}
-	return
-}
-
-// CreatorIDs returns the "creator" edge IDs in the mutation.
+// OwnerIDs returns the "owner" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CreatorID instead. It exists only for internal usage by the builders.
-func (m *PlatformTokenMutation) CreatorIDs() (ids []int) {
-	if id := m.creator; id != nil {
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *PlatformTokenMutation) OwnerIDs() (ids []int) {
+	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetCreator resets all changes to the "creator" edge.
-func (m *PlatformTokenMutation) ResetCreator() {
-	m.creator = nil
-	m.clearedcreator = false
+// ResetOwner resets all changes to the "owner" edge.
+func (m *PlatformTokenMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
 }
 
 // SetRoleID sets the "role" edge to the PlatformAppRole entity by id.
@@ -9439,12 +9463,15 @@ func (m *PlatformTokenMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlatformTokenMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.create_time != nil {
 		fields = append(fields, platformtoken.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, platformtoken.FieldUpdateTime)
+	}
+	if m.owner != nil {
+		fields = append(fields, platformtoken.FieldOwnerID)
 	}
 	if m.public_id != nil {
 		fields = append(fields, platformtoken.FieldPublicID)
@@ -9470,6 +9497,8 @@ func (m *PlatformTokenMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case platformtoken.FieldUpdateTime:
 		return m.UpdateTime()
+	case platformtoken.FieldOwnerID:
+		return m.OwnerID()
 	case platformtoken.FieldPublicID:
 		return m.PublicID()
 	case platformtoken.FieldSecretHash:
@@ -9491,6 +9520,8 @@ func (m *PlatformTokenMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCreateTime(ctx)
 	case platformtoken.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case platformtoken.FieldOwnerID:
+		return m.OldOwnerID(ctx)
 	case platformtoken.FieldPublicID:
 		return m.OldPublicID(ctx)
 	case platformtoken.FieldSecretHash:
@@ -9521,6 +9552,13 @@ func (m *PlatformTokenMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdateTime(v)
+		return nil
+	case platformtoken.FieldOwnerID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerID(v)
 		return nil
 	case platformtoken.FieldPublicID:
 		v, ok := value.(string)
@@ -9557,13 +9595,16 @@ func (m *PlatformTokenMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PlatformTokenMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PlatformTokenMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -9614,6 +9655,9 @@ func (m *PlatformTokenMutation) ResetField(name string) error {
 	case platformtoken.FieldUpdateTime:
 		m.ResetUpdateTime()
 		return nil
+	case platformtoken.FieldOwnerID:
+		m.ResetOwnerID()
+		return nil
 	case platformtoken.FieldPublicID:
 		m.ResetPublicID()
 		return nil
@@ -9633,8 +9677,8 @@ func (m *PlatformTokenMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlatformTokenMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.creator != nil {
-		edges = append(edges, platformtoken.EdgeCreator)
+	if m.owner != nil {
+		edges = append(edges, platformtoken.EdgeOwner)
 	}
 	if m.role != nil {
 		edges = append(edges, platformtoken.EdgeRole)
@@ -9646,8 +9690,8 @@ func (m *PlatformTokenMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PlatformTokenMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case platformtoken.EdgeCreator:
-		if id := m.creator; id != nil {
+	case platformtoken.EdgeOwner:
+		if id := m.owner; id != nil {
 			return []ent.Value{*id}
 		}
 	case platformtoken.EdgeRole:
@@ -9673,8 +9717,8 @@ func (m *PlatformTokenMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlatformTokenMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedcreator {
-		edges = append(edges, platformtoken.EdgeCreator)
+	if m.clearedowner {
+		edges = append(edges, platformtoken.EdgeOwner)
 	}
 	if m.clearedrole {
 		edges = append(edges, platformtoken.EdgeRole)
@@ -9686,8 +9730,8 @@ func (m *PlatformTokenMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PlatformTokenMutation) EdgeCleared(name string) bool {
 	switch name {
-	case platformtoken.EdgeCreator:
-		return m.clearedcreator
+	case platformtoken.EdgeOwner:
+		return m.clearedowner
 	case platformtoken.EdgeRole:
 		return m.clearedrole
 	}
@@ -9698,8 +9742,8 @@ func (m *PlatformTokenMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PlatformTokenMutation) ClearEdge(name string) error {
 	switch name {
-	case platformtoken.EdgeCreator:
-		m.ClearCreator()
+	case platformtoken.EdgeOwner:
+		m.ClearOwner()
 		return nil
 	case platformtoken.EdgeRole:
 		m.ClearRole()
@@ -9712,8 +9756,8 @@ func (m *PlatformTokenMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PlatformTokenMutation) ResetEdge(name string) error {
 	switch name {
-	case platformtoken.EdgeCreator:
-		m.ResetCreator()
+	case platformtoken.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	case platformtoken.EdgeRole:
 		m.ResetRole()

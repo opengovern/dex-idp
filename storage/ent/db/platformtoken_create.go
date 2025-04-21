@@ -50,6 +50,12 @@ func (ptc *PlatformTokenCreate) SetNillableUpdateTime(t *time.Time) *PlatformTok
 	return ptc
 }
 
+// SetOwnerID sets the "owner_id" field.
+func (ptc *PlatformTokenCreate) SetOwnerID(i int) *PlatformTokenCreate {
+	ptc.mutation.SetOwnerID(i)
+	return ptc
+}
+
 // SetPublicID sets the "public_id" field.
 func (ptc *PlatformTokenCreate) SetPublicID(s string) *PlatformTokenCreate {
 	ptc.mutation.SetPublicID(s)
@@ -90,15 +96,9 @@ func (ptc *PlatformTokenCreate) SetNillableExpiresAt(t *time.Time) *PlatformToke
 	return ptc
 }
 
-// SetCreatorID sets the "creator" edge to the PlatformUser entity by ID.
-func (ptc *PlatformTokenCreate) SetCreatorID(id int) *PlatformTokenCreate {
-	ptc.mutation.SetCreatorID(id)
-	return ptc
-}
-
-// SetCreator sets the "creator" edge to the PlatformUser entity.
-func (ptc *PlatformTokenCreate) SetCreator(p *PlatformUser) *PlatformTokenCreate {
-	return ptc.SetCreatorID(p.ID)
+// SetOwner sets the "owner" edge to the PlatformUser entity.
+func (ptc *PlatformTokenCreate) SetOwner(p *PlatformUser) *PlatformTokenCreate {
+	return ptc.SetOwnerID(p.ID)
 }
 
 // SetRoleID sets the "role" edge to the PlatformAppRole entity by ID.
@@ -169,6 +169,9 @@ func (ptc *PlatformTokenCreate) check() error {
 	if _, ok := ptc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`db: missing required field "PlatformToken.update_time"`)}
 	}
+	if _, ok := ptc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner_id", err: errors.New(`db: missing required field "PlatformToken.owner_id"`)}
+	}
 	if _, ok := ptc.mutation.PublicID(); !ok {
 		return &ValidationError{Name: "public_id", err: errors.New(`db: missing required field "PlatformToken.public_id"`)}
 	}
@@ -188,8 +191,8 @@ func (ptc *PlatformTokenCreate) check() error {
 	if _, ok := ptc.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`db: missing required field "PlatformToken.is_active"`)}
 	}
-	if len(ptc.mutation.CreatorIDs()) == 0 {
-		return &ValidationError{Name: "creator", err: errors.New(`db: missing required edge "PlatformToken.creator"`)}
+	if len(ptc.mutation.OwnerIDs()) == 0 {
+		return &ValidationError{Name: "owner", err: errors.New(`db: missing required edge "PlatformToken.owner"`)}
 	}
 	if len(ptc.mutation.RoleIDs()) == 0 {
 		return &ValidationError{Name: "role", err: errors.New(`db: missing required edge "PlatformToken.role"`)}
@@ -244,12 +247,12 @@ func (ptc *PlatformTokenCreate) createSpec() (*PlatformToken, *sqlgraph.CreateSp
 		_spec.SetField(platformtoken.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = &value
 	}
-	if nodes := ptc.mutation.CreatorIDs(); len(nodes) > 0 {
+	if nodes := ptc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   platformtoken.CreatorTable,
-			Columns: []string{platformtoken.CreatorColumn},
+			Table:   platformtoken.OwnerTable,
+			Columns: []string{platformtoken.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(platformuser.FieldID, field.TypeInt),
@@ -258,7 +261,7 @@ func (ptc *PlatformTokenCreate) createSpec() (*PlatformToken, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.platform_user_created_tokens = &nodes[0]
+		_node.OwnerID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ptc.mutation.RoleIDs(); len(nodes) > 0 {

@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -688,7 +689,11 @@ type PlatformUserServiceClient interface {
 	GetUser(ctx context.Context, in *GetPlatformUserRequest, opts ...grpc.CallOption) (*GetPlatformUserResponse, error)
 	ListUsers(ctx context.Context, in *ListPlatformUsersRequest, opts ...grpc.CallOption) (*ListPlatformUsersResponse, error)
 	UpdateUser(ctx context.Context, in *UpdatePlatformUserRequest, opts ...grpc.CallOption) (*UpdatePlatformUserResponse, error)
-	DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*DeletePlatformUserResponse, error)
+	DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// User Role Assignment Methods
+	AssignRoleToUser(ctx context.Context, in *AssignRoleToUserRequest, opts ...grpc.CallOption) (*AssignRoleToUserResponse, error)
+	RemoveRoleFromUser(ctx context.Context, in *RemoveRoleFromUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...grpc.CallOption) (*ListUserAssignmentsResponse, error)
 }
 
 type platformUserServiceClient struct {
@@ -735,9 +740,36 @@ func (c *platformUserServiceClient) UpdateUser(ctx context.Context, in *UpdatePl
 	return out, nil
 }
 
-func (c *platformUserServiceClient) DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*DeletePlatformUserResponse, error) {
-	out := new(DeletePlatformUserResponse)
+func (c *platformUserServiceClient) DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/api.PlatformUserService/DeleteUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformUserServiceClient) AssignRoleToUser(ctx context.Context, in *AssignRoleToUserRequest, opts ...grpc.CallOption) (*AssignRoleToUserResponse, error) {
+	out := new(AssignRoleToUserResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformUserService/AssignRoleToUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformUserServiceClient) RemoveRoleFromUser(ctx context.Context, in *RemoveRoleFromUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.PlatformUserService/RemoveRoleFromUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformUserServiceClient) ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...grpc.CallOption) (*ListUserAssignmentsResponse, error) {
+	out := new(ListUserAssignmentsResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformUserService/ListUserAssignments", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -752,7 +784,11 @@ type PlatformUserServiceServer interface {
 	GetUser(context.Context, *GetPlatformUserRequest) (*GetPlatformUserResponse, error)
 	ListUsers(context.Context, *ListPlatformUsersRequest) (*ListPlatformUsersResponse, error)
 	UpdateUser(context.Context, *UpdatePlatformUserRequest) (*UpdatePlatformUserResponse, error)
-	DeleteUser(context.Context, *DeletePlatformUserRequest) (*DeletePlatformUserResponse, error)
+	DeleteUser(context.Context, *DeletePlatformUserRequest) (*emptypb.Empty, error)
+	// User Role Assignment Methods
+	AssignRoleToUser(context.Context, *AssignRoleToUserRequest) (*AssignRoleToUserResponse, error)
+	RemoveRoleFromUser(context.Context, *RemoveRoleFromUserRequest) (*emptypb.Empty, error)
+	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
 	mustEmbedUnimplementedPlatformUserServiceServer()
 }
 
@@ -772,8 +808,17 @@ func (UnimplementedPlatformUserServiceServer) ListUsers(context.Context, *ListPl
 func (UnimplementedPlatformUserServiceServer) UpdateUser(context.Context, *UpdatePlatformUserRequest) (*UpdatePlatformUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedPlatformUserServiceServer) DeleteUser(context.Context, *DeletePlatformUserRequest) (*DeletePlatformUserResponse, error) {
+func (UnimplementedPlatformUserServiceServer) DeleteUser(context.Context, *DeletePlatformUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedPlatformUserServiceServer) AssignRoleToUser(context.Context, *AssignRoleToUserRequest) (*AssignRoleToUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AssignRoleToUser not implemented")
+}
+func (UnimplementedPlatformUserServiceServer) RemoveRoleFromUser(context.Context, *RemoveRoleFromUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveRoleFromUser not implemented")
+}
+func (UnimplementedPlatformUserServiceServer) ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserAssignments not implemented")
 }
 func (UnimplementedPlatformUserServiceServer) mustEmbedUnimplementedPlatformUserServiceServer() {}
 
@@ -878,6 +923,60 @@ func _PlatformUserService_DeleteUser_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformUserService_AssignRoleToUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignRoleToUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformUserServiceServer).AssignRoleToUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformUserService/AssignRoleToUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformUserServiceServer).AssignRoleToUser(ctx, req.(*AssignRoleToUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformUserService_RemoveRoleFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRoleFromUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformUserServiceServer).RemoveRoleFromUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformUserService/RemoveRoleFromUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformUserServiceServer).RemoveRoleFromUser(ctx, req.(*RemoveRoleFromUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformUserService_ListUserAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformUserServiceServer).ListUserAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformUserService/ListUserAssignments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformUserServiceServer).ListUserAssignments(ctx, req.(*ListUserAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlatformUserService_ServiceDesc is the grpc.ServiceDesc for PlatformUserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -904,6 +1003,794 @@ var PlatformUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUser",
 			Handler:    _PlatformUserService_DeleteUser_Handler,
+		},
+		{
+			MethodName: "AssignRoleToUser",
+			Handler:    _PlatformUserService_AssignRoleToUser_Handler,
+		},
+		{
+			MethodName: "RemoveRoleFromUser",
+			Handler:    _PlatformUserService_RemoveRoleFromUser_Handler,
+		},
+		{
+			MethodName: "ListUserAssignments",
+			Handler:    _PlatformUserService_ListUserAssignments_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/v2/api.proto",
+}
+
+// PlatformAppRoleServiceClient is the client API for PlatformAppRoleService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PlatformAppRoleServiceClient interface {
+	CreatePlatformAppRole(ctx context.Context, in *CreatePlatformAppRoleRequest, opts ...grpc.CallOption) (*CreatePlatformAppRoleResponse, error)
+	GetPlatformAppRole(ctx context.Context, in *GetPlatformAppRoleRequest, opts ...grpc.CallOption) (*GetPlatformAppRoleResponse, error)
+	ListPlatformAppRoles(ctx context.Context, in *ListPlatformAppRolesRequest, opts ...grpc.CallOption) (*ListPlatformAppRolesResponse, error)
+	UpdatePlatformAppRole(ctx context.Context, in *UpdatePlatformAppRoleRequest, opts ...grpc.CallOption) (*UpdatePlatformAppRoleResponse, error)
+	DeletePlatformAppRole(ctx context.Context, in *DeletePlatformAppRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
+
+type platformAppRoleServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPlatformAppRoleServiceClient(cc grpc.ClientConnInterface) PlatformAppRoleServiceClient {
+	return &platformAppRoleServiceClient{cc}
+}
+
+func (c *platformAppRoleServiceClient) CreatePlatformAppRole(ctx context.Context, in *CreatePlatformAppRoleRequest, opts ...grpc.CallOption) (*CreatePlatformAppRoleResponse, error) {
+	out := new(CreatePlatformAppRoleResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformAppRoleService/CreatePlatformAppRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformAppRoleServiceClient) GetPlatformAppRole(ctx context.Context, in *GetPlatformAppRoleRequest, opts ...grpc.CallOption) (*GetPlatformAppRoleResponse, error) {
+	out := new(GetPlatformAppRoleResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformAppRoleService/GetPlatformAppRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformAppRoleServiceClient) ListPlatformAppRoles(ctx context.Context, in *ListPlatformAppRolesRequest, opts ...grpc.CallOption) (*ListPlatformAppRolesResponse, error) {
+	out := new(ListPlatformAppRolesResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformAppRoleService/ListPlatformAppRoles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformAppRoleServiceClient) UpdatePlatformAppRole(ctx context.Context, in *UpdatePlatformAppRoleRequest, opts ...grpc.CallOption) (*UpdatePlatformAppRoleResponse, error) {
+	out := new(UpdatePlatformAppRoleResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformAppRoleService/UpdatePlatformAppRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformAppRoleServiceClient) DeletePlatformAppRole(ctx context.Context, in *DeletePlatformAppRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.PlatformAppRoleService/DeletePlatformAppRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PlatformAppRoleServiceServer is the server API for PlatformAppRoleService service.
+// All implementations must embed UnimplementedPlatformAppRoleServiceServer
+// for forward compatibility
+type PlatformAppRoleServiceServer interface {
+	CreatePlatformAppRole(context.Context, *CreatePlatformAppRoleRequest) (*CreatePlatformAppRoleResponse, error)
+	GetPlatformAppRole(context.Context, *GetPlatformAppRoleRequest) (*GetPlatformAppRoleResponse, error)
+	ListPlatformAppRoles(context.Context, *ListPlatformAppRolesRequest) (*ListPlatformAppRolesResponse, error)
+	UpdatePlatformAppRole(context.Context, *UpdatePlatformAppRoleRequest) (*UpdatePlatformAppRoleResponse, error)
+	DeletePlatformAppRole(context.Context, *DeletePlatformAppRoleRequest) (*emptypb.Empty, error)
+	mustEmbedUnimplementedPlatformAppRoleServiceServer()
+}
+
+// UnimplementedPlatformAppRoleServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPlatformAppRoleServiceServer struct {
+}
+
+func (UnimplementedPlatformAppRoleServiceServer) CreatePlatformAppRole(context.Context, *CreatePlatformAppRoleRequest) (*CreatePlatformAppRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlatformAppRole not implemented")
+}
+func (UnimplementedPlatformAppRoleServiceServer) GetPlatformAppRole(context.Context, *GetPlatformAppRoleRequest) (*GetPlatformAppRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlatformAppRole not implemented")
+}
+func (UnimplementedPlatformAppRoleServiceServer) ListPlatformAppRoles(context.Context, *ListPlatformAppRolesRequest) (*ListPlatformAppRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPlatformAppRoles not implemented")
+}
+func (UnimplementedPlatformAppRoleServiceServer) UpdatePlatformAppRole(context.Context, *UpdatePlatformAppRoleRequest) (*UpdatePlatformAppRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePlatformAppRole not implemented")
+}
+func (UnimplementedPlatformAppRoleServiceServer) DeletePlatformAppRole(context.Context, *DeletePlatformAppRoleRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlatformAppRole not implemented")
+}
+func (UnimplementedPlatformAppRoleServiceServer) mustEmbedUnimplementedPlatformAppRoleServiceServer() {
+}
+
+// UnsafePlatformAppRoleServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PlatformAppRoleServiceServer will
+// result in compilation errors.
+type UnsafePlatformAppRoleServiceServer interface {
+	mustEmbedUnimplementedPlatformAppRoleServiceServer()
+}
+
+func RegisterPlatformAppRoleServiceServer(s grpc.ServiceRegistrar, srv PlatformAppRoleServiceServer) {
+	s.RegisterService(&PlatformAppRoleService_ServiceDesc, srv)
+}
+
+func _PlatformAppRoleService_CreatePlatformAppRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlatformAppRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformAppRoleServiceServer).CreatePlatformAppRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformAppRoleService/CreatePlatformAppRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformAppRoleServiceServer).CreatePlatformAppRole(ctx, req.(*CreatePlatformAppRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformAppRoleService_GetPlatformAppRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlatformAppRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformAppRoleServiceServer).GetPlatformAppRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformAppRoleService/GetPlatformAppRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformAppRoleServiceServer).GetPlatformAppRole(ctx, req.(*GetPlatformAppRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformAppRoleService_ListPlatformAppRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlatformAppRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformAppRoleServiceServer).ListPlatformAppRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformAppRoleService/ListPlatformAppRoles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformAppRoleServiceServer).ListPlatformAppRoles(ctx, req.(*ListPlatformAppRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformAppRoleService_UpdatePlatformAppRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePlatformAppRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformAppRoleServiceServer).UpdatePlatformAppRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformAppRoleService/UpdatePlatformAppRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformAppRoleServiceServer).UpdatePlatformAppRole(ctx, req.(*UpdatePlatformAppRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformAppRoleService_DeletePlatformAppRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlatformAppRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformAppRoleServiceServer).DeletePlatformAppRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformAppRoleService/DeletePlatformAppRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformAppRoleServiceServer).DeletePlatformAppRole(ctx, req.(*DeletePlatformAppRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// PlatformAppRoleService_ServiceDesc is the grpc.ServiceDesc for PlatformAppRoleService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PlatformAppRoleService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.PlatformAppRoleService",
+	HandlerType: (*PlatformAppRoleServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreatePlatformAppRole",
+			Handler:    _PlatformAppRoleService_CreatePlatformAppRole_Handler,
+		},
+		{
+			MethodName: "GetPlatformAppRole",
+			Handler:    _PlatformAppRoleService_GetPlatformAppRole_Handler,
+		},
+		{
+			MethodName: "ListPlatformAppRoles",
+			Handler:    _PlatformAppRoleService_ListPlatformAppRoles_Handler,
+		},
+		{
+			MethodName: "UpdatePlatformAppRole",
+			Handler:    _PlatformAppRoleService_UpdatePlatformAppRole_Handler,
+		},
+		{
+			MethodName: "DeletePlatformAppRole",
+			Handler:    _PlatformAppRoleService_DeletePlatformAppRole_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/v2/api.proto",
+}
+
+// PlatformTokenServiceClient is the client API for PlatformTokenService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PlatformTokenServiceClient interface {
+	// Create returns the secret ONCE. Client must store it.
+	CreatePlatformToken(ctx context.Context, in *CreatePlatformTokenRequest, opts ...grpc.CallOption) (*CreatePlatformTokenResponse, error)
+	// Get/List never return the secret hash.
+	GetPlatformToken(ctx context.Context, in *GetPlatformTokenRequest, opts ...grpc.CallOption) (*GetPlatformTokenResponse, error)
+	ListPlatformTokens(ctx context.Context, in *ListPlatformTokensRequest, opts ...grpc.CallOption) (*ListPlatformTokensResponse, error)
+	// Update allows changing ONLY the assigned role.
+	UpdatePlatformToken(ctx context.Context, in *UpdatePlatformTokenRequest, opts ...grpc.CallOption) (*UpdatePlatformTokenResponse, error)
+	DeletePlatformToken(ctx context.Context, in *DeletePlatformTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Verify checks a presented secret against the stored hash.
+	VerifyPlatformToken(ctx context.Context, in *VerifyPlatformTokenRequest, opts ...grpc.CallOption) (*VerifyPlatformTokenResponse, error)
+}
+
+type platformTokenServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPlatformTokenServiceClient(cc grpc.ClientConnInterface) PlatformTokenServiceClient {
+	return &platformTokenServiceClient{cc}
+}
+
+func (c *platformTokenServiceClient) CreatePlatformToken(ctx context.Context, in *CreatePlatformTokenRequest, opts ...grpc.CallOption) (*CreatePlatformTokenResponse, error) {
+	out := new(CreatePlatformTokenResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/CreatePlatformToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformTokenServiceClient) GetPlatformToken(ctx context.Context, in *GetPlatformTokenRequest, opts ...grpc.CallOption) (*GetPlatformTokenResponse, error) {
+	out := new(GetPlatformTokenResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/GetPlatformToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformTokenServiceClient) ListPlatformTokens(ctx context.Context, in *ListPlatformTokensRequest, opts ...grpc.CallOption) (*ListPlatformTokensResponse, error) {
+	out := new(ListPlatformTokensResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/ListPlatformTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformTokenServiceClient) UpdatePlatformToken(ctx context.Context, in *UpdatePlatformTokenRequest, opts ...grpc.CallOption) (*UpdatePlatformTokenResponse, error) {
+	out := new(UpdatePlatformTokenResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/UpdatePlatformToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformTokenServiceClient) DeletePlatformToken(ctx context.Context, in *DeletePlatformTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/DeletePlatformToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformTokenServiceClient) VerifyPlatformToken(ctx context.Context, in *VerifyPlatformTokenRequest, opts ...grpc.CallOption) (*VerifyPlatformTokenResponse, error) {
+	out := new(VerifyPlatformTokenResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformTokenService/VerifyPlatformToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PlatformTokenServiceServer is the server API for PlatformTokenService service.
+// All implementations must embed UnimplementedPlatformTokenServiceServer
+// for forward compatibility
+type PlatformTokenServiceServer interface {
+	// Create returns the secret ONCE. Client must store it.
+	CreatePlatformToken(context.Context, *CreatePlatformTokenRequest) (*CreatePlatformTokenResponse, error)
+	// Get/List never return the secret hash.
+	GetPlatformToken(context.Context, *GetPlatformTokenRequest) (*GetPlatformTokenResponse, error)
+	ListPlatformTokens(context.Context, *ListPlatformTokensRequest) (*ListPlatformTokensResponse, error)
+	// Update allows changing ONLY the assigned role.
+	UpdatePlatformToken(context.Context, *UpdatePlatformTokenRequest) (*UpdatePlatformTokenResponse, error)
+	DeletePlatformToken(context.Context, *DeletePlatformTokenRequest) (*emptypb.Empty, error)
+	// Verify checks a presented secret against the stored hash.
+	VerifyPlatformToken(context.Context, *VerifyPlatformTokenRequest) (*VerifyPlatformTokenResponse, error)
+	mustEmbedUnimplementedPlatformTokenServiceServer()
+}
+
+// UnimplementedPlatformTokenServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPlatformTokenServiceServer struct {
+}
+
+func (UnimplementedPlatformTokenServiceServer) CreatePlatformToken(context.Context, *CreatePlatformTokenRequest) (*CreatePlatformTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlatformToken not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) GetPlatformToken(context.Context, *GetPlatformTokenRequest) (*GetPlatformTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlatformToken not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) ListPlatformTokens(context.Context, *ListPlatformTokensRequest) (*ListPlatformTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPlatformTokens not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) UpdatePlatformToken(context.Context, *UpdatePlatformTokenRequest) (*UpdatePlatformTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePlatformToken not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) DeletePlatformToken(context.Context, *DeletePlatformTokenRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlatformToken not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) VerifyPlatformToken(context.Context, *VerifyPlatformTokenRequest) (*VerifyPlatformTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyPlatformToken not implemented")
+}
+func (UnimplementedPlatformTokenServiceServer) mustEmbedUnimplementedPlatformTokenServiceServer() {}
+
+// UnsafePlatformTokenServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PlatformTokenServiceServer will
+// result in compilation errors.
+type UnsafePlatformTokenServiceServer interface {
+	mustEmbedUnimplementedPlatformTokenServiceServer()
+}
+
+func RegisterPlatformTokenServiceServer(s grpc.ServiceRegistrar, srv PlatformTokenServiceServer) {
+	s.RegisterService(&PlatformTokenService_ServiceDesc, srv)
+}
+
+func _PlatformTokenService_CreatePlatformToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlatformTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).CreatePlatformToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/CreatePlatformToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).CreatePlatformToken(ctx, req.(*CreatePlatformTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformTokenService_GetPlatformToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlatformTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).GetPlatformToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/GetPlatformToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).GetPlatformToken(ctx, req.(*GetPlatformTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformTokenService_ListPlatformTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlatformTokensRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).ListPlatformTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/ListPlatformTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).ListPlatformTokens(ctx, req.(*ListPlatformTokensRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformTokenService_UpdatePlatformToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePlatformTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).UpdatePlatformToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/UpdatePlatformToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).UpdatePlatformToken(ctx, req.(*UpdatePlatformTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformTokenService_DeletePlatformToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlatformTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).DeletePlatformToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/DeletePlatformToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).DeletePlatformToken(ctx, req.(*DeletePlatformTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformTokenService_VerifyPlatformToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyPlatformTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformTokenServiceServer).VerifyPlatformToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformTokenService/VerifyPlatformToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformTokenServiceServer).VerifyPlatformToken(ctx, req.(*VerifyPlatformTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// PlatformTokenService_ServiceDesc is the grpc.ServiceDesc for PlatformTokenService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PlatformTokenService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.PlatformTokenService",
+	HandlerType: (*PlatformTokenServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreatePlatformToken",
+			Handler:    _PlatformTokenService_CreatePlatformToken_Handler,
+		},
+		{
+			MethodName: "GetPlatformToken",
+			Handler:    _PlatformTokenService_GetPlatformToken_Handler,
+		},
+		{
+			MethodName: "ListPlatformTokens",
+			Handler:    _PlatformTokenService_ListPlatformTokens_Handler,
+		},
+		{
+			MethodName: "UpdatePlatformToken",
+			Handler:    _PlatformTokenService_UpdatePlatformToken_Handler,
+		},
+		{
+			MethodName: "DeletePlatformToken",
+			Handler:    _PlatformTokenService_DeletePlatformToken_Handler,
+		},
+		{
+			MethodName: "VerifyPlatformToken",
+			Handler:    _PlatformTokenService_VerifyPlatformToken_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/v2/api.proto",
+}
+
+// PlatformFederatedIdentityServiceClient is the client API for PlatformFederatedIdentityService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PlatformFederatedIdentityServiceClient interface {
+	// Create often implicit via login flow, but Get/List/Delete useful for admin.
+	GetPlatformFederatedIdentity(ctx context.Context, in *GetPlatformFederatedIdentityRequest, opts ...grpc.CallOption) (*GetPlatformFederatedIdentityResponse, error)
+	ListPlatformFederatedIdentities(ctx context.Context, in *ListPlatformFederatedIdentitiesRequest, opts ...grpc.CallOption) (*ListPlatformFederatedIdentitiesResponse, error)
+	DeletePlatformFederatedIdentity(ctx context.Context, in *DeletePlatformFederatedIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Identity Role Assignment Methods
+	AssignRoleToIdentity(ctx context.Context, in *AssignRoleToIdentityRequest, opts ...grpc.CallOption) (*AssignRoleToIdentityResponse, error)
+	RemoveRoleFromIdentity(ctx context.Context, in *RemoveRoleFromIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListIdentityAssignments(ctx context.Context, in *ListIdentityAssignmentsRequest, opts ...grpc.CallOption) (*ListIdentityAssignmentsResponse, error)
+}
+
+type platformFederatedIdentityServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPlatformFederatedIdentityServiceClient(cc grpc.ClientConnInterface) PlatformFederatedIdentityServiceClient {
+	return &platformFederatedIdentityServiceClient{cc}
+}
+
+func (c *platformFederatedIdentityServiceClient) GetPlatformFederatedIdentity(ctx context.Context, in *GetPlatformFederatedIdentityRequest, opts ...grpc.CallOption) (*GetPlatformFederatedIdentityResponse, error) {
+	out := new(GetPlatformFederatedIdentityResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/GetPlatformFederatedIdentity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformFederatedIdentityServiceClient) ListPlatformFederatedIdentities(ctx context.Context, in *ListPlatformFederatedIdentitiesRequest, opts ...grpc.CallOption) (*ListPlatformFederatedIdentitiesResponse, error) {
+	out := new(ListPlatformFederatedIdentitiesResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/ListPlatformFederatedIdentities", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformFederatedIdentityServiceClient) DeletePlatformFederatedIdentity(ctx context.Context, in *DeletePlatformFederatedIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/DeletePlatformFederatedIdentity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformFederatedIdentityServiceClient) AssignRoleToIdentity(ctx context.Context, in *AssignRoleToIdentityRequest, opts ...grpc.CallOption) (*AssignRoleToIdentityResponse, error) {
+	out := new(AssignRoleToIdentityResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/AssignRoleToIdentity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformFederatedIdentityServiceClient) RemoveRoleFromIdentity(ctx context.Context, in *RemoveRoleFromIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/RemoveRoleFromIdentity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformFederatedIdentityServiceClient) ListIdentityAssignments(ctx context.Context, in *ListIdentityAssignmentsRequest, opts ...grpc.CallOption) (*ListIdentityAssignmentsResponse, error) {
+	out := new(ListIdentityAssignmentsResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformFederatedIdentityService/ListIdentityAssignments", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PlatformFederatedIdentityServiceServer is the server API for PlatformFederatedIdentityService service.
+// All implementations must embed UnimplementedPlatformFederatedIdentityServiceServer
+// for forward compatibility
+type PlatformFederatedIdentityServiceServer interface {
+	// Create often implicit via login flow, but Get/List/Delete useful for admin.
+	GetPlatformFederatedIdentity(context.Context, *GetPlatformFederatedIdentityRequest) (*GetPlatformFederatedIdentityResponse, error)
+	ListPlatformFederatedIdentities(context.Context, *ListPlatformFederatedIdentitiesRequest) (*ListPlatformFederatedIdentitiesResponse, error)
+	DeletePlatformFederatedIdentity(context.Context, *DeletePlatformFederatedIdentityRequest) (*emptypb.Empty, error)
+	// Identity Role Assignment Methods
+	AssignRoleToIdentity(context.Context, *AssignRoleToIdentityRequest) (*AssignRoleToIdentityResponse, error)
+	RemoveRoleFromIdentity(context.Context, *RemoveRoleFromIdentityRequest) (*emptypb.Empty, error)
+	ListIdentityAssignments(context.Context, *ListIdentityAssignmentsRequest) (*ListIdentityAssignmentsResponse, error)
+	mustEmbedUnimplementedPlatformFederatedIdentityServiceServer()
+}
+
+// UnimplementedPlatformFederatedIdentityServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPlatformFederatedIdentityServiceServer struct {
+}
+
+func (UnimplementedPlatformFederatedIdentityServiceServer) GetPlatformFederatedIdentity(context.Context, *GetPlatformFederatedIdentityRequest) (*GetPlatformFederatedIdentityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlatformFederatedIdentity not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) ListPlatformFederatedIdentities(context.Context, *ListPlatformFederatedIdentitiesRequest) (*ListPlatformFederatedIdentitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPlatformFederatedIdentities not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) DeletePlatformFederatedIdentity(context.Context, *DeletePlatformFederatedIdentityRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlatformFederatedIdentity not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) AssignRoleToIdentity(context.Context, *AssignRoleToIdentityRequest) (*AssignRoleToIdentityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AssignRoleToIdentity not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) RemoveRoleFromIdentity(context.Context, *RemoveRoleFromIdentityRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveRoleFromIdentity not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) ListIdentityAssignments(context.Context, *ListIdentityAssignmentsRequest) (*ListIdentityAssignmentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListIdentityAssignments not implemented")
+}
+func (UnimplementedPlatformFederatedIdentityServiceServer) mustEmbedUnimplementedPlatformFederatedIdentityServiceServer() {
+}
+
+// UnsafePlatformFederatedIdentityServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PlatformFederatedIdentityServiceServer will
+// result in compilation errors.
+type UnsafePlatformFederatedIdentityServiceServer interface {
+	mustEmbedUnimplementedPlatformFederatedIdentityServiceServer()
+}
+
+func RegisterPlatformFederatedIdentityServiceServer(s grpc.ServiceRegistrar, srv PlatformFederatedIdentityServiceServer) {
+	s.RegisterService(&PlatformFederatedIdentityService_ServiceDesc, srv)
+}
+
+func _PlatformFederatedIdentityService_GetPlatformFederatedIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlatformFederatedIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).GetPlatformFederatedIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/GetPlatformFederatedIdentity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).GetPlatformFederatedIdentity(ctx, req.(*GetPlatformFederatedIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformFederatedIdentityService_ListPlatformFederatedIdentities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlatformFederatedIdentitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).ListPlatformFederatedIdentities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/ListPlatformFederatedIdentities",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).ListPlatformFederatedIdentities(ctx, req.(*ListPlatformFederatedIdentitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformFederatedIdentityService_DeletePlatformFederatedIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlatformFederatedIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).DeletePlatformFederatedIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/DeletePlatformFederatedIdentity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).DeletePlatformFederatedIdentity(ctx, req.(*DeletePlatformFederatedIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformFederatedIdentityService_AssignRoleToIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignRoleToIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).AssignRoleToIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/AssignRoleToIdentity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).AssignRoleToIdentity(ctx, req.(*AssignRoleToIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformFederatedIdentityService_RemoveRoleFromIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRoleFromIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).RemoveRoleFromIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/RemoveRoleFromIdentity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).RemoveRoleFromIdentity(ctx, req.(*RemoveRoleFromIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformFederatedIdentityService_ListIdentityAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListIdentityAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformFederatedIdentityServiceServer).ListIdentityAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformFederatedIdentityService/ListIdentityAssignments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformFederatedIdentityServiceServer).ListIdentityAssignments(ctx, req.(*ListIdentityAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// PlatformFederatedIdentityService_ServiceDesc is the grpc.ServiceDesc for PlatformFederatedIdentityService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PlatformFederatedIdentityService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.PlatformFederatedIdentityService",
+	HandlerType: (*PlatformFederatedIdentityServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetPlatformFederatedIdentity",
+			Handler:    _PlatformFederatedIdentityService_GetPlatformFederatedIdentity_Handler,
+		},
+		{
+			MethodName: "ListPlatformFederatedIdentities",
+			Handler:    _PlatformFederatedIdentityService_ListPlatformFederatedIdentities_Handler,
+		},
+		{
+			MethodName: "DeletePlatformFederatedIdentity",
+			Handler:    _PlatformFederatedIdentityService_DeletePlatformFederatedIdentity_Handler,
+		},
+		{
+			MethodName: "AssignRoleToIdentity",
+			Handler:    _PlatformFederatedIdentityService_AssignRoleToIdentity_Handler,
+		},
+		{
+			MethodName: "RemoveRoleFromIdentity",
+			Handler:    _PlatformFederatedIdentityService_RemoveRoleFromIdentity_Handler,
+		},
+		{
+			MethodName: "ListIdentityAssignments",
+			Handler:    _PlatformFederatedIdentityService_ListIdentityAssignments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

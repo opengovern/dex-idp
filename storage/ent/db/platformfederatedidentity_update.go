@@ -50,16 +50,16 @@ func (pfiu *PlatformFederatedIdentityUpdate) SetNillableConnectorID(s *string) *
 	return pfiu
 }
 
-// SetFederatedUserID sets the "federated_user_id" field.
-func (pfiu *PlatformFederatedIdentityUpdate) SetFederatedUserID(s string) *PlatformFederatedIdentityUpdate {
-	pfiu.mutation.SetFederatedUserID(s)
+// SetConnectorSubject sets the "connector_subject" field.
+func (pfiu *PlatformFederatedIdentityUpdate) SetConnectorSubject(s string) *PlatformFederatedIdentityUpdate {
+	pfiu.mutation.SetConnectorSubject(s)
 	return pfiu
 }
 
-// SetNillableFederatedUserID sets the "federated_user_id" field if the given value is not nil.
-func (pfiu *PlatformFederatedIdentityUpdate) SetNillableFederatedUserID(s *string) *PlatformFederatedIdentityUpdate {
+// SetNillableConnectorSubject sets the "connector_subject" field if the given value is not nil.
+func (pfiu *PlatformFederatedIdentityUpdate) SetNillableConnectorSubject(s *string) *PlatformFederatedIdentityUpdate {
 	if s != nil {
-		pfiu.SetFederatedUserID(*s)
+		pfiu.SetConnectorSubject(*s)
 	}
 	return pfiu
 }
@@ -165,9 +165,9 @@ func (pfiu *PlatformFederatedIdentityUpdate) check() error {
 			return &ValidationError{Name: "connector_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_id": %w`, err)}
 		}
 	}
-	if v, ok := pfiu.mutation.FederatedUserID(); ok {
-		if err := platformfederatedidentity.FederatedUserIDValidator(v); err != nil {
-			return &ValidationError{Name: "federated_user_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.federated_user_id": %w`, err)}
+	if v, ok := pfiu.mutation.ConnectorSubject(); ok {
+		if err := platformfederatedidentity.ConnectorSubjectValidator(v); err != nil {
+			return &ValidationError{Name: "connector_subject", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_subject": %w`, err)}
 		}
 	}
 	if pfiu.mutation.UserCleared() && len(pfiu.mutation.UserIDs()) > 0 {
@@ -194,8 +194,8 @@ func (pfiu *PlatformFederatedIdentityUpdate) sqlSave(ctx context.Context) (n int
 	if value, ok := pfiu.mutation.ConnectorID(); ok {
 		_spec.SetField(platformfederatedidentity.FieldConnectorID, field.TypeString, value)
 	}
-	if value, ok := pfiu.mutation.FederatedUserID(); ok {
-		_spec.SetField(platformfederatedidentity.FieldFederatedUserID, field.TypeString, value)
+	if value, ok := pfiu.mutation.ConnectorSubject(); ok {
+		_spec.SetField(platformfederatedidentity.FieldConnectorSubject, field.TypeString, value)
 	}
 	if pfiu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -311,16 +311,16 @@ func (pfiuo *PlatformFederatedIdentityUpdateOne) SetNillableConnectorID(s *strin
 	return pfiuo
 }
 
-// SetFederatedUserID sets the "federated_user_id" field.
-func (pfiuo *PlatformFederatedIdentityUpdateOne) SetFederatedUserID(s string) *PlatformFederatedIdentityUpdateOne {
-	pfiuo.mutation.SetFederatedUserID(s)
+// SetConnectorSubject sets the "connector_subject" field.
+func (pfiuo *PlatformFederatedIdentityUpdateOne) SetConnectorSubject(s string) *PlatformFederatedIdentityUpdateOne {
+	pfiuo.mutation.SetConnectorSubject(s)
 	return pfiuo
 }
 
-// SetNillableFederatedUserID sets the "federated_user_id" field if the given value is not nil.
-func (pfiuo *PlatformFederatedIdentityUpdateOne) SetNillableFederatedUserID(s *string) *PlatformFederatedIdentityUpdateOne {
+// SetNillableConnectorSubject sets the "connector_subject" field if the given value is not nil.
+func (pfiuo *PlatformFederatedIdentityUpdateOne) SetNillableConnectorSubject(s *string) *PlatformFederatedIdentityUpdateOne {
 	if s != nil {
-		pfiuo.SetFederatedUserID(*s)
+		pfiuo.SetConnectorSubject(*s)
 	}
 	return pfiuo
 }
@@ -439,9 +439,9 @@ func (pfiuo *PlatformFederatedIdentityUpdateOne) check() error {
 			return &ValidationError{Name: "connector_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_id": %w`, err)}
 		}
 	}
-	if v, ok := pfiuo.mutation.FederatedUserID(); ok {
-		if err := platformfederatedidentity.FederatedUserIDValidator(v); err != nil {
-			return &ValidationError{Name: "federated_user_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.federated_user_id": %w`, err)}
+	if v, ok := pfiuo.mutation.ConnectorSubject(); ok {
+		if err := platformfederatedidentity.ConnectorSubjectValidator(v); err != nil {
+			return &ValidationError{Name: "connector_subject", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_subject": %w`, err)}
 		}
 	}
 	if pfiuo.mutation.UserCleared() && len(pfiuo.mutation.UserIDs()) > 0 {
@@ -485,8 +485,8 @@ func (pfiuo *PlatformFederatedIdentityUpdateOne) sqlSave(ctx context.Context) (_
 	if value, ok := pfiuo.mutation.ConnectorID(); ok {
 		_spec.SetField(platformfederatedidentity.FieldConnectorID, field.TypeString, value)
 	}
-	if value, ok := pfiuo.mutation.FederatedUserID(); ok {
-		_spec.SetField(platformfederatedidentity.FieldFederatedUserID, field.TypeString, value)
+	if value, ok := pfiuo.mutation.ConnectorSubject(); ok {
+		_spec.SetField(platformfederatedidentity.FieldConnectorSubject, field.TypeString, value)
 	}
 	if pfiuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -56,9 +56,9 @@ func (pfic *PlatformFederatedIdentityCreate) SetConnectorID(s string) *PlatformF
 	return pfic
 }
 
-// SetFederatedUserID sets the "federated_user_id" field.
-func (pfic *PlatformFederatedIdentityCreate) SetFederatedUserID(s string) *PlatformFederatedIdentityCreate {
-	pfic.mutation.SetFederatedUserID(s)
+// SetConnectorSubject sets the "connector_subject" field.
+func (pfic *PlatformFederatedIdentityCreate) SetConnectorSubject(s string) *PlatformFederatedIdentityCreate {
+	pfic.mutation.SetConnectorSubject(s)
 	return pfic
 }
 
@@ -149,12 +149,12 @@ func (pfic *PlatformFederatedIdentityCreate) check() error {
 			return &ValidationError{Name: "connector_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_id": %w`, err)}
 		}
 	}
-	if _, ok := pfic.mutation.FederatedUserID(); !ok {
-		return &ValidationError{Name: "federated_user_id", err: errors.New(`db: missing required field "PlatformFederatedIdentity.federated_user_id"`)}
+	if _, ok := pfic.mutation.ConnectorSubject(); !ok {
+		return &ValidationError{Name: "connector_subject", err: errors.New(`db: missing required field "PlatformFederatedIdentity.connector_subject"`)}
 	}
-	if v, ok := pfic.mutation.FederatedUserID(); ok {
-		if err := platformfederatedidentity.FederatedUserIDValidator(v); err != nil {
-			return &ValidationError{Name: "federated_user_id", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.federated_user_id": %w`, err)}
+	if v, ok := pfic.mutation.ConnectorSubject(); ok {
+		if err := platformfederatedidentity.ConnectorSubjectValidator(v); err != nil {
+			return &ValidationError{Name: "connector_subject", err: fmt.Errorf(`db: validator failed for field "PlatformFederatedIdentity.connector_subject": %w`, err)}
 		}
 	}
 	if len(pfic.mutation.UserIDs()) == 0 {
@@ -198,9 +198,9 @@ func (pfic *PlatformFederatedIdentityCreate) createSpec() (*PlatformFederatedIde
 		_spec.SetField(platformfederatedidentity.FieldConnectorID, field.TypeString, value)
 		_node.ConnectorID = value
 	}
-	if value, ok := pfic.mutation.FederatedUserID(); ok {
-		_spec.SetField(platformfederatedidentity.FieldFederatedUserID, field.TypeString, value)
-		_node.FederatedUserID = value
+	if value, ok := pfic.mutation.ConnectorSubject(); ok {
+		_spec.SetField(platformfederatedidentity.FieldConnectorSubject, field.TypeString, value)
+		_node.ConnectorSubject = value
 	}
 	if nodes := pfic.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

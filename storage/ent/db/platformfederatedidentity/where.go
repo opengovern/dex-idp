@@ -70,9 +70,9 @@ func ConnectorID(v string) predicate.PlatformFederatedIdentity {
 	return predicate.PlatformFederatedIdentity(sql.FieldEQ(FieldConnectorID, v))
 }
 
-// FederatedUserID applies equality check predicate on the "federated_user_id" field. It's identical to FederatedUserIDEQ.
-func FederatedUserID(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldEQ(FieldFederatedUserID, v))
+// ConnectorSubject applies equality check predicate on the "connector_subject" field. It's identical to ConnectorSubjectEQ.
+func ConnectorSubject(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldEQ(FieldConnectorSubject, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
@@ -220,69 +220,69 @@ func ConnectorIDContainsFold(v string) predicate.PlatformFederatedIdentity {
 	return predicate.PlatformFederatedIdentity(sql.FieldContainsFold(FieldConnectorID, v))
 }
 
-// FederatedUserIDEQ applies the EQ predicate on the "federated_user_id" field.
-func FederatedUserIDEQ(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldEQ(FieldFederatedUserID, v))
+// ConnectorSubjectEQ applies the EQ predicate on the "connector_subject" field.
+func ConnectorSubjectEQ(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldEQ(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDNEQ applies the NEQ predicate on the "federated_user_id" field.
-func FederatedUserIDNEQ(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldNEQ(FieldFederatedUserID, v))
+// ConnectorSubjectNEQ applies the NEQ predicate on the "connector_subject" field.
+func ConnectorSubjectNEQ(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldNEQ(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDIn applies the In predicate on the "federated_user_id" field.
-func FederatedUserIDIn(vs ...string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldIn(FieldFederatedUserID, vs...))
+// ConnectorSubjectIn applies the In predicate on the "connector_subject" field.
+func ConnectorSubjectIn(vs ...string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldIn(FieldConnectorSubject, vs...))
 }
 
-// FederatedUserIDNotIn applies the NotIn predicate on the "federated_user_id" field.
-func FederatedUserIDNotIn(vs ...string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldNotIn(FieldFederatedUserID, vs...))
+// ConnectorSubjectNotIn applies the NotIn predicate on the "connector_subject" field.
+func ConnectorSubjectNotIn(vs ...string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldNotIn(FieldConnectorSubject, vs...))
 }
 
-// FederatedUserIDGT applies the GT predicate on the "federated_user_id" field.
-func FederatedUserIDGT(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldGT(FieldFederatedUserID, v))
+// ConnectorSubjectGT applies the GT predicate on the "connector_subject" field.
+func ConnectorSubjectGT(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldGT(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDGTE applies the GTE predicate on the "federated_user_id" field.
-func FederatedUserIDGTE(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldGTE(FieldFederatedUserID, v))
+// ConnectorSubjectGTE applies the GTE predicate on the "connector_subject" field.
+func ConnectorSubjectGTE(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldGTE(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDLT applies the LT predicate on the "federated_user_id" field.
-func FederatedUserIDLT(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldLT(FieldFederatedUserID, v))
+// ConnectorSubjectLT applies the LT predicate on the "connector_subject" field.
+func ConnectorSubjectLT(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldLT(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDLTE applies the LTE predicate on the "federated_user_id" field.
-func FederatedUserIDLTE(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldLTE(FieldFederatedUserID, v))
+// ConnectorSubjectLTE applies the LTE predicate on the "connector_subject" field.
+func ConnectorSubjectLTE(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldLTE(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDContains applies the Contains predicate on the "federated_user_id" field.
-func FederatedUserIDContains(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldContains(FieldFederatedUserID, v))
+// ConnectorSubjectContains applies the Contains predicate on the "connector_subject" field.
+func ConnectorSubjectContains(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldContains(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDHasPrefix applies the HasPrefix predicate on the "federated_user_id" field.
-func FederatedUserIDHasPrefix(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldHasPrefix(FieldFederatedUserID, v))
+// ConnectorSubjectHasPrefix applies the HasPrefix predicate on the "connector_subject" field.
+func ConnectorSubjectHasPrefix(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldHasPrefix(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDHasSuffix applies the HasSuffix predicate on the "federated_user_id" field.
-func FederatedUserIDHasSuffix(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldHasSuffix(FieldFederatedUserID, v))
+// ConnectorSubjectHasSuffix applies the HasSuffix predicate on the "connector_subject" field.
+func ConnectorSubjectHasSuffix(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldHasSuffix(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDEqualFold applies the EqualFold predicate on the "federated_user_id" field.
-func FederatedUserIDEqualFold(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldEqualFold(FieldFederatedUserID, v))
+// ConnectorSubjectEqualFold applies the EqualFold predicate on the "connector_subject" field.
+func ConnectorSubjectEqualFold(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldEqualFold(FieldConnectorSubject, v))
 }
 
-// FederatedUserIDContainsFold applies the ContainsFold predicate on the "federated_user_id" field.
-func FederatedUserIDContainsFold(v string) predicate.PlatformFederatedIdentity {
-	return predicate.PlatformFederatedIdentity(sql.FieldContainsFold(FieldFederatedUserID, v))
+// ConnectorSubjectContainsFold applies the ContainsFold predicate on the "connector_subject" field.
+func ConnectorSubjectContainsFold(v string) predicate.PlatformFederatedIdentity {
+	return predicate.PlatformFederatedIdentity(sql.FieldContainsFold(FieldConnectorSubject, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

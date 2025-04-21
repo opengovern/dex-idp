@@ -2147,15 +2147,15 @@ func (c *PlatformTokenClient) GetX(ctx context.Context, id int) *PlatformToken {
 	return obj
 }
 
-// QueryCreator queries the creator edge of a PlatformToken.
-func (c *PlatformTokenClient) QueryCreator(pt *PlatformToken) *PlatformUserQuery {
+// QueryOwner queries the owner edge of a PlatformToken.
+func (c *PlatformTokenClient) QueryOwner(pt *PlatformToken) *PlatformUserQuery {
 	query := (&PlatformUserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pt.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(platformtoken.Table, platformtoken.FieldID, id),
 			sqlgraph.To(platformuser.Table, platformuser.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.CreatorTable, platformtoken.CreatorColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.OwnerTable, platformtoken.OwnerColumn),
 		)
 		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
 		return fromV, nil

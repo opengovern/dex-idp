@@ -54,7 +54,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "platformtoken" package.
 	CreatedTokensInverseTable = "platform_tokens"
 	// CreatedTokensColumn is the table column denoting the created_tokens relation/edge.
-	CreatedTokensColumn = "platform_user_created_tokens"
+	CreatedTokensColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for platformuser fields.

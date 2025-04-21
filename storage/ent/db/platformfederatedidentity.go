@@ -24,8 +24,8 @@ type PlatformFederatedIdentity struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Identifier of the Dex connector used for authentication.
 	ConnectorID string `json:"connector_id,omitempty"`
-	// The unique User ID provided by the specific external connector (e.g., subject ID, username).
-	FederatedUserID string `json:"federated_user_id,omitempty"`
+	// The unique subject identifier provided by the external connector (e.g., OIDC 'sub', SAML NameID, LDAP DN/uid).
+	ConnectorSubject string `json:"connector_subject,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlatformFederatedIdentityQuery when eager-loading is set.
 	Edges                              PlatformFederatedIdentityEdges `json:"edges"`
@@ -71,7 +71,7 @@ func (*PlatformFederatedIdentity) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case platformfederatedidentity.FieldID:
 			values[i] = new(sql.NullInt64)
-		case platformfederatedidentity.FieldConnectorID, platformfederatedidentity.FieldFederatedUserID:
+		case platformfederatedidentity.FieldConnectorID, platformfederatedidentity.FieldConnectorSubject:
 			values[i] = new(sql.NullString)
 		case platformfederatedidentity.FieldCreateTime, platformfederatedidentity.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -116,11 +116,11 @@ func (pfi *PlatformFederatedIdentity) assignValues(columns []string, values []an
 			} else if value.Valid {
 				pfi.ConnectorID = value.String
 			}
-		case platformfederatedidentity.FieldFederatedUserID:
+		case platformfederatedidentity.FieldConnectorSubject:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field federated_user_id", values[i])
+				return fmt.Errorf("unexpected type %T for field connector_subject", values[i])
 			} else if value.Valid {
-				pfi.FederatedUserID = value.String
+				pfi.ConnectorSubject = value.String
 			}
 		case platformfederatedidentity.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -184,8 +184,8 @@ func (pfi *PlatformFederatedIdentity) String() string {
 	builder.WriteString("connector_id=")
 	builder.WriteString(pfi.ConnectorID)
 	builder.WriteString(", ")
-	builder.WriteString("federated_user_id=")
-	builder.WriteString(pfi.FederatedUserID)
+	builder.WriteString("connector_subject=")
+	builder.WriteString(pfi.ConnectorSubject)
 	builder.WriteByte(')')
 	return builder.String()
 }
