@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 	"github.com/dexidp/dex/storage/ent/db/predicate"
-	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // PlatformUserUpdate is the builder for updating PlatformUser entities.
@@ -83,46 +85,6 @@ func (puu *PlatformUserUpdate) SetNillableIsActive(b *bool) *PlatformUserUpdate 
 	return puu
 }
 
-// SetFirstConnectorID sets the "first_connector_id" field.
-func (puu *PlatformUserUpdate) SetFirstConnectorID(s string) *PlatformUserUpdate {
-	puu.mutation.SetFirstConnectorID(s)
-	return puu
-}
-
-// SetNillableFirstConnectorID sets the "first_connector_id" field if the given value is not nil.
-func (puu *PlatformUserUpdate) SetNillableFirstConnectorID(s *string) *PlatformUserUpdate {
-	if s != nil {
-		puu.SetFirstConnectorID(*s)
-	}
-	return puu
-}
-
-// ClearFirstConnectorID clears the value of the "first_connector_id" field.
-func (puu *PlatformUserUpdate) ClearFirstConnectorID() *PlatformUserUpdate {
-	puu.mutation.ClearFirstConnectorID()
-	return puu
-}
-
-// SetFirstFederatedUserID sets the "first_federated_user_id" field.
-func (puu *PlatformUserUpdate) SetFirstFederatedUserID(s string) *PlatformUserUpdate {
-	puu.mutation.SetFirstFederatedUserID(s)
-	return puu
-}
-
-// SetNillableFirstFederatedUserID sets the "first_federated_user_id" field if the given value is not nil.
-func (puu *PlatformUserUpdate) SetNillableFirstFederatedUserID(s *string) *PlatformUserUpdate {
-	if s != nil {
-		puu.SetFirstFederatedUserID(*s)
-	}
-	return puu
-}
-
-// ClearFirstFederatedUserID clears the value of the "first_federated_user_id" field.
-func (puu *PlatformUserUpdate) ClearFirstFederatedUserID() *PlatformUserUpdate {
-	puu.mutation.ClearFirstFederatedUserID()
-	return puu
-}
-
 // SetLastLogin sets the "last_login" field.
 func (puu *PlatformUserUpdate) SetLastLogin(t time.Time) *PlatformUserUpdate {
 	puu.mutation.SetLastLogin(t)
@@ -143,19 +105,49 @@ func (puu *PlatformUserUpdate) ClearLastLogin() *PlatformUserUpdate {
 	return puu
 }
 
-// AddAssignmentIDs adds the "assignments" edge to the UserAppRole entity by IDs.
-func (puu *PlatformUserUpdate) AddAssignmentIDs(ids ...int) *PlatformUserUpdate {
-	puu.mutation.AddAssignmentIDs(ids...)
+// AddUserRoleAssignmentIDs adds the "user_role_assignments" edge to the PlatformUserRoleAssignment entity by IDs.
+func (puu *PlatformUserUpdate) AddUserRoleAssignmentIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.AddUserRoleAssignmentIDs(ids...)
 	return puu
 }
 
-// AddAssignments adds the "assignments" edges to the UserAppRole entity.
-func (puu *PlatformUserUpdate) AddAssignments(u ...*UserAppRole) *PlatformUserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// AddUserRoleAssignments adds the "user_role_assignments" edges to the PlatformUserRoleAssignment entity.
+func (puu *PlatformUserUpdate) AddUserRoleAssignments(p ...*PlatformUserRoleAssignment) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return puu.AddAssignmentIDs(ids...)
+	return puu.AddUserRoleAssignmentIDs(ids...)
+}
+
+// AddFederatedIdentityIDs adds the "federated_identities" edge to the PlatformFederatedIdentity entity by IDs.
+func (puu *PlatformUserUpdate) AddFederatedIdentityIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.AddFederatedIdentityIDs(ids...)
+	return puu
+}
+
+// AddFederatedIdentities adds the "federated_identities" edges to the PlatformFederatedIdentity entity.
+func (puu *PlatformUserUpdate) AddFederatedIdentities(p ...*PlatformFederatedIdentity) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puu.AddFederatedIdentityIDs(ids...)
+}
+
+// AddCreatedTokenIDs adds the "created_tokens" edge to the PlatformToken entity by IDs.
+func (puu *PlatformUserUpdate) AddCreatedTokenIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.AddCreatedTokenIDs(ids...)
+	return puu
+}
+
+// AddCreatedTokens adds the "created_tokens" edges to the PlatformToken entity.
+func (puu *PlatformUserUpdate) AddCreatedTokens(p ...*PlatformToken) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puu.AddCreatedTokenIDs(ids...)
 }
 
 // Mutation returns the PlatformUserMutation object of the builder.
@@ -163,25 +155,67 @@ func (puu *PlatformUserUpdate) Mutation() *PlatformUserMutation {
 	return puu.mutation
 }
 
-// ClearAssignments clears all "assignments" edges to the UserAppRole entity.
-func (puu *PlatformUserUpdate) ClearAssignments() *PlatformUserUpdate {
-	puu.mutation.ClearAssignments()
+// ClearUserRoleAssignments clears all "user_role_assignments" edges to the PlatformUserRoleAssignment entity.
+func (puu *PlatformUserUpdate) ClearUserRoleAssignments() *PlatformUserUpdate {
+	puu.mutation.ClearUserRoleAssignments()
 	return puu
 }
 
-// RemoveAssignmentIDs removes the "assignments" edge to UserAppRole entities by IDs.
-func (puu *PlatformUserUpdate) RemoveAssignmentIDs(ids ...int) *PlatformUserUpdate {
-	puu.mutation.RemoveAssignmentIDs(ids...)
+// RemoveUserRoleAssignmentIDs removes the "user_role_assignments" edge to PlatformUserRoleAssignment entities by IDs.
+func (puu *PlatformUserUpdate) RemoveUserRoleAssignmentIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.RemoveUserRoleAssignmentIDs(ids...)
 	return puu
 }
 
-// RemoveAssignments removes "assignments" edges to UserAppRole entities.
-func (puu *PlatformUserUpdate) RemoveAssignments(u ...*UserAppRole) *PlatformUserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// RemoveUserRoleAssignments removes "user_role_assignments" edges to PlatformUserRoleAssignment entities.
+func (puu *PlatformUserUpdate) RemoveUserRoleAssignments(p ...*PlatformUserRoleAssignment) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return puu.RemoveAssignmentIDs(ids...)
+	return puu.RemoveUserRoleAssignmentIDs(ids...)
+}
+
+// ClearFederatedIdentities clears all "federated_identities" edges to the PlatformFederatedIdentity entity.
+func (puu *PlatformUserUpdate) ClearFederatedIdentities() *PlatformUserUpdate {
+	puu.mutation.ClearFederatedIdentities()
+	return puu
+}
+
+// RemoveFederatedIdentityIDs removes the "federated_identities" edge to PlatformFederatedIdentity entities by IDs.
+func (puu *PlatformUserUpdate) RemoveFederatedIdentityIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.RemoveFederatedIdentityIDs(ids...)
+	return puu
+}
+
+// RemoveFederatedIdentities removes "federated_identities" edges to PlatformFederatedIdentity entities.
+func (puu *PlatformUserUpdate) RemoveFederatedIdentities(p ...*PlatformFederatedIdentity) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puu.RemoveFederatedIdentityIDs(ids...)
+}
+
+// ClearCreatedTokens clears all "created_tokens" edges to the PlatformToken entity.
+func (puu *PlatformUserUpdate) ClearCreatedTokens() *PlatformUserUpdate {
+	puu.mutation.ClearCreatedTokens()
+	return puu
+}
+
+// RemoveCreatedTokenIDs removes the "created_tokens" edge to PlatformToken entities by IDs.
+func (puu *PlatformUserUpdate) RemoveCreatedTokenIDs(ids ...int) *PlatformUserUpdate {
+	puu.mutation.RemoveCreatedTokenIDs(ids...)
+	return puu
+}
+
+// RemoveCreatedTokens removes "created_tokens" edges to PlatformToken entities.
+func (puu *PlatformUserUpdate) RemoveCreatedTokens(p ...*PlatformToken) *PlatformUserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puu.RemoveCreatedTokenIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -257,46 +291,34 @@ func (puu *PlatformUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := puu.mutation.IsActive(); ok {
 		_spec.SetField(platformuser.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := puu.mutation.FirstConnectorID(); ok {
-		_spec.SetField(platformuser.FieldFirstConnectorID, field.TypeString, value)
-	}
-	if puu.mutation.FirstConnectorIDCleared() {
-		_spec.ClearField(platformuser.FieldFirstConnectorID, field.TypeString)
-	}
-	if value, ok := puu.mutation.FirstFederatedUserID(); ok {
-		_spec.SetField(platformuser.FieldFirstFederatedUserID, field.TypeString, value)
-	}
-	if puu.mutation.FirstFederatedUserIDCleared() {
-		_spec.ClearField(platformuser.FieldFirstFederatedUserID, field.TypeString)
-	}
 	if value, ok := puu.mutation.LastLogin(); ok {
 		_spec.SetField(platformuser.FieldLastLogin, field.TypeTime, value)
 	}
 	if puu.mutation.LastLoginCleared() {
 		_spec.ClearField(platformuser.FieldLastLogin, field.TypeTime)
 	}
-	if puu.mutation.AssignmentsCleared() {
+	if puu.mutation.UserRoleAssignmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puu.mutation.RemovedAssignmentsIDs(); len(nodes) > 0 && !puu.mutation.AssignmentsCleared() {
+	if nodes := puu.mutation.RemovedUserRoleAssignmentsIDs(); len(nodes) > 0 && !puu.mutation.UserRoleAssignmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -304,15 +326,105 @@ func (puu *PlatformUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puu.mutation.AssignmentsIDs(); len(nodes) > 0 {
+	if nodes := puu.mutation.UserRoleAssignmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puu.mutation.FederatedIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puu.mutation.RemovedFederatedIdentitiesIDs(); len(nodes) > 0 && !puu.mutation.FederatedIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puu.mutation.FederatedIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puu.mutation.CreatedTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puu.mutation.RemovedCreatedTokensIDs(); len(nodes) > 0 && !puu.mutation.CreatedTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puu.mutation.CreatedTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -394,46 +506,6 @@ func (puuo *PlatformUserUpdateOne) SetNillableIsActive(b *bool) *PlatformUserUpd
 	return puuo
 }
 
-// SetFirstConnectorID sets the "first_connector_id" field.
-func (puuo *PlatformUserUpdateOne) SetFirstConnectorID(s string) *PlatformUserUpdateOne {
-	puuo.mutation.SetFirstConnectorID(s)
-	return puuo
-}
-
-// SetNillableFirstConnectorID sets the "first_connector_id" field if the given value is not nil.
-func (puuo *PlatformUserUpdateOne) SetNillableFirstConnectorID(s *string) *PlatformUserUpdateOne {
-	if s != nil {
-		puuo.SetFirstConnectorID(*s)
-	}
-	return puuo
-}
-
-// ClearFirstConnectorID clears the value of the "first_connector_id" field.
-func (puuo *PlatformUserUpdateOne) ClearFirstConnectorID() *PlatformUserUpdateOne {
-	puuo.mutation.ClearFirstConnectorID()
-	return puuo
-}
-
-// SetFirstFederatedUserID sets the "first_federated_user_id" field.
-func (puuo *PlatformUserUpdateOne) SetFirstFederatedUserID(s string) *PlatformUserUpdateOne {
-	puuo.mutation.SetFirstFederatedUserID(s)
-	return puuo
-}
-
-// SetNillableFirstFederatedUserID sets the "first_federated_user_id" field if the given value is not nil.
-func (puuo *PlatformUserUpdateOne) SetNillableFirstFederatedUserID(s *string) *PlatformUserUpdateOne {
-	if s != nil {
-		puuo.SetFirstFederatedUserID(*s)
-	}
-	return puuo
-}
-
-// ClearFirstFederatedUserID clears the value of the "first_federated_user_id" field.
-func (puuo *PlatformUserUpdateOne) ClearFirstFederatedUserID() *PlatformUserUpdateOne {
-	puuo.mutation.ClearFirstFederatedUserID()
-	return puuo
-}
-
 // SetLastLogin sets the "last_login" field.
 func (puuo *PlatformUserUpdateOne) SetLastLogin(t time.Time) *PlatformUserUpdateOne {
 	puuo.mutation.SetLastLogin(t)
@@ -454,19 +526,49 @@ func (puuo *PlatformUserUpdateOne) ClearLastLogin() *PlatformUserUpdateOne {
 	return puuo
 }
 
-// AddAssignmentIDs adds the "assignments" edge to the UserAppRole entity by IDs.
-func (puuo *PlatformUserUpdateOne) AddAssignmentIDs(ids ...int) *PlatformUserUpdateOne {
-	puuo.mutation.AddAssignmentIDs(ids...)
+// AddUserRoleAssignmentIDs adds the "user_role_assignments" edge to the PlatformUserRoleAssignment entity by IDs.
+func (puuo *PlatformUserUpdateOne) AddUserRoleAssignmentIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.AddUserRoleAssignmentIDs(ids...)
 	return puuo
 }
 
-// AddAssignments adds the "assignments" edges to the UserAppRole entity.
-func (puuo *PlatformUserUpdateOne) AddAssignments(u ...*UserAppRole) *PlatformUserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// AddUserRoleAssignments adds the "user_role_assignments" edges to the PlatformUserRoleAssignment entity.
+func (puuo *PlatformUserUpdateOne) AddUserRoleAssignments(p ...*PlatformUserRoleAssignment) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return puuo.AddAssignmentIDs(ids...)
+	return puuo.AddUserRoleAssignmentIDs(ids...)
+}
+
+// AddFederatedIdentityIDs adds the "federated_identities" edge to the PlatformFederatedIdentity entity by IDs.
+func (puuo *PlatformUserUpdateOne) AddFederatedIdentityIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.AddFederatedIdentityIDs(ids...)
+	return puuo
+}
+
+// AddFederatedIdentities adds the "federated_identities" edges to the PlatformFederatedIdentity entity.
+func (puuo *PlatformUserUpdateOne) AddFederatedIdentities(p ...*PlatformFederatedIdentity) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puuo.AddFederatedIdentityIDs(ids...)
+}
+
+// AddCreatedTokenIDs adds the "created_tokens" edge to the PlatformToken entity by IDs.
+func (puuo *PlatformUserUpdateOne) AddCreatedTokenIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.AddCreatedTokenIDs(ids...)
+	return puuo
+}
+
+// AddCreatedTokens adds the "created_tokens" edges to the PlatformToken entity.
+func (puuo *PlatformUserUpdateOne) AddCreatedTokens(p ...*PlatformToken) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puuo.AddCreatedTokenIDs(ids...)
 }
 
 // Mutation returns the PlatformUserMutation object of the builder.
@@ -474,25 +576,67 @@ func (puuo *PlatformUserUpdateOne) Mutation() *PlatformUserMutation {
 	return puuo.mutation
 }
 
-// ClearAssignments clears all "assignments" edges to the UserAppRole entity.
-func (puuo *PlatformUserUpdateOne) ClearAssignments() *PlatformUserUpdateOne {
-	puuo.mutation.ClearAssignments()
+// ClearUserRoleAssignments clears all "user_role_assignments" edges to the PlatformUserRoleAssignment entity.
+func (puuo *PlatformUserUpdateOne) ClearUserRoleAssignments() *PlatformUserUpdateOne {
+	puuo.mutation.ClearUserRoleAssignments()
 	return puuo
 }
 
-// RemoveAssignmentIDs removes the "assignments" edge to UserAppRole entities by IDs.
-func (puuo *PlatformUserUpdateOne) RemoveAssignmentIDs(ids ...int) *PlatformUserUpdateOne {
-	puuo.mutation.RemoveAssignmentIDs(ids...)
+// RemoveUserRoleAssignmentIDs removes the "user_role_assignments" edge to PlatformUserRoleAssignment entities by IDs.
+func (puuo *PlatformUserUpdateOne) RemoveUserRoleAssignmentIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.RemoveUserRoleAssignmentIDs(ids...)
 	return puuo
 }
 
-// RemoveAssignments removes "assignments" edges to UserAppRole entities.
-func (puuo *PlatformUserUpdateOne) RemoveAssignments(u ...*UserAppRole) *PlatformUserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// RemoveUserRoleAssignments removes "user_role_assignments" edges to PlatformUserRoleAssignment entities.
+func (puuo *PlatformUserUpdateOne) RemoveUserRoleAssignments(p ...*PlatformUserRoleAssignment) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return puuo.RemoveAssignmentIDs(ids...)
+	return puuo.RemoveUserRoleAssignmentIDs(ids...)
+}
+
+// ClearFederatedIdentities clears all "federated_identities" edges to the PlatformFederatedIdentity entity.
+func (puuo *PlatformUserUpdateOne) ClearFederatedIdentities() *PlatformUserUpdateOne {
+	puuo.mutation.ClearFederatedIdentities()
+	return puuo
+}
+
+// RemoveFederatedIdentityIDs removes the "federated_identities" edge to PlatformFederatedIdentity entities by IDs.
+func (puuo *PlatformUserUpdateOne) RemoveFederatedIdentityIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.RemoveFederatedIdentityIDs(ids...)
+	return puuo
+}
+
+// RemoveFederatedIdentities removes "federated_identities" edges to PlatformFederatedIdentity entities.
+func (puuo *PlatformUserUpdateOne) RemoveFederatedIdentities(p ...*PlatformFederatedIdentity) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puuo.RemoveFederatedIdentityIDs(ids...)
+}
+
+// ClearCreatedTokens clears all "created_tokens" edges to the PlatformToken entity.
+func (puuo *PlatformUserUpdateOne) ClearCreatedTokens() *PlatformUserUpdateOne {
+	puuo.mutation.ClearCreatedTokens()
+	return puuo
+}
+
+// RemoveCreatedTokenIDs removes the "created_tokens" edge to PlatformToken entities by IDs.
+func (puuo *PlatformUserUpdateOne) RemoveCreatedTokenIDs(ids ...int) *PlatformUserUpdateOne {
+	puuo.mutation.RemoveCreatedTokenIDs(ids...)
+	return puuo
+}
+
+// RemoveCreatedTokens removes "created_tokens" edges to PlatformToken entities.
+func (puuo *PlatformUserUpdateOne) RemoveCreatedTokens(p ...*PlatformToken) *PlatformUserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puuo.RemoveCreatedTokenIDs(ids...)
 }
 
 // Where appends a list predicates to the PlatformUserUpdate builder.
@@ -598,46 +742,34 @@ func (puuo *PlatformUserUpdateOne) sqlSave(ctx context.Context) (_node *Platform
 	if value, ok := puuo.mutation.IsActive(); ok {
 		_spec.SetField(platformuser.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := puuo.mutation.FirstConnectorID(); ok {
-		_spec.SetField(platformuser.FieldFirstConnectorID, field.TypeString, value)
-	}
-	if puuo.mutation.FirstConnectorIDCleared() {
-		_spec.ClearField(platformuser.FieldFirstConnectorID, field.TypeString)
-	}
-	if value, ok := puuo.mutation.FirstFederatedUserID(); ok {
-		_spec.SetField(platformuser.FieldFirstFederatedUserID, field.TypeString, value)
-	}
-	if puuo.mutation.FirstFederatedUserIDCleared() {
-		_spec.ClearField(platformuser.FieldFirstFederatedUserID, field.TypeString)
-	}
 	if value, ok := puuo.mutation.LastLogin(); ok {
 		_spec.SetField(platformuser.FieldLastLogin, field.TypeTime, value)
 	}
 	if puuo.mutation.LastLoginCleared() {
 		_spec.ClearField(platformuser.FieldLastLogin, field.TypeTime)
 	}
-	if puuo.mutation.AssignmentsCleared() {
+	if puuo.mutation.UserRoleAssignmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puuo.mutation.RemovedAssignmentsIDs(); len(nodes) > 0 && !puuo.mutation.AssignmentsCleared() {
+	if nodes := puuo.mutation.RemovedUserRoleAssignmentsIDs(); len(nodes) > 0 && !puuo.mutation.UserRoleAssignmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -645,15 +777,105 @@ func (puuo *PlatformUserUpdateOne) sqlSave(ctx context.Context) (_node *Platform
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puuo.mutation.AssignmentsIDs(); len(nodes) > 0 {
+	if nodes := puuo.mutation.UserRoleAssignmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puuo.mutation.FederatedIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puuo.mutation.RemovedFederatedIdentitiesIDs(); len(nodes) > 0 && !puuo.mutation.FederatedIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puuo.mutation.FederatedIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puuo.mutation.CreatedTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puuo.mutation.RemovedCreatedTokensIDs(); len(nodes) > 0 && !puuo.mutation.CreatedTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puuo.mutation.CreatedTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

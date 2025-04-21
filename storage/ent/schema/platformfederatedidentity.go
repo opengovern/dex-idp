@@ -57,11 +57,11 @@ func (PlatformFederatedIdentity) Edges() []ent.Edge {
 // Indexes of the PlatformFederatedIdentity.
 func (PlatformFederatedIdentity) Indexes() []ent.Index {
 	return []ent.Index{
-		// Unique index on connector+federated ID
+		// Enforce uniqueness on the combination of connector and the user ID from that connector.
 		index.Fields("connector_id", "federated_user_id").
 			Unique(),
 
-		// Index the foreign key for efficient lookups of identities by user.
-		index.Fields("platform_user_id"), // Ent likely generates based on edge field
+		// CORRECTED: Index the foreign key edge for efficient lookups of identities by user.
+		index.Edges("user"), // Use index.Edges() for edge-defined FKs
 	}
 }

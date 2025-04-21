@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api; // Keep package name as 'api'
 
-// Change Go package alias to apiV2 for consistency with Go code
+// Use 'api' alias for Go package for compatibility with existing code
 option go_package = "github.com/dexidp/dex/api/v2;api";
 option java_package = "com.coreos.dex.api";
 
@@ -13,6 +13,7 @@ import "google/protobuf/empty.proto"; // Needed for Delete response potentially
 
 // -------------------------------------------------------------
 // Existing Dex Messages (Clients, Passwords, Connectors, etc.)
+// (Copied from your input - assumed correct)
 // -------------------------------------------------------------
 
 // Client represents an OAuth2 client.
@@ -239,7 +240,8 @@ message VerifyPasswordResp {
 }
 
 // -------------------------------------------------------------
-// NEW PlatformUser Messages and Service
+// PlatformUser Messages and Service Definitions
+// (Updated section)
 // -------------------------------------------------------------
 
 // PlatformUser message - mirrors the Ent schema PlatformUser entity.
@@ -250,48 +252,67 @@ message PlatformUser {
   bool is_active = 4;
   google.protobuf.Timestamp create_time = 5; // Corresponds to Ent CreateTime
   google.protobuf.Timestamp update_time = 6; // Corresponds to Ent UpdateTime
-  google.protobuf.Timestamp last_login = 7;  // Optional
-  google.protobuf.StringValue first_connector_id = 8; // Optional
-  google.protobuf.StringValue first_federated_user_id = 9; // Optional
+  google.protobuf.Timestamp last_login = 7;  // Optional (nullable time)
+  // Note: first_connector_id and first_federated_user_id removed from proto
 }
 
-// CreateUser messages
-message CreateUserRequest {
+// --- Create messages --- (Using consistent naming)
+message CreatePlatformUserRequest {
   string email = 1; // Required
   google.protobuf.StringValue display_name = 2; // Optional
-  // google.protobuf.BoolValue is_active = 3; // Optional: set initial state explicitly?
 }
-message CreateUserResponse {
+message CreatePlatformUserResponse {
   PlatformUser platform_user = 1; // Contains the created PlatformUser
 }
 
-// GetUser messages
-message GetUserRequest {
-  string id = 1; // ID of the user to retrieve
+// --- Get messages --- (Using consistent naming)
+message GetPlatformUserRequest {
+  string id = 1; // ID of the user to retrieve (required)
 }
-message GetUserResponse {
+message GetPlatformUserResponse {
   PlatformUser platform_user = 1; // Contains the retrieved PlatformUser
 }
 
-// UpdateUser messages
-message UpdateUserRequest {
-  string id = 1; // ID of the user to update
-  // Use wrappers for optional fields to indicate presence
+// --- List messages --- (Using consistent naming)
+message ListPlatformUsersRequest {
+  // The maximum number of users to return. Defaults server-side if 0. Max limit may apply.
+  int32 page_size = 1;
+  // Token from previous response to get the next page. Empty for first page.
+  string page_token = 2;
+  // Optional filter: only return users with this active status.
+  google.protobuf.BoolValue filter_is_active = 3;
+  // Optional filter: only return users whose email contains this substring (case-insensitive).
+  string filter_email_contains = 4;
+}
+message ListPlatformUsersResponse {
+  // The list of platform users for the current page.
+  repeated PlatformUser users = 1;
+  // Token to retrieve the next page. Empty if no more pages.
+  string next_page_token = 2;
+  // Total number of users matching the filter criteria, disregarding pagination.
+  int32 total_size = 3;
+  // Total number of pages available based on the effective page size used by the server.
+  int32 total_pages = 4;
+}
+
+// --- Update messages --- (Using consistent naming)
+message UpdatePlatformUserRequest {
+  string id = 1; // ID of the user to update (required)
+  // Use wrappers for optional fields to indicate presence for update
   google.protobuf.StringValue display_name = 2;
   google.protobuf.BoolValue is_active = 3;
-  // Add other updatable fields as needed
 }
-message UpdateUserResponse {
+message UpdatePlatformUserResponse {
   PlatformUser platform_user = 1; // Contains the updated PlatformUser
 }
 
-// DeleteUser messages
-message DeleteUserRequest {
-  string id = 1; // ID of the user to delete
+// --- Delete messages --- (Using consistent naming)
+message DeletePlatformUserRequest {
+  string id = 1; // ID of the user to delete (required)
 }
-message DeleteUserResponse {
-  // Can be empty or return confirmation
-  google.protobuf.Empty placeholder = 1; // Using Empty is common
+message DeletePlatformUserResponse {
+  // Standard practice is to return Empty for successful deletes.
+  google.protobuf.Empty placeholder = 1;
 }
 
 // -------------------------------------------------------------
@@ -299,6 +320,7 @@ message DeleteUserResponse {
 // -------------------------------------------------------------
 
 // Dex represents the main dex gRPC service.
+// (Copied from your input - assumed correct)
 service Dex {
   rpc GetClient(GetClientReq) returns (GetClientResp) {};
   rpc CreateClient(CreateClientReq) returns (CreateClientResp) {};
@@ -320,9 +342,14 @@ service Dex {
 }
 
 // NEW: PlatformUserService defines RPCs for managing platform users.
+// (Updated with consistent message names and ListUsers)
 service PlatformUserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); // Using DeleteUserResponse with Empty
+  rpc CreateUser(CreatePlatformUserRequest) returns (CreatePlatformUserResponse);
+  rpc GetUser(GetPlatformUserRequest) returns (GetPlatformUserResponse);
+  rpc ListUsers(ListPlatformUsersRequest) returns (ListPlatformUsersResponse); // Added ListUsers
+  rpc UpdateUser(UpdatePlatformUserRequest) returns (UpdatePlatformUserResponse);
+  rpc DeleteUser(DeletePlatformUserRequest) returns (DeletePlatformUserResponse);
 }
+
+// TODO: Add service definitions and messages for PlatformAppRole, PlatformToken,
+// PlatformFederatedIdentity, and the assignment operations later.

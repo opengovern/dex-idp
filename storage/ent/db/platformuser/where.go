@@ -80,16 +80,6 @@ func IsActive(v bool) predicate.PlatformUser {
 	return predicate.PlatformUser(sql.FieldEQ(FieldIsActive, v))
 }
 
-// FirstConnectorID applies equality check predicate on the "first_connector_id" field. It's identical to FirstConnectorIDEQ.
-func FirstConnectorID(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEQ(FieldFirstConnectorID, v))
-}
-
-// FirstFederatedUserID applies equality check predicate on the "first_federated_user_id" field. It's identical to FirstFederatedUserIDEQ.
-func FirstFederatedUserID(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEQ(FieldFirstFederatedUserID, v))
-}
-
 // LastLogin applies equality check predicate on the "last_login" field. It's identical to LastLoginEQ.
 func LastLogin(v time.Time) predicate.PlatformUser {
 	return predicate.PlatformUser(sql.FieldEQ(FieldLastLogin, v))
@@ -325,156 +315,6 @@ func IsActiveNEQ(v bool) predicate.PlatformUser {
 	return predicate.PlatformUser(sql.FieldNEQ(FieldIsActive, v))
 }
 
-// FirstConnectorIDEQ applies the EQ predicate on the "first_connector_id" field.
-func FirstConnectorIDEQ(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEQ(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDNEQ applies the NEQ predicate on the "first_connector_id" field.
-func FirstConnectorIDNEQ(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNEQ(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDIn applies the In predicate on the "first_connector_id" field.
-func FirstConnectorIDIn(vs ...string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldIn(FieldFirstConnectorID, vs...))
-}
-
-// FirstConnectorIDNotIn applies the NotIn predicate on the "first_connector_id" field.
-func FirstConnectorIDNotIn(vs ...string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNotIn(FieldFirstConnectorID, vs...))
-}
-
-// FirstConnectorIDGT applies the GT predicate on the "first_connector_id" field.
-func FirstConnectorIDGT(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldGT(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDGTE applies the GTE predicate on the "first_connector_id" field.
-func FirstConnectorIDGTE(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldGTE(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDLT applies the LT predicate on the "first_connector_id" field.
-func FirstConnectorIDLT(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldLT(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDLTE applies the LTE predicate on the "first_connector_id" field.
-func FirstConnectorIDLTE(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldLTE(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDContains applies the Contains predicate on the "first_connector_id" field.
-func FirstConnectorIDContains(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldContains(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDHasPrefix applies the HasPrefix predicate on the "first_connector_id" field.
-func FirstConnectorIDHasPrefix(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldHasPrefix(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDHasSuffix applies the HasSuffix predicate on the "first_connector_id" field.
-func FirstConnectorIDHasSuffix(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldHasSuffix(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDIsNil applies the IsNil predicate on the "first_connector_id" field.
-func FirstConnectorIDIsNil() predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldIsNull(FieldFirstConnectorID))
-}
-
-// FirstConnectorIDNotNil applies the NotNil predicate on the "first_connector_id" field.
-func FirstConnectorIDNotNil() predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNotNull(FieldFirstConnectorID))
-}
-
-// FirstConnectorIDEqualFold applies the EqualFold predicate on the "first_connector_id" field.
-func FirstConnectorIDEqualFold(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEqualFold(FieldFirstConnectorID, v))
-}
-
-// FirstConnectorIDContainsFold applies the ContainsFold predicate on the "first_connector_id" field.
-func FirstConnectorIDContainsFold(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldContainsFold(FieldFirstConnectorID, v))
-}
-
-// FirstFederatedUserIDEQ applies the EQ predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDEQ(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEQ(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDNEQ applies the NEQ predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDNEQ(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNEQ(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDIn applies the In predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDIn(vs ...string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldIn(FieldFirstFederatedUserID, vs...))
-}
-
-// FirstFederatedUserIDNotIn applies the NotIn predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDNotIn(vs ...string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNotIn(FieldFirstFederatedUserID, vs...))
-}
-
-// FirstFederatedUserIDGT applies the GT predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDGT(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldGT(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDGTE applies the GTE predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDGTE(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldGTE(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDLT applies the LT predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDLT(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldLT(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDLTE applies the LTE predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDLTE(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldLTE(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDContains applies the Contains predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDContains(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldContains(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDHasPrefix applies the HasPrefix predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDHasPrefix(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldHasPrefix(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDHasSuffix applies the HasSuffix predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDHasSuffix(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldHasSuffix(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDIsNil applies the IsNil predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDIsNil() predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldIsNull(FieldFirstFederatedUserID))
-}
-
-// FirstFederatedUserIDNotNil applies the NotNil predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDNotNil() predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldNotNull(FieldFirstFederatedUserID))
-}
-
-// FirstFederatedUserIDEqualFold applies the EqualFold predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDEqualFold(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldEqualFold(FieldFirstFederatedUserID, v))
-}
-
-// FirstFederatedUserIDContainsFold applies the ContainsFold predicate on the "first_federated_user_id" field.
-func FirstFederatedUserIDContainsFold(v string) predicate.PlatformUser {
-	return predicate.PlatformUser(sql.FieldContainsFold(FieldFirstFederatedUserID, v))
-}
-
 // LastLoginEQ applies the EQ predicate on the "last_login" field.
 func LastLoginEQ(v time.Time) predicate.PlatformUser {
 	return predicate.PlatformUser(sql.FieldEQ(FieldLastLogin, v))
@@ -525,21 +365,67 @@ func LastLoginNotNil() predicate.PlatformUser {
 	return predicate.PlatformUser(sql.FieldNotNull(FieldLastLogin))
 }
 
-// HasAssignments applies the HasEdge predicate on the "assignments" edge.
-func HasAssignments() predicate.PlatformUser {
+// HasUserRoleAssignments applies the HasEdge predicate on the "user_role_assignments" edge.
+func HasUserRoleAssignments() predicate.PlatformUser {
 	return predicate.PlatformUser(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AssignmentsTable, AssignmentsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, UserRoleAssignmentsTable, UserRoleAssignmentsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAssignmentsWith applies the HasEdge predicate on the "assignments" edge with a given conditions (other predicates).
-func HasAssignmentsWith(preds ...predicate.UserAppRole) predicate.PlatformUser {
+// HasUserRoleAssignmentsWith applies the HasEdge predicate on the "user_role_assignments" edge with a given conditions (other predicates).
+func HasUserRoleAssignmentsWith(preds ...predicate.PlatformUserRoleAssignment) predicate.PlatformUser {
 	return predicate.PlatformUser(func(s *sql.Selector) {
-		step := newAssignmentsStep()
+		step := newUserRoleAssignmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFederatedIdentities applies the HasEdge predicate on the "federated_identities" edge.
+func HasFederatedIdentities() predicate.PlatformUser {
+	return predicate.PlatformUser(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FederatedIdentitiesTable, FederatedIdentitiesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFederatedIdentitiesWith applies the HasEdge predicate on the "federated_identities" edge with a given conditions (other predicates).
+func HasFederatedIdentitiesWith(preds ...predicate.PlatformFederatedIdentity) predicate.PlatformUser {
+	return predicate.PlatformUser(func(s *sql.Selector) {
+		step := newFederatedIdentitiesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCreatedTokens applies the HasEdge predicate on the "created_tokens" edge.
+func HasCreatedTokens() predicate.PlatformUser {
+	return predicate.PlatformUser(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CreatedTokensTable, CreatedTokensColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCreatedTokensWith applies the HasEdge predicate on the "created_tokens" edge with a given conditions (other predicates).
+func HasCreatedTokensWith(preds ...predicate.PlatformToken) predicate.PlatformUser {
+	return predicate.PlatformUser(func(s *sql.Selector) {
+		step := newCreatedTokensStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

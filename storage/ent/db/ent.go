@@ -21,9 +21,13 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformapprole"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformidentityroleassignment"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
-	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -84,18 +88,22 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authcode.Table:       authcode.ValidColumn,
-			authrequest.Table:    authrequest.ValidColumn,
-			connector.Table:      connector.ValidColumn,
-			devicerequest.Table:  devicerequest.ValidColumn,
-			devicetoken.Table:    devicetoken.ValidColumn,
-			keys.Table:           keys.ValidColumn,
-			oauth2client.Table:   oauth2client.ValidColumn,
-			offlinesession.Table: offlinesession.ValidColumn,
-			password.Table:       password.ValidColumn,
-			platformuser.Table:   platformuser.ValidColumn,
-			refreshtoken.Table:   refreshtoken.ValidColumn,
-			userapprole.Table:    userapprole.ValidColumn,
+			authcode.Table:                       authcode.ValidColumn,
+			authrequest.Table:                    authrequest.ValidColumn,
+			connector.Table:                      connector.ValidColumn,
+			devicerequest.Table:                  devicerequest.ValidColumn,
+			devicetoken.Table:                    devicetoken.ValidColumn,
+			keys.Table:                           keys.ValidColumn,
+			oauth2client.Table:                   oauth2client.ValidColumn,
+			offlinesession.Table:                 offlinesession.ValidColumn,
+			password.Table:                       password.ValidColumn,
+			platformapprole.Table:                platformapprole.ValidColumn,
+			platformfederatedidentity.Table:      platformfederatedidentity.ValidColumn,
+			platformidentityroleassignment.Table: platformidentityroleassignment.ValidColumn,
+			platformtoken.Table:                  platformtoken.ValidColumn,
+			platformuser.Table:                   platformuser.ValidColumn,
+			platformuserroleassignment.Table:     platformuserroleassignment.ValidColumn,
+			refreshtoken.Table:                   refreshtoken.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

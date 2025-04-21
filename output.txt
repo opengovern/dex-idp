@@ -1,0 +1,680 @@
+Running tests...
+# Runs tests recursively from the project root
+go test -v ./...
+?   	github.com/dexidp/dex/api	[no test files]
+=== RUN   TestValidConfiguration
+--- PASS: TestValidConfiguration (0.00s)
+=== RUN   TestInvalidConfiguration
+--- PASS: TestInvalidConfiguration (0.00s)
+=== RUN   TestUnmarshalConfig
+--- PASS: TestUnmarshalConfig (0.00s)
+=== RUN   TestUnmarshalConfigWithEnvNoExpand
+--- PASS: TestUnmarshalConfigWithEnvNoExpand (0.00s)
+=== RUN   TestUnmarshalConfigWithEnvExpand
+--- PASS: TestUnmarshalConfigWithEnvExpand (0.00s)
+=== RUN   TestNewLogger
+=== RUN   TestNewLogger/JSON
+=== RUN   TestNewLogger/Text
+=== RUN   TestNewLogger/Unknown
+--- PASS: TestNewLogger (0.00s)
+    --- PASS: TestNewLogger/JSON (0.00s)
+    --- PASS: TestNewLogger/Text (0.00s)
+    --- PASS: TestNewLogger/Unknown (0.00s)
+PASS
+ok  	github.com/dexidp/dex/cmd/dex	(cached)
+=== RUN   TestRun
+=== RUN   TestRun/executable_not_dex
+=== RUN   TestRun/executable_is_full_path_to_dex
+=== RUN   TestRun/command_is_not_serve
+=== RUN   TestRun/no_templates
+=== RUN   TestRun/no_templates#01
+=== RUN   TestRun/.tpl_template
+=== RUN   TestRun/.tmpl_template
+=== RUN   TestRun/.yaml_template
+--- PASS: TestRun (0.00s)
+    --- PASS: TestRun/executable_not_dex (0.00s)
+    --- PASS: TestRun/executable_is_full_path_to_dex (0.00s)
+    --- PASS: TestRun/command_is_not_serve (0.00s)
+    --- PASS: TestRun/no_templates (0.00s)
+    --- PASS: TestRun/no_templates#01 (0.00s)
+    --- PASS: TestRun/.tpl_template (0.00s)
+    --- PASS: TestRun/.tmpl_template (0.00s)
+    --- PASS: TestRun/.yaml_template (0.00s)
+PASS
+ok  	github.com/dexidp/dex/cmd/docker-entrypoint	(cached)
+?   	github.com/dexidp/dex/connector	[no test files]
+=== RUN   TestUserGroups
+--- PASS: TestUserGroups (0.00s)
+=== RUN   TestUserGroupsWithFiltering
+--- PASS: TestUserGroupsWithFiltering (0.00s)
+=== RUN   TestUserLoginFlow
+--- PASS: TestUserLoginFlow (0.01s)
+=== RUN   TestUserPassword
+--- PASS: TestUserPassword (0.00s)
+=== RUN   TestIdentityFromCrowdUser
+--- PASS: TestIdentityFromCrowdUser (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/atlassiancrowd	(cached)
+=== RUN   TestUser
+--- PASS: TestUser (0.00s)
+=== RUN   TestExtraHeaders
+--- PASS: TestExtraHeaders (0.00s)
+=== RUN   TestSingleGroup
+--- PASS: TestSingleGroup (0.00s)
+=== RUN   TestMultipleGroup
+--- PASS: TestMultipleGroup (0.00s)
+=== RUN   TestStaticGroup
+--- PASS: TestStaticGroup (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/authproxy	(cached)
+=== RUN   TestUserGroups
+--- PASS: TestUserGroups (0.01s)
+=== RUN   TestUserWithoutTeams
+--- PASS: TestUserWithoutTeams (0.00s)
+=== RUN   TestUsernameIncludedInFederatedIdentity
+--- PASS: TestUsernameIncludedInFederatedIdentity (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/bitbucketcloud	(cached)
+=== RUN   TestUsernameIncludedInFederatedIdentity
+--- PASS: TestUsernameIncludedInFederatedIdentity (0.01s)
+PASS
+ok  	github.com/dexidp/dex/connector/gitea	(cached)
+=== RUN   TestUserGroups
+--- PASS: TestUserGroups (0.00s)
+=== RUN   TestUserGroupsWithoutOrgs
+--- PASS: TestUserGroupsWithoutOrgs (0.00s)
+=== RUN   TestUserGroupsWithTeamNameFieldConfig
+--- PASS: TestUserGroupsWithTeamNameFieldConfig (0.00s)
+=== RUN   TestUserGroupsWithTeamNameAndSlugFieldConfig
+--- PASS: TestUserGroupsWithTeamNameAndSlugFieldConfig (0.00s)
+=== RUN   TestUsernameIncludedInFederatedIdentity
+--- PASS: TestUsernameIncludedInFederatedIdentity (0.00s)
+=== RUN   TestLoginUsedAsIDWhenConfigured
+--- PASS: TestLoginUsedAsIDWhenConfigured (0.00s)
+=== RUN   TestPreferredEmailDomainConfigured
+--- PASS: TestPreferredEmailDomainConfigured (0.00s)
+=== RUN   TestPreferredEmailDomainConfiguredWithGlob
+--- PASS: TestPreferredEmailDomainConfiguredWithGlob (0.00s)
+=== RUN   TestPreferredEmailDomainConfigured_UserHasNoPreferredDomainEmail
+--- PASS: TestPreferredEmailDomainConfigured_UserHasNoPreferredDomainEmail (0.00s)
+=== RUN   TestPreferredEmailDomainNotConfigured
+--- PASS: TestPreferredEmailDomainNotConfigured (0.00s)
+=== RUN   TestPreferredEmailDomainConfigured_Error_BothPrimaryAndPreferredDomainEmailNotFound
+--- PASS: TestPreferredEmailDomainConfigured_Error_BothPrimaryAndPreferredDomainEmailNotFound (0.00s)
+=== RUN   Test_isPreferredEmailDomain
+=== RUN   Test_isPreferredEmailDomain/example.com
+=== RUN   Test_isPreferredEmailDomain/example.com#01
+=== RUN   Test_isPreferredEmailDomain/*.example.com
+=== RUN   Test_isPreferredEmailDomain/*.example.com#01
+=== RUN   Test_isPreferredEmailDomain/*.example.com#02
+=== RUN   Test_isPreferredEmailDomain/*.example.com#03
+=== RUN   Test_isPreferredEmailDomain/*.*.example.com
+=== RUN   Test_isPreferredEmailDomain/*.*.example.com#01
+--- PASS: Test_isPreferredEmailDomain (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/example.com (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/example.com#01 (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.example.com (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.example.com#01 (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.example.com#02 (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.example.com#03 (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.*.example.com (0.00s)
+    --- PASS: Test_isPreferredEmailDomain/*.*.example.com#01 (0.00s)
+=== RUN   Test_Open_PreferredDomainConfig
+=== RUN   Test_Open_PreferredDomainConfig/example.com
+=== RUN   Test_Open_PreferredDomainConfig/*.example.com
+=== RUN   Test_Open_PreferredDomainConfig/*.*.example.com
+=== RUN   Test_Open_PreferredDomainConfig/example.*
+--- PASS: Test_Open_PreferredDomainConfig (0.00s)
+    --- PASS: Test_Open_PreferredDomainConfig/example.com (0.00s)
+    --- PASS: Test_Open_PreferredDomainConfig/*.example.com (0.00s)
+    --- PASS: Test_Open_PreferredDomainConfig/*.*.example.com (0.00s)
+    --- PASS: Test_Open_PreferredDomainConfig/example.* (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/github	(cached)
+=== RUN   TestUserGroups
+--- PASS: TestUserGroups (0.00s)
+=== RUN   TestUserGroupsWithFiltering
+--- PASS: TestUserGroupsWithFiltering (0.00s)
+=== RUN   TestUserGroupsWithoutOrgs
+--- PASS: TestUserGroupsWithoutOrgs (0.00s)
+=== RUN   TestUsernameIncludedInFederatedIdentity
+--- PASS: TestUsernameIncludedInFederatedIdentity (0.00s)
+=== RUN   TestLoginUsedAsIDWhenConfigured
+--- PASS: TestLoginUsedAsIDWhenConfigured (0.00s)
+=== RUN   TestLoginWithTeamWhitelisted
+--- PASS: TestLoginWithTeamWhitelisted (0.00s)
+=== RUN   TestLoginWithTeamNonWhitelisted
+--- PASS: TestLoginWithTeamNonWhitelisted (0.00s)
+=== RUN   TestRefresh
+--- PASS: TestRefresh (0.00s)
+=== RUN   TestRefreshWithEmptyConnectorData
+--- PASS: TestRefreshWithEmptyConnectorData (0.00s)
+=== RUN   TestGroupsWithPermission
+--- PASS: TestGroupsWithPermission (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/gitlab	(cached)
+=== RUN   TestOpen
+=== RUN   TestOpen/service_account_key_valid
+=== RUN   TestOpen/adc
+=== RUN   TestOpen/adc_priority
+=== RUN   TestOpen/missing_admin_email
+=== RUN   TestOpen/service_account_key_not_found
+--- PASS: TestOpen (0.24s)
+    --- PASS: TestOpen/service_account_key_valid (0.15s)
+    --- PASS: TestOpen/adc (0.02s)
+    --- PASS: TestOpen/adc_priority (0.02s)
+    --- PASS: TestOpen/missing_admin_email (0.02s)
+    --- PASS: TestOpen/service_account_key_not_found (0.02s)
+=== RUN   TestGetGroups
+=== RUN   TestGetGroups/user2_transitive_lookup
+    google_test.go:239: [TestGetGroups/user2_transitive_lookup] Amount of API calls per userKey: map[groups_0@dexidp.com:1 groups_1@dexidp.com:1 user_2@dexidp.com:1]
+=== RUN   TestGetGroups/user1_non_transitive_lookup
+    google_test.go:239: [TestGetGroups/user1_non_transitive_lookup] Amount of API calls per userKey: map[user_1@dexidp.com:1]
+=== RUN   TestGetGroups/user1_transitive_lookup
+    google_test.go:239: [TestGetGroups/user1_transitive_lookup] Amount of API calls per userKey: map[groups_0@dexidp.com:1 groups_1@dexidp.com:1 groups_2@dexidp.com:1 user_1@dexidp.com:1]
+=== RUN   TestGetGroups/user2_non_transitive_lookup
+    google_test.go:239: [TestGetGroups/user2_non_transitive_lookup] Amount of API calls per userKey: map[user_2@dexidp.com:1]
+--- PASS: TestGetGroups (0.08s)
+    --- PASS: TestGetGroups/user2_transitive_lookup (0.00s)
+    --- PASS: TestGetGroups/user1_non_transitive_lookup (0.00s)
+    --- PASS: TestGetGroups/user1_transitive_lookup (0.00s)
+    --- PASS: TestGetGroups/user2_non_transitive_lookup (0.00s)
+=== RUN   TestDomainToAdminEmailConfig
+=== RUN   TestDomainToAdminEmailConfig/correct_user_request
+    google_test.go:294: [TestDomainToAdminEmailConfig/correct_user_request] Amount of API calls per userKey: map[groups_0@dexidp.com:1 groups_1@dexidp.com:1 groups_2@dexidp.com:1 user_1@dexidp.com:1]
+=== RUN   TestDomainToAdminEmailConfig/wrong_user_request
+    google_test.go:294: [TestDomainToAdminEmailConfig/wrong_user_request] Amount of API calls per userKey: map[]
+=== RUN   TestDomainToAdminEmailConfig/wrong_connector_response
+    google_test.go:294: [TestDomainToAdminEmailConfig/wrong_connector_response] Amount of API calls per userKey: map[]
+--- PASS: TestDomainToAdminEmailConfig (0.06s)
+    --- PASS: TestDomainToAdminEmailConfig/correct_user_request (0.00s)
+    --- PASS: TestDomainToAdminEmailConfig/wrong_user_request (0.00s)
+    --- PASS: TestDomainToAdminEmailConfig/wrong_connector_response (0.00s)
+=== RUN   TestGCEWorkloadIdentity
+=== RUN   TestGCEWorkloadIdentity/wrong_connector_response
+=== RUN   TestGCEWorkloadIdentity/correct_user_request
+=== RUN   TestGCEWorkloadIdentity/wrong_user_request
+--- PASS: TestGCEWorkloadIdentity (0.08s)
+    --- PASS: TestGCEWorkloadIdentity/wrong_connector_response (0.00s)
+    --- PASS: TestGCEWorkloadIdentity/correct_user_request (0.00s)
+    --- PASS: TestGCEWorkloadIdentity/wrong_user_request (0.00s)
+=== RUN   TestPromptTypeConfig
+=== RUN   TestPromptTypeConfig/prompt_type_is_nil
+=== RUN   TestPromptTypeConfig/prompt_type_is_empty
+=== RUN   TestPromptTypeConfig/prompt_type_is_set
+--- PASS: TestPromptTypeConfig (0.11s)
+    --- PASS: TestPromptTypeConfig/prompt_type_is_nil (0.07s)
+    --- PASS: TestPromptTypeConfig/prompt_type_is_empty (0.02s)
+    --- PASS: TestPromptTypeConfig/prompt_type_is_set (0.02s)
+PASS
+ok  	github.com/dexidp/dex/connector/google	(cached)
+=== RUN   TestIncorrectCredentialsLogin
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestIncorrectCredentialsLogin (0.00s)
+=== RUN   TestValidUserLogin
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestValidUserLogin (0.00s)
+=== RUN   TestUseRefreshToken
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestUseRefreshToken (0.00s)
+=== RUN   TestUseRefreshTokenUserDeleted
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestUseRefreshTokenUserDeleted (0.00s)
+=== RUN   TestUseRefreshTokenGroupsChanged
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestUseRefreshTokenGroupsChanged (0.00s)
+=== RUN   TestNoGroupsInScope
+    keystone_test.go:609: variable "DEX_KEYSTONE_URL" not set, skipping keystone connector tests
+--- SKIP: TestNoGroupsInScope (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/keystone	(cached)
+=== RUN   TestQuery
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestQuery (0.00s)
+=== RUN   TestQueryWithEmailSuffix
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestQueryWithEmailSuffix (0.00s)
+=== RUN   TestUserFilter
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestUserFilter (0.00s)
+=== RUN   TestGroupQuery
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestGroupQuery (0.00s)
+=== RUN   TestGroupsOnUserEntity
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestGroupsOnUserEntity (0.00s)
+=== RUN   TestGroupFilter
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestGroupFilter (0.00s)
+=== RUN   TestGroupToUserMatchers
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestGroupToUserMatchers (0.00s)
+=== RUN   TestDeprecatedGroupToUserMatcher
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestDeprecatedGroupToUserMatcher (0.00s)
+=== RUN   TestStartTLS
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestStartTLS (0.00s)
+=== RUN   TestInsecureSkipVerify
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestInsecureSkipVerify (0.00s)
+=== RUN   TestLDAPS
+    ldap_test.go:542: test environment variable "DEX_LDAP_HOST" not set, skipping
+--- SKIP: TestLDAPS (0.00s)
+=== RUN   TestUsernamePrompt
+=== RUN   TestUsernamePrompt/with_usernamePrompt_set_it_returns_that
+=== RUN   TestUsernamePrompt/with_usernamePrompt_unset_it_returns_""
+--- PASS: TestUsernamePrompt (0.00s)
+    --- PASS: TestUsernamePrompt/with_usernamePrompt_set_it_returns_that (0.00s)
+    --- PASS: TestUsernamePrompt/with_usernamePrompt_unset_it_returns_"" (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/ldap	(cached)
+?   	github.com/dexidp/dex/connector/linkedin	[no test files]
+=== RUN   TestLoginURL
+--- PASS: TestLoginURL (0.00s)
+=== RUN   TestLoginURLWithOptions
+--- PASS: TestLoginURLWithOptions (0.00s)
+=== RUN   TestUserIdentityFromGraphAPI
+--- PASS: TestUserIdentityFromGraphAPI (0.00s)
+=== RUN   TestUserGroupsFromGraphAPI
+--- PASS: TestUserGroupsFromGraphAPI (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/microsoft	(cached)
+?   	github.com/dexidp/dex/connector/mock	[no test files]
+=== RUN   TestOpen
+--- PASS: TestOpen (0.03s)
+=== RUN   TestLoginURL
+--- PASS: TestLoginURL (0.01s)
+=== RUN   TestHandleCallBackForGroupsInUserInfo
+--- PASS: TestHandleCallBackForGroupsInUserInfo (0.02s)
+=== RUN   TestHandleCallBackForGroupMapsInUserInfo
+--- PASS: TestHandleCallBackForGroupMapsInUserInfo (0.02s)
+=== RUN   TestHandleCallBackForGroupsInToken
+--- PASS: TestHandleCallBackForGroupsInToken (0.04s)
+=== RUN   TestHandleCallbackForNumericUserID
+--- PASS: TestHandleCallbackForNumericUserID (0.02s)
+PASS
+ok  	github.com/dexidp/dex/connector/oauth	(cached)
+=== RUN   TestKnownBrokenAuthHeaderProvider
+--- PASS: TestKnownBrokenAuthHeaderProvider (0.00s)
+=== RUN   TestHandleCallback
+=== RUN   TestHandleCallback/simpleCase
+=== RUN   TestHandleCallback/customEmailClaim
+=== RUN   TestHandleCallback/overrideWithCustomEmailClaim
+=== RUN   TestHandleCallback/email_verified_not_in_claims,_configured_to_be_skipped
+=== RUN   TestHandleCallback/withUserIDKey
+=== RUN   TestHandleCallback/withUserNameKey
+=== RUN   TestHandleCallback/withPreferredUsernameKey
+=== RUN   TestHandleCallback/withoutPreferredUsernameKeyAndBackendReturns
+=== RUN   TestHandleCallback/withoutPreferredUsernameKeyAndBackendNotReturn
+=== RUN   TestHandleCallback/emptyEmailScope
+=== RUN   TestHandleCallback/emptyEmailScopeButEmailProvided
+=== RUN   TestHandleCallback/customGroupsKey
+=== RUN   TestHandleCallback/customGroupsKeyButGroupsProvided
+=== RUN   TestHandleCallback/customGroupsKeyDespiteGroupsProvidedButOverride
+=== RUN   TestHandleCallback/singularGroupResponseAsString
+=== RUN   TestHandleCallback/singularGroupResponseAsMap
+=== RUN   TestHandleCallback/multipleGroupResponseAsMap
+=== RUN   TestHandleCallback/newGroupFromClaims
+=== RUN   TestHandleCallback/filterGroupClaims
+=== RUN   TestHandleCallback/filterGroupClaimsMap
+--- PASS: TestHandleCallback (0.58s)
+    --- PASS: TestHandleCallback/simpleCase (0.02s)
+    --- PASS: TestHandleCallback/customEmailClaim (0.02s)
+    --- PASS: TestHandleCallback/overrideWithCustomEmailClaim (0.04s)
+    --- PASS: TestHandleCallback/email_verified_not_in_claims,_configured_to_be_skipped (0.02s)
+    --- PASS: TestHandleCallback/withUserIDKey (0.03s)
+    --- PASS: TestHandleCallback/withUserNameKey (0.02s)
+    --- PASS: TestHandleCallback/withPreferredUsernameKey (0.03s)
+    --- PASS: TestHandleCallback/withoutPreferredUsernameKeyAndBackendReturns (0.02s)
+    --- PASS: TestHandleCallback/withoutPreferredUsernameKeyAndBackendNotReturn (0.05s)
+    --- PASS: TestHandleCallback/emptyEmailScope (0.02s)
+    --- PASS: TestHandleCallback/emptyEmailScopeButEmailProvided (0.02s)
+    --- PASS: TestHandleCallback/customGroupsKey (0.04s)
+    --- PASS: TestHandleCallback/customGroupsKeyButGroupsProvided (0.03s)
+    --- PASS: TestHandleCallback/customGroupsKeyDespiteGroupsProvidedButOverride (0.03s)
+    --- PASS: TestHandleCallback/singularGroupResponseAsString (0.08s)
+    --- PASS: TestHandleCallback/singularGroupResponseAsMap (0.02s)
+    --- PASS: TestHandleCallback/multipleGroupResponseAsMap (0.01s)
+    --- PASS: TestHandleCallback/newGroupFromClaims (0.01s)
+    --- PASS: TestHandleCallback/filterGroupClaims (0.05s)
+    --- PASS: TestHandleCallback/filterGroupClaimsMap (0.03s)
+=== RUN   TestRefresh
+=== RUN   TestRefresh/IDTokenOnRefresh
+=== RUN   TestRefresh/NoIDTokenOnRefresh
+--- PASS: TestRefresh (0.06s)
+    --- PASS: TestRefresh/IDTokenOnRefresh (0.01s)
+    --- PASS: TestRefresh/NoIDTokenOnRefresh (0.04s)
+=== RUN   TestTokenIdentity
+=== RUN   TestTokenIdentity/id_token
+=== RUN   TestTokenIdentity/access_token
+=== RUN   TestTokenIdentity/id_token_with_user_info
+=== RUN   TestTokenIdentity/access_token_with_user_info
+--- PASS: TestTokenIdentity (0.10s)
+    --- PASS: TestTokenIdentity/id_token (0.01s)
+    --- PASS: TestTokenIdentity/access_token (0.02s)
+    --- PASS: TestTokenIdentity/id_token_with_user_info (0.05s)
+    --- PASS: TestTokenIdentity/access_token_with_user_info (0.02s)
+=== RUN   TestPromptType
+=== RUN   TestPromptType/none
+=== RUN   TestPromptType/provided_empty_string
+=== RUN   TestPromptType/login
+=== RUN   TestPromptType/consent
+=== RUN   TestPromptType/default_value
+--- PASS: TestPromptType (0.03s)
+    --- PASS: TestPromptType/none (0.00s)
+    --- PASS: TestPromptType/provided_empty_string (0.00s)
+    --- PASS: TestPromptType/login (0.00s)
+    --- PASS: TestPromptType/consent (0.00s)
+    --- PASS: TestPromptType/default_value (0.00s)
+=== RUN   TestProviderOverride
+=== RUN   TestProviderOverride/No_override
+=== RUN   TestProviderOverride/Override
+--- PASS: TestProviderOverride (0.01s)
+    --- PASS: TestProviderOverride/No_override (0.00s)
+    --- PASS: TestProviderOverride/Override (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/oidc	(cached)
+=== RUN   TestOpen
+--- PASS: TestOpen (0.00s)
+=== RUN   TestGetUser
+--- PASS: TestGetUser (0.00s)
+=== RUN   TestVerifySingleGroupFn
+--- PASS: TestVerifySingleGroupFn (0.00s)
+=== RUN   TestVerifySingleGroupFailureFn
+--- PASS: TestVerifySingleGroupFailureFn (0.00s)
+=== RUN   TestVerifyMultipleGroupFn
+--- PASS: TestVerifyMultipleGroupFn (0.00s)
+=== RUN   TestVerifyGroup
+--- PASS: TestVerifyGroup (0.00s)
+=== RUN   TestCallbackIdentity
+--- PASS: TestCallbackIdentity (0.00s)
+=== RUN   TestRefreshIdentity
+--- PASS: TestRefreshIdentity (0.00s)
+=== RUN   TestRefreshIdentityFailure
+--- PASS: TestRefreshIdentityFailure (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/openshift	(cached)
+=== RUN   TestGoodResponse
+--- PASS: TestGoodResponse (0.00s)
+=== RUN   TestGroups
+--- PASS: TestGroups (0.00s)
+=== RUN   TestGroupsWhitelist
+--- PASS: TestGroupsWhitelist (0.00s)
+=== RUN   TestGroupsWhitelistWithFiltering
+--- PASS: TestGroupsWhitelistWithFiltering (0.00s)
+=== RUN   TestGroupsWhitelistEmpty
+--- PASS: TestGroupsWhitelistEmpty (0.00s)
+=== RUN   TestGroupsWhitelistDisallowed
+--- PASS: TestGroupsWhitelistDisallowed (0.00s)
+=== RUN   TestGroupsWhitelistDisallowedNoGroupsOnIdent
+--- PASS: TestGroupsWhitelistDisallowedNoGroupsOnIdent (0.00s)
+=== RUN   TestOkta
+--- PASS: TestOkta (0.00s)
+=== RUN   TestBadStatus
+--- PASS: TestBadStatus (0.00s)
+=== RUN   TestInvalidCA
+--- PASS: TestInvalidCA (0.00s)
+=== RUN   TestUnsignedResponse
+--- PASS: TestUnsignedResponse (0.00s)
+=== RUN   TestExpiredAssertion
+--- PASS: TestExpiredAssertion (0.00s)
+=== RUN   TestAssertionSignedNotResponse
+--- PASS: TestAssertionSignedNotResponse (0.00s)
+=== RUN   TestInvalidSubjectInResponseTo
+--- PASS: TestInvalidSubjectInResponseTo (0.00s)
+=== RUN   TestInvalidSubjectRecipient
+--- PASS: TestInvalidSubjectRecipient (0.00s)
+=== RUN   TestInvalidAssertionAudience
+--- PASS: TestInvalidAssertionAudience (0.00s)
+=== RUN   TestTwoAssertionFirstSigned
+--- PASS: TestTwoAssertionFirstSigned (0.00s)
+=== RUN   TestTamperedResponseNameID
+--- PASS: TestTamperedResponseNameID (0.00s)
+=== RUN   TestConfigCAData
+=== RUN   TestConfigCAData/one_valid_PEM_entry
+=== RUN   TestConfigCAData/one_valid_PEM_entry_with_trailing_newline
+=== RUN   TestConfigCAData/one_valid_PEM_entry_with_trailing_spaces
+=== RUN   TestConfigCAData/one_valid_PEM_entry_with_two_trailing_newlines
+=== RUN   TestConfigCAData/two_valid_PEM_entries
+=== RUN   TestConfigCAData/two_valid_PEM_entries_with_newline_in_between
+=== RUN   TestConfigCAData/two_valid_PEM_entries_with_trailing_newline
+=== RUN   TestConfigCAData/empty
+=== RUN   TestConfigCAData/one_valid_PEM_entry_with_trailing_data
+=== RUN   TestConfigCAData/one_valid_PEM_entry_with_bad_data_before
+--- PASS: TestConfigCAData (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry_with_trailing_newline (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry_with_trailing_spaces (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry_with_two_trailing_newlines (0.00s)
+    --- PASS: TestConfigCAData/two_valid_PEM_entries (0.00s)
+    --- PASS: TestConfigCAData/two_valid_PEM_entries_with_newline_in_between (0.00s)
+    --- PASS: TestConfigCAData/two_valid_PEM_entries_with_trailing_newline (0.00s)
+    --- PASS: TestConfigCAData/empty (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry_with_trailing_data (0.00s)
+    --- PASS: TestConfigCAData/one_valid_PEM_entry_with_bad_data_before (0.00s)
+=== RUN   TestVerify
+--- PASS: TestVerify (0.00s)
+=== RUN   TestVerifyUnsignedMessageAndSignedAssertionWithRootXmlNs
+--- PASS: TestVerifyUnsignedMessageAndSignedAssertionWithRootXmlNs (0.00s)
+=== RUN   TestVerifySignedMessageAndUnsignedAssertion
+--- PASS: TestVerifySignedMessageAndUnsignedAssertion (0.00s)
+=== RUN   TestVerifyUnsignedMessageAndSignedAssertion
+--- PASS: TestVerifyUnsignedMessageAndSignedAssertion (0.00s)
+=== RUN   TestVerifySignedMessageAndSignedAssertion
+--- PASS: TestVerifySignedMessageAndSignedAssertion (0.00s)
+=== RUN   TestVerifyUnsignedMessageAndUnsignedAssertion
+--- PASS: TestVerifyUnsignedMessageAndUnsignedAssertion (0.00s)
+PASS
+ok  	github.com/dexidp/dex/connector/saml	(cached)
+?   	github.com/dexidp/dex/pkg/featureflags	[no test files]
+=== RUN   TestFilter
+=== RUN   TestFilter/nothing_given
+=== RUN   TestFilter/exactly_one_match
+=== RUN   TestFilter/no_group_of_the_required_ones
+=== RUN   TestFilter/subset_matching
+--- PASS: TestFilter (0.00s)
+    --- PASS: TestFilter/nothing_given (0.00s)
+    --- PASS: TestFilter/exactly_one_match (0.00s)
+    --- PASS: TestFilter/no_group_of_the_required_ones (0.00s)
+    --- PASS: TestFilter/subset_matching (0.00s)
+PASS
+ok  	github.com/dexidp/dex/pkg/groups	(cached)
+=== RUN   TestRootCAs
+=== RUN   TestRootCAs/From_file
+=== RUN   TestRootCAs/From_string
+=== RUN   TestRootCAs/From_bytes
+--- PASS: TestRootCAs (0.03s)
+    --- PASS: TestRootCAs/From_file (0.01s)
+    --- PASS: TestRootCAs/From_string (0.01s)
+    --- PASS: TestRootCAs/From_bytes (0.01s)
+=== RUN   TestInsecureSkipVerify
+--- PASS: TestInsecureSkipVerify (0.00s)
+PASS
+ok  	github.com/dexidp/dex/pkg/httpclient	(cached)
+FAIL	github.com/dexidp/dex/server [build failed]
+?   	github.com/dexidp/dex/server/internal	[no test files]
+?   	github.com/dexidp/dex/storage	[no test files]
+?   	github.com/dexidp/dex/storage/conformance	[no test files]
+=== RUN   TestMySQL
+    mysql_test.go:57: test environment variable DEX_MYSQL_ENT_HOST not set, skipping
+--- SKIP: TestMySQL (0.00s)
+=== RUN   TestMySQLDSN
+=== RUN   TestMySQLDSN/Host_port
+=== RUN   TestMySQLDSN/Host_with_port
+=== RUN   TestMySQLDSN/Host_ipv6_with_port
+=== RUN   TestMySQLDSN/Credentials_and_timeout
+=== RUN   TestMySQLDSN/SSL
+=== RUN   TestMySQLDSN/With_Params
+--- PASS: TestMySQLDSN (0.00s)
+    --- PASS: TestMySQLDSN/Host_port (0.00s)
+    --- PASS: TestMySQLDSN/Host_with_port (0.00s)
+    --- PASS: TestMySQLDSN/Host_ipv6_with_port (0.00s)
+    --- PASS: TestMySQLDSN/Credentials_and_timeout (0.00s)
+    --- PASS: TestMySQLDSN/SSL (0.00s)
+    --- PASS: TestMySQLDSN/With_Params (0.00s)
+=== RUN   TestPostgres
+    postgres_test.go:52: test environment variable DEX_POSTGRES_ENT_HOST not set, skipping
+--- SKIP: TestPostgres (0.00s)
+=== RUN   TestPostgresDSN
+=== RUN   TestPostgresDSN/Host_port
+=== RUN   TestPostgresDSN/Host_with_port
+=== RUN   TestPostgresDSN/Host_ipv6_with_port
+=== RUN   TestPostgresDSN/Credentials_and_timeout
+=== RUN   TestPostgresDSN/SSL
+--- PASS: TestPostgresDSN (0.00s)
+    --- PASS: TestPostgresDSN/Host_port (0.00s)
+    --- PASS: TestPostgresDSN/Host_with_port (0.00s)
+    --- PASS: TestPostgresDSN/Host_ipv6_with_port (0.00s)
+    --- PASS: TestPostgresDSN/Credentials_and_timeout (0.00s)
+    --- PASS: TestPostgresDSN/SSL (0.00s)
+=== RUN   TestPostgresDriver
+    postgres_test.go:140: test environment variable DEX_POSTGRES_ENT_HOST not set, skipping
+--- SKIP: TestPostgresDriver (0.00s)
+=== RUN   TestSQLite3
+=== RUN   TestSQLite3/AuthCodeCRUD
+=== RUN   TestSQLite3/AuthRequestCRUD
+=== RUN   TestSQLite3/ClientCRUD
+=== RUN   TestSQLite3/RefreshTokenCRUD
+=== RUN   TestSQLite3/PasswordCRUD
+=== RUN   TestSQLite3/KeysCRUD
+=== RUN   TestSQLite3/OfflineSessionCRUD
+=== RUN   TestSQLite3/ConnectorCRUD
+=== RUN   TestSQLite3/GarbageCollection
+=== RUN   TestSQLite3/TimezoneSupport
+=== RUN   TestSQLite3/DeviceRequestCRUD
+=== RUN   TestSQLite3/DeviceTokenCRUD
+--- PASS: TestSQLite3 (0.03s)
+    --- PASS: TestSQLite3/AuthCodeCRUD (0.00s)
+    --- PASS: TestSQLite3/AuthRequestCRUD (0.00s)
+    --- PASS: TestSQLite3/ClientCRUD (0.00s)
+    --- PASS: TestSQLite3/RefreshTokenCRUD (0.00s)
+    --- PASS: TestSQLite3/PasswordCRUD (0.00s)
+    --- PASS: TestSQLite3/KeysCRUD (0.00s)
+    --- PASS: TestSQLite3/OfflineSessionCRUD (0.00s)
+    --- PASS: TestSQLite3/ConnectorCRUD (0.00s)
+    --- PASS: TestSQLite3/GarbageCollection (0.00s)
+    --- PASS: TestSQLite3/TimezoneSupport (0.00s)
+    --- PASS: TestSQLite3/DeviceRequestCRUD (0.00s)
+    --- PASS: TestSQLite3/DeviceTokenCRUD (0.00s)
+PASS
+ok  	github.com/dexidp/dex/storage/ent	(cached)
+?   	github.com/dexidp/dex/storage/ent/client	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/authcode	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/authrequest	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/connector	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/devicerequest	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/devicetoken	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/enttest	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/hook	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/keys	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/migrate	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/oauth2client	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/offlinesession	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/password	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformapprole	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformfederatedidentity	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformidentityroleassignment	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformtoken	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformuser	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/platformuserroleassignment	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/predicate	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/refreshtoken	[no test files]
+?   	github.com/dexidp/dex/storage/ent/db/runtime	[no test files]
+?   	github.com/dexidp/dex/storage/ent/schema	[no test files]
+=== RUN   TestEtcd
+    etcd_test.go:64: test environment variable "DEX_ETCD_ENDPOINTS" not set, skipping
+--- SKIP: TestEtcd (0.00s)
+PASS
+ok  	github.com/dexidp/dex/storage/etcd	(cached)
+=== RUN   TestIDToName
+--- PASS: TestIDToName (0.00s)
+=== RUN   TestOfflineTokenName
+--- PASS: TestOfflineTokenName (0.00s)
+=== RUN   TestInClusterTransport
+=== RUN   TestInClusterTransport/Stale_token
+=== RUN   TestInClusterTransport/Normal_token
+--- PASS: TestInClusterTransport (0.00s)
+    --- PASS: TestInClusterTransport/Stale_token (0.00s)
+    --- PASS: TestInClusterTransport/Normal_token (0.00s)
+=== RUN   TestNamespaceFromServiceAccountJWT
+--- PASS: TestNamespaceFromServiceAccountJWT (0.00s)
+=== RUN   TestGetClusterConfigNamespace
+=== RUN   TestGetClusterConfigNamespace/With_env_variable
+=== RUN   TestGetClusterConfigNamespace/With_token
+=== RUN   TestGetClusterConfigNamespace/With_namespace_file
+=== RUN   TestGetClusterConfigNamespace/With_file_and_token
+=== RUN   TestGetClusterConfigNamespace/With_file_and_env
+=== RUN   TestGetClusterConfigNamespace/With_token_and_env
+=== RUN   TestGetClusterConfigNamespace/With_file,_token_and_env
+=== RUN   TestGetClusterConfigNamespace/Without_anything
+--- PASS: TestGetClusterConfigNamespace (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_env_variable (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_token (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_namespace_file (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_file_and_token (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_file_and_env (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_token_and_env (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/With_file,_token_and_env (0.00s)
+    --- PASS: TestGetClusterConfigNamespace/Without_anything (0.00s)
+=== RUN   TestStorage
+    storage_test.go:28: variable "DEX_KUBERNETES_CONFIG_PATH" not set, skipping kubernetes storage tests
+--- SKIP: TestStorage (0.00s)
+=== RUN   TestURLFor
+--- PASS: TestURLFor (0.00s)
+=== RUN   TestUpdateKeys
+--- PASS: TestUpdateKeys (0.04s)
+=== RUN   TestRetryOnConflict
+=== RUN   TestRetryOnConflict/Timeout_reached
+=== RUN   TestRetryOnConflict/HTTP_Error
+=== RUN   TestRetryOnConflict/Error
+=== RUN   TestRetryOnConflict/OK
+--- PASS: TestRetryOnConflict (0.01s)
+    --- PASS: TestRetryOnConflict/Timeout_reached (0.01s)
+    --- PASS: TestRetryOnConflict/HTTP_Error (0.00s)
+    --- PASS: TestRetryOnConflict/Error (0.00s)
+    --- PASS: TestRetryOnConflict/OK (0.00s)
+=== RUN   TestRefreshTokenLock
+    storage_test.go:299: variable "DEX_KUBERNETES_CONFIG_PATH" not set, skipping kubernetes storage tests
+--- SKIP: TestRefreshTokenLock (0.00s)
+PASS
+ok  	github.com/dexidp/dex/storage/kubernetes	(cached)
+?   	github.com/dexidp/dex/storage/kubernetes/k8sapi	[no test files]
+=== RUN   TestStorage
+=== RUN   TestStorage/AuthCodeCRUD
+=== RUN   TestStorage/AuthRequestCRUD
+=== RUN   TestStorage/ClientCRUD
+=== RUN   TestStorage/RefreshTokenCRUD
+=== RUN   TestStorage/PasswordCRUD
+=== RUN   TestStorage/KeysCRUD
+=== RUN   TestStorage/OfflineSessionCRUD
+=== RUN   TestStorage/ConnectorCRUD
+=== RUN   TestStorage/GarbageCollection
+=== RUN   TestStorage/TimezoneSupport
+=== RUN   TestStorage/DeviceRequestCRUD
+=== RUN   TestStorage/DeviceTokenCRUD
+--- PASS: TestStorage (0.01s)
+    --- PASS: TestStorage/AuthCodeCRUD (0.00s)
+    --- PASS: TestStorage/AuthRequestCRUD (0.00s)
+    --- PASS: TestStorage/ClientCRUD (0.00s)
+    --- PASS: TestStorage/RefreshTokenCRUD (0.00s)
+    --- PASS: TestStorage/PasswordCRUD (0.00s)
+    --- PASS: TestStorage/KeysCRUD (0.00s)
+    --- PASS: TestStorage/OfflineSessionCRUD (0.00s)
+    --- PASS: TestStorage/ConnectorCRUD (0.00s)
+    --- PASS: TestStorage/GarbageCollection (0.00s)
+    --- PASS: TestStorage/TimezoneSupport (0.00s)
+    --- PASS: TestStorage/DeviceRequestCRUD (0.00s)
+    --- PASS: TestStorage/DeviceTokenCRUD (0.00s)
+=== RUN   TestStaticClients
+--- PASS: TestStaticClients (0.00s)
+=== RUN   TestStaticPasswords
+--- PASS: TestStaticPasswords (0.00s)
+=== RUN   TestStaticConnectors
+--- PASS: TestStaticConnectors (0.00s)
+PASS
+ok  	github.com/dexidp/dex/storage/memory	(cached)
+FAIL	github.com/dexidp/dex/storage/sql [build failed]
+?   	github.com/dexidp/dex/web	[no test files]
+FAIL

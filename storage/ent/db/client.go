@@ -24,9 +24,13 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformapprole"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformidentityroleassignment"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
-	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // Client is the client that holds all ent builders.
@@ -52,12 +56,20 @@ type Client struct {
 	OfflineSession *OfflineSessionClient
 	// Password is the client for interacting with the Password builders.
 	Password *PasswordClient
+	// PlatformAppRole is the client for interacting with the PlatformAppRole builders.
+	PlatformAppRole *PlatformAppRoleClient
+	// PlatformFederatedIdentity is the client for interacting with the PlatformFederatedIdentity builders.
+	PlatformFederatedIdentity *PlatformFederatedIdentityClient
+	// PlatformIdentityRoleAssignment is the client for interacting with the PlatformIdentityRoleAssignment builders.
+	PlatformIdentityRoleAssignment *PlatformIdentityRoleAssignmentClient
+	// PlatformToken is the client for interacting with the PlatformToken builders.
+	PlatformToken *PlatformTokenClient
 	// PlatformUser is the client for interacting with the PlatformUser builders.
 	PlatformUser *PlatformUserClient
+	// PlatformUserRoleAssignment is the client for interacting with the PlatformUserRoleAssignment builders.
+	PlatformUserRoleAssignment *PlatformUserRoleAssignmentClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
-	// UserAppRole is the client for interacting with the UserAppRole builders.
-	UserAppRole *UserAppRoleClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -78,9 +90,13 @@ func (c *Client) init() {
 	c.OAuth2Client = NewOAuth2ClientClient(c.config)
 	c.OfflineSession = NewOfflineSessionClient(c.config)
 	c.Password = NewPasswordClient(c.config)
+	c.PlatformAppRole = NewPlatformAppRoleClient(c.config)
+	c.PlatformFederatedIdentity = NewPlatformFederatedIdentityClient(c.config)
+	c.PlatformIdentityRoleAssignment = NewPlatformIdentityRoleAssignmentClient(c.config)
+	c.PlatformToken = NewPlatformTokenClient(c.config)
 	c.PlatformUser = NewPlatformUserClient(c.config)
+	c.PlatformUserRoleAssignment = NewPlatformUserRoleAssignmentClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
-	c.UserAppRole = NewUserAppRoleClient(c.config)
 }
 
 type (
@@ -171,20 +187,24 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		AuthCode:       NewAuthCodeClient(cfg),
-		AuthRequest:    NewAuthRequestClient(cfg),
-		Connector:      NewConnectorClient(cfg),
-		DeviceRequest:  NewDeviceRequestClient(cfg),
-		DeviceToken:    NewDeviceTokenClient(cfg),
-		Keys:           NewKeysClient(cfg),
-		OAuth2Client:   NewOAuth2ClientClient(cfg),
-		OfflineSession: NewOfflineSessionClient(cfg),
-		Password:       NewPasswordClient(cfg),
-		PlatformUser:   NewPlatformUserClient(cfg),
-		RefreshToken:   NewRefreshTokenClient(cfg),
-		UserAppRole:    NewUserAppRoleClient(cfg),
+		ctx:                            ctx,
+		config:                         cfg,
+		AuthCode:                       NewAuthCodeClient(cfg),
+		AuthRequest:                    NewAuthRequestClient(cfg),
+		Connector:                      NewConnectorClient(cfg),
+		DeviceRequest:                  NewDeviceRequestClient(cfg),
+		DeviceToken:                    NewDeviceTokenClient(cfg),
+		Keys:                           NewKeysClient(cfg),
+		OAuth2Client:                   NewOAuth2ClientClient(cfg),
+		OfflineSession:                 NewOfflineSessionClient(cfg),
+		Password:                       NewPasswordClient(cfg),
+		PlatformAppRole:                NewPlatformAppRoleClient(cfg),
+		PlatformFederatedIdentity:      NewPlatformFederatedIdentityClient(cfg),
+		PlatformIdentityRoleAssignment: NewPlatformIdentityRoleAssignmentClient(cfg),
+		PlatformToken:                  NewPlatformTokenClient(cfg),
+		PlatformUser:                   NewPlatformUserClient(cfg),
+		PlatformUserRoleAssignment:     NewPlatformUserRoleAssignmentClient(cfg),
+		RefreshToken:                   NewRefreshTokenClient(cfg),
 	}, nil
 }
 
@@ -202,20 +222,24 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		AuthCode:       NewAuthCodeClient(cfg),
-		AuthRequest:    NewAuthRequestClient(cfg),
-		Connector:      NewConnectorClient(cfg),
-		DeviceRequest:  NewDeviceRequestClient(cfg),
-		DeviceToken:    NewDeviceTokenClient(cfg),
-		Keys:           NewKeysClient(cfg),
-		OAuth2Client:   NewOAuth2ClientClient(cfg),
-		OfflineSession: NewOfflineSessionClient(cfg),
-		Password:       NewPasswordClient(cfg),
-		PlatformUser:   NewPlatformUserClient(cfg),
-		RefreshToken:   NewRefreshTokenClient(cfg),
-		UserAppRole:    NewUserAppRoleClient(cfg),
+		ctx:                            ctx,
+		config:                         cfg,
+		AuthCode:                       NewAuthCodeClient(cfg),
+		AuthRequest:                    NewAuthRequestClient(cfg),
+		Connector:                      NewConnectorClient(cfg),
+		DeviceRequest:                  NewDeviceRequestClient(cfg),
+		DeviceToken:                    NewDeviceTokenClient(cfg),
+		Keys:                           NewKeysClient(cfg),
+		OAuth2Client:                   NewOAuth2ClientClient(cfg),
+		OfflineSession:                 NewOfflineSessionClient(cfg),
+		Password:                       NewPasswordClient(cfg),
+		PlatformAppRole:                NewPlatformAppRoleClient(cfg),
+		PlatformFederatedIdentity:      NewPlatformFederatedIdentityClient(cfg),
+		PlatformIdentityRoleAssignment: NewPlatformIdentityRoleAssignmentClient(cfg),
+		PlatformToken:                  NewPlatformTokenClient(cfg),
+		PlatformUser:                   NewPlatformUserClient(cfg),
+		PlatformUserRoleAssignment:     NewPlatformUserRoleAssignmentClient(cfg),
+		RefreshToken:                   NewRefreshTokenClient(cfg),
 	}, nil
 }
 
@@ -246,8 +270,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthCode, c.AuthRequest, c.Connector, c.DeviceRequest, c.DeviceToken, c.Keys,
-		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformUser, c.RefreshToken,
-		c.UserAppRole,
+		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformAppRole,
+		c.PlatformFederatedIdentity, c.PlatformIdentityRoleAssignment, c.PlatformToken,
+		c.PlatformUser, c.PlatformUserRoleAssignment, c.RefreshToken,
 	} {
 		n.Use(hooks...)
 	}
@@ -258,8 +283,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthCode, c.AuthRequest, c.Connector, c.DeviceRequest, c.DeviceToken, c.Keys,
-		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformUser, c.RefreshToken,
-		c.UserAppRole,
+		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformAppRole,
+		c.PlatformFederatedIdentity, c.PlatformIdentityRoleAssignment, c.PlatformToken,
+		c.PlatformUser, c.PlatformUserRoleAssignment, c.RefreshToken,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -286,12 +312,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OfflineSession.mutate(ctx, m)
 	case *PasswordMutation:
 		return c.Password.mutate(ctx, m)
+	case *PlatformAppRoleMutation:
+		return c.PlatformAppRole.mutate(ctx, m)
+	case *PlatformFederatedIdentityMutation:
+		return c.PlatformFederatedIdentity.mutate(ctx, m)
+	case *PlatformIdentityRoleAssignmentMutation:
+		return c.PlatformIdentityRoleAssignment.mutate(ctx, m)
+	case *PlatformTokenMutation:
+		return c.PlatformToken.mutate(ctx, m)
 	case *PlatformUserMutation:
 		return c.PlatformUser.mutate(ctx, m)
+	case *PlatformUserRoleAssignmentMutation:
+		return c.PlatformUserRoleAssignment.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
-	case *UserAppRoleMutation:
-		return c.UserAppRole.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("db: unknown mutation type %T", m)
 	}
@@ -1494,6 +1528,682 @@ func (c *PasswordClient) mutate(ctx context.Context, m *PasswordMutation) (Value
 	}
 }
 
+// PlatformAppRoleClient is a client for the PlatformAppRole schema.
+type PlatformAppRoleClient struct {
+	config
+}
+
+// NewPlatformAppRoleClient returns a client for the PlatformAppRole from the given config.
+func NewPlatformAppRoleClient(c config) *PlatformAppRoleClient {
+	return &PlatformAppRoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformapprole.Hooks(f(g(h())))`.
+func (c *PlatformAppRoleClient) Use(hooks ...Hook) {
+	c.hooks.PlatformAppRole = append(c.hooks.PlatformAppRole, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformapprole.Intercept(f(g(h())))`.
+func (c *PlatformAppRoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformAppRole = append(c.inters.PlatformAppRole, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformAppRole entity.
+func (c *PlatformAppRoleClient) Create() *PlatformAppRoleCreate {
+	mutation := newPlatformAppRoleMutation(c.config, OpCreate)
+	return &PlatformAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformAppRole entities.
+func (c *PlatformAppRoleClient) CreateBulk(builders ...*PlatformAppRoleCreate) *PlatformAppRoleCreateBulk {
+	return &PlatformAppRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformAppRoleClient) MapCreateBulk(slice any, setFunc func(*PlatformAppRoleCreate, int)) *PlatformAppRoleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformAppRoleCreateBulk{err: fmt.Errorf("calling to PlatformAppRoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformAppRoleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformAppRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformAppRole.
+func (c *PlatformAppRoleClient) Update() *PlatformAppRoleUpdate {
+	mutation := newPlatformAppRoleMutation(c.config, OpUpdate)
+	return &PlatformAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformAppRoleClient) UpdateOne(par *PlatformAppRole) *PlatformAppRoleUpdateOne {
+	mutation := newPlatformAppRoleMutation(c.config, OpUpdateOne, withPlatformAppRole(par))
+	return &PlatformAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformAppRoleClient) UpdateOneID(id int) *PlatformAppRoleUpdateOne {
+	mutation := newPlatformAppRoleMutation(c.config, OpUpdateOne, withPlatformAppRoleID(id))
+	return &PlatformAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformAppRole.
+func (c *PlatformAppRoleClient) Delete() *PlatformAppRoleDelete {
+	mutation := newPlatformAppRoleMutation(c.config, OpDelete)
+	return &PlatformAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformAppRoleClient) DeleteOne(par *PlatformAppRole) *PlatformAppRoleDeleteOne {
+	return c.DeleteOneID(par.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformAppRoleClient) DeleteOneID(id int) *PlatformAppRoleDeleteOne {
+	builder := c.Delete().Where(platformapprole.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformAppRoleDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformAppRole.
+func (c *PlatformAppRoleClient) Query() *PlatformAppRoleQuery {
+	return &PlatformAppRoleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformAppRole},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformAppRole entity by its id.
+func (c *PlatformAppRoleClient) Get(ctx context.Context, id int) (*PlatformAppRole, error) {
+	return c.Query().Where(platformapprole.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformAppRoleClient) GetX(ctx context.Context, id int) *PlatformAppRole {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUserAssignments queries the user_assignments edge of a PlatformAppRole.
+func (c *PlatformAppRoleClient) QueryUserAssignments(par *PlatformAppRole) *PlatformUserRoleAssignmentQuery {
+	query := (&PlatformUserRoleAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := par.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformapprole.Table, platformapprole.FieldID, id),
+			sqlgraph.To(platformuserroleassignment.Table, platformuserroleassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformapprole.UserAssignmentsTable, platformapprole.UserAssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(par.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIdentityAssignments queries the identity_assignments edge of a PlatformAppRole.
+func (c *PlatformAppRoleClient) QueryIdentityAssignments(par *PlatformAppRole) *PlatformIdentityRoleAssignmentQuery {
+	query := (&PlatformIdentityRoleAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := par.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformapprole.Table, platformapprole.FieldID, id),
+			sqlgraph.To(platformidentityroleassignment.Table, platformidentityroleassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformapprole.IdentityAssignmentsTable, platformapprole.IdentityAssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(par.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTokens queries the tokens edge of a PlatformAppRole.
+func (c *PlatformAppRoleClient) QueryTokens(par *PlatformAppRole) *PlatformTokenQuery {
+	query := (&PlatformTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := par.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformapprole.Table, platformapprole.FieldID, id),
+			sqlgraph.To(platformtoken.Table, platformtoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformapprole.TokensTable, platformapprole.TokensColumn),
+		)
+		fromV = sqlgraph.Neighbors(par.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformAppRoleClient) Hooks() []Hook {
+	return c.hooks.PlatformAppRole
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformAppRoleClient) Interceptors() []Interceptor {
+	return c.inters.PlatformAppRole
+}
+
+func (c *PlatformAppRoleClient) mutate(ctx context.Context, m *PlatformAppRoleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformAppRole mutation op: %q", m.Op())
+	}
+}
+
+// PlatformFederatedIdentityClient is a client for the PlatformFederatedIdentity schema.
+type PlatformFederatedIdentityClient struct {
+	config
+}
+
+// NewPlatformFederatedIdentityClient returns a client for the PlatformFederatedIdentity from the given config.
+func NewPlatformFederatedIdentityClient(c config) *PlatformFederatedIdentityClient {
+	return &PlatformFederatedIdentityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformfederatedidentity.Hooks(f(g(h())))`.
+func (c *PlatformFederatedIdentityClient) Use(hooks ...Hook) {
+	c.hooks.PlatformFederatedIdentity = append(c.hooks.PlatformFederatedIdentity, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformfederatedidentity.Intercept(f(g(h())))`.
+func (c *PlatformFederatedIdentityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformFederatedIdentity = append(c.inters.PlatformFederatedIdentity, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformFederatedIdentity entity.
+func (c *PlatformFederatedIdentityClient) Create() *PlatformFederatedIdentityCreate {
+	mutation := newPlatformFederatedIdentityMutation(c.config, OpCreate)
+	return &PlatformFederatedIdentityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformFederatedIdentity entities.
+func (c *PlatformFederatedIdentityClient) CreateBulk(builders ...*PlatformFederatedIdentityCreate) *PlatformFederatedIdentityCreateBulk {
+	return &PlatformFederatedIdentityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformFederatedIdentityClient) MapCreateBulk(slice any, setFunc func(*PlatformFederatedIdentityCreate, int)) *PlatformFederatedIdentityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformFederatedIdentityCreateBulk{err: fmt.Errorf("calling to PlatformFederatedIdentityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformFederatedIdentityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformFederatedIdentityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformFederatedIdentity.
+func (c *PlatformFederatedIdentityClient) Update() *PlatformFederatedIdentityUpdate {
+	mutation := newPlatformFederatedIdentityMutation(c.config, OpUpdate)
+	return &PlatformFederatedIdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformFederatedIdentityClient) UpdateOne(pfi *PlatformFederatedIdentity) *PlatformFederatedIdentityUpdateOne {
+	mutation := newPlatformFederatedIdentityMutation(c.config, OpUpdateOne, withPlatformFederatedIdentity(pfi))
+	return &PlatformFederatedIdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformFederatedIdentityClient) UpdateOneID(id int) *PlatformFederatedIdentityUpdateOne {
+	mutation := newPlatformFederatedIdentityMutation(c.config, OpUpdateOne, withPlatformFederatedIdentityID(id))
+	return &PlatformFederatedIdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformFederatedIdentity.
+func (c *PlatformFederatedIdentityClient) Delete() *PlatformFederatedIdentityDelete {
+	mutation := newPlatformFederatedIdentityMutation(c.config, OpDelete)
+	return &PlatformFederatedIdentityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformFederatedIdentityClient) DeleteOne(pfi *PlatformFederatedIdentity) *PlatformFederatedIdentityDeleteOne {
+	return c.DeleteOneID(pfi.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformFederatedIdentityClient) DeleteOneID(id int) *PlatformFederatedIdentityDeleteOne {
+	builder := c.Delete().Where(platformfederatedidentity.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformFederatedIdentityDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformFederatedIdentity.
+func (c *PlatformFederatedIdentityClient) Query() *PlatformFederatedIdentityQuery {
+	return &PlatformFederatedIdentityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformFederatedIdentity},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformFederatedIdentity entity by its id.
+func (c *PlatformFederatedIdentityClient) Get(ctx context.Context, id int) (*PlatformFederatedIdentity, error) {
+	return c.Query().Where(platformfederatedidentity.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformFederatedIdentityClient) GetX(ctx context.Context, id int) *PlatformFederatedIdentity {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a PlatformFederatedIdentity.
+func (c *PlatformFederatedIdentityClient) QueryUser(pfi *PlatformFederatedIdentity) *PlatformUserQuery {
+	query := (&PlatformUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pfi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformfederatedidentity.Table, platformfederatedidentity.FieldID, id),
+			sqlgraph.To(platformuser.Table, platformuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformfederatedidentity.UserTable, platformfederatedidentity.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(pfi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRoleAssignments queries the role_assignments edge of a PlatformFederatedIdentity.
+func (c *PlatformFederatedIdentityClient) QueryRoleAssignments(pfi *PlatformFederatedIdentity) *PlatformIdentityRoleAssignmentQuery {
+	query := (&PlatformIdentityRoleAssignmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pfi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformfederatedidentity.Table, platformfederatedidentity.FieldID, id),
+			sqlgraph.To(platformidentityroleassignment.Table, platformidentityroleassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformfederatedidentity.RoleAssignmentsTable, platformfederatedidentity.RoleAssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pfi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformFederatedIdentityClient) Hooks() []Hook {
+	return c.hooks.PlatformFederatedIdentity
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformFederatedIdentityClient) Interceptors() []Interceptor {
+	return c.inters.PlatformFederatedIdentity
+}
+
+func (c *PlatformFederatedIdentityClient) mutate(ctx context.Context, m *PlatformFederatedIdentityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformFederatedIdentityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformFederatedIdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformFederatedIdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformFederatedIdentityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformFederatedIdentity mutation op: %q", m.Op())
+	}
+}
+
+// PlatformIdentityRoleAssignmentClient is a client for the PlatformIdentityRoleAssignment schema.
+type PlatformIdentityRoleAssignmentClient struct {
+	config
+}
+
+// NewPlatformIdentityRoleAssignmentClient returns a client for the PlatformIdentityRoleAssignment from the given config.
+func NewPlatformIdentityRoleAssignmentClient(c config) *PlatformIdentityRoleAssignmentClient {
+	return &PlatformIdentityRoleAssignmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformidentityroleassignment.Hooks(f(g(h())))`.
+func (c *PlatformIdentityRoleAssignmentClient) Use(hooks ...Hook) {
+	c.hooks.PlatformIdentityRoleAssignment = append(c.hooks.PlatformIdentityRoleAssignment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformidentityroleassignment.Intercept(f(g(h())))`.
+func (c *PlatformIdentityRoleAssignmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformIdentityRoleAssignment = append(c.inters.PlatformIdentityRoleAssignment, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformIdentityRoleAssignment entity.
+func (c *PlatformIdentityRoleAssignmentClient) Create() *PlatformIdentityRoleAssignmentCreate {
+	mutation := newPlatformIdentityRoleAssignmentMutation(c.config, OpCreate)
+	return &PlatformIdentityRoleAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformIdentityRoleAssignment entities.
+func (c *PlatformIdentityRoleAssignmentClient) CreateBulk(builders ...*PlatformIdentityRoleAssignmentCreate) *PlatformIdentityRoleAssignmentCreateBulk {
+	return &PlatformIdentityRoleAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformIdentityRoleAssignmentClient) MapCreateBulk(slice any, setFunc func(*PlatformIdentityRoleAssignmentCreate, int)) *PlatformIdentityRoleAssignmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformIdentityRoleAssignmentCreateBulk{err: fmt.Errorf("calling to PlatformIdentityRoleAssignmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformIdentityRoleAssignmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformIdentityRoleAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformIdentityRoleAssignment.
+func (c *PlatformIdentityRoleAssignmentClient) Update() *PlatformIdentityRoleAssignmentUpdate {
+	mutation := newPlatformIdentityRoleAssignmentMutation(c.config, OpUpdate)
+	return &PlatformIdentityRoleAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformIdentityRoleAssignmentClient) UpdateOne(pira *PlatformIdentityRoleAssignment) *PlatformIdentityRoleAssignmentUpdateOne {
+	mutation := newPlatformIdentityRoleAssignmentMutation(c.config, OpUpdateOne, withPlatformIdentityRoleAssignment(pira))
+	return &PlatformIdentityRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformIdentityRoleAssignmentClient) UpdateOneID(id int) *PlatformIdentityRoleAssignmentUpdateOne {
+	mutation := newPlatformIdentityRoleAssignmentMutation(c.config, OpUpdateOne, withPlatformIdentityRoleAssignmentID(id))
+	return &PlatformIdentityRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformIdentityRoleAssignment.
+func (c *PlatformIdentityRoleAssignmentClient) Delete() *PlatformIdentityRoleAssignmentDelete {
+	mutation := newPlatformIdentityRoleAssignmentMutation(c.config, OpDelete)
+	return &PlatformIdentityRoleAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformIdentityRoleAssignmentClient) DeleteOne(pira *PlatformIdentityRoleAssignment) *PlatformIdentityRoleAssignmentDeleteOne {
+	return c.DeleteOneID(pira.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformIdentityRoleAssignmentClient) DeleteOneID(id int) *PlatformIdentityRoleAssignmentDeleteOne {
+	builder := c.Delete().Where(platformidentityroleassignment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformIdentityRoleAssignmentDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformIdentityRoleAssignment.
+func (c *PlatformIdentityRoleAssignmentClient) Query() *PlatformIdentityRoleAssignmentQuery {
+	return &PlatformIdentityRoleAssignmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformIdentityRoleAssignment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformIdentityRoleAssignment entity by its id.
+func (c *PlatformIdentityRoleAssignmentClient) Get(ctx context.Context, id int) (*PlatformIdentityRoleAssignment, error) {
+	return c.Query().Where(platformidentityroleassignment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformIdentityRoleAssignmentClient) GetX(ctx context.Context, id int) *PlatformIdentityRoleAssignment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryIdentity queries the identity edge of a PlatformIdentityRoleAssignment.
+func (c *PlatformIdentityRoleAssignmentClient) QueryIdentity(pira *PlatformIdentityRoleAssignment) *PlatformFederatedIdentityQuery {
+	query := (&PlatformFederatedIdentityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pira.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformidentityroleassignment.Table, platformidentityroleassignment.FieldID, id),
+			sqlgraph.To(platformfederatedidentity.Table, platformfederatedidentity.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformidentityroleassignment.IdentityTable, platformidentityroleassignment.IdentityColumn),
+		)
+		fromV = sqlgraph.Neighbors(pira.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRole queries the role edge of a PlatformIdentityRoleAssignment.
+func (c *PlatformIdentityRoleAssignmentClient) QueryRole(pira *PlatformIdentityRoleAssignment) *PlatformAppRoleQuery {
+	query := (&PlatformAppRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pira.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformidentityroleassignment.Table, platformidentityroleassignment.FieldID, id),
+			sqlgraph.To(platformapprole.Table, platformapprole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformidentityroleassignment.RoleTable, platformidentityroleassignment.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(pira.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformIdentityRoleAssignmentClient) Hooks() []Hook {
+	return c.hooks.PlatformIdentityRoleAssignment
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformIdentityRoleAssignmentClient) Interceptors() []Interceptor {
+	return c.inters.PlatformIdentityRoleAssignment
+}
+
+func (c *PlatformIdentityRoleAssignmentClient) mutate(ctx context.Context, m *PlatformIdentityRoleAssignmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformIdentityRoleAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformIdentityRoleAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformIdentityRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformIdentityRoleAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformIdentityRoleAssignment mutation op: %q", m.Op())
+	}
+}
+
+// PlatformTokenClient is a client for the PlatformToken schema.
+type PlatformTokenClient struct {
+	config
+}
+
+// NewPlatformTokenClient returns a client for the PlatformToken from the given config.
+func NewPlatformTokenClient(c config) *PlatformTokenClient {
+	return &PlatformTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformtoken.Hooks(f(g(h())))`.
+func (c *PlatformTokenClient) Use(hooks ...Hook) {
+	c.hooks.PlatformToken = append(c.hooks.PlatformToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformtoken.Intercept(f(g(h())))`.
+func (c *PlatformTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformToken = append(c.inters.PlatformToken, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformToken entity.
+func (c *PlatformTokenClient) Create() *PlatformTokenCreate {
+	mutation := newPlatformTokenMutation(c.config, OpCreate)
+	return &PlatformTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformToken entities.
+func (c *PlatformTokenClient) CreateBulk(builders ...*PlatformTokenCreate) *PlatformTokenCreateBulk {
+	return &PlatformTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformTokenClient) MapCreateBulk(slice any, setFunc func(*PlatformTokenCreate, int)) *PlatformTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformTokenCreateBulk{err: fmt.Errorf("calling to PlatformTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformToken.
+func (c *PlatformTokenClient) Update() *PlatformTokenUpdate {
+	mutation := newPlatformTokenMutation(c.config, OpUpdate)
+	return &PlatformTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformTokenClient) UpdateOne(pt *PlatformToken) *PlatformTokenUpdateOne {
+	mutation := newPlatformTokenMutation(c.config, OpUpdateOne, withPlatformToken(pt))
+	return &PlatformTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformTokenClient) UpdateOneID(id int) *PlatformTokenUpdateOne {
+	mutation := newPlatformTokenMutation(c.config, OpUpdateOne, withPlatformTokenID(id))
+	return &PlatformTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformToken.
+func (c *PlatformTokenClient) Delete() *PlatformTokenDelete {
+	mutation := newPlatformTokenMutation(c.config, OpDelete)
+	return &PlatformTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformTokenClient) DeleteOne(pt *PlatformToken) *PlatformTokenDeleteOne {
+	return c.DeleteOneID(pt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformTokenClient) DeleteOneID(id int) *PlatformTokenDeleteOne {
+	builder := c.Delete().Where(platformtoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformToken.
+func (c *PlatformTokenClient) Query() *PlatformTokenQuery {
+	return &PlatformTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformToken entity by its id.
+func (c *PlatformTokenClient) Get(ctx context.Context, id int) (*PlatformToken, error) {
+	return c.Query().Where(platformtoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformTokenClient) GetX(ctx context.Context, id int) *PlatformToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCreator queries the creator edge of a PlatformToken.
+func (c *PlatformTokenClient) QueryCreator(pt *PlatformToken) *PlatformUserQuery {
+	query := (&PlatformUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformtoken.Table, platformtoken.FieldID, id),
+			sqlgraph.To(platformuser.Table, platformuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.CreatorTable, platformtoken.CreatorColumn),
+		)
+		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRole queries the role edge of a PlatformToken.
+func (c *PlatformTokenClient) QueryRole(pt *PlatformToken) *PlatformAppRoleQuery {
+	query := (&PlatformAppRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformtoken.Table, platformtoken.FieldID, id),
+			sqlgraph.To(platformapprole.Table, platformapprole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformtoken.RoleTable, platformtoken.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformTokenClient) Hooks() []Hook {
+	return c.hooks.PlatformToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformTokenClient) Interceptors() []Interceptor {
+	return c.inters.PlatformToken
+}
+
+func (c *PlatformTokenClient) mutate(ctx context.Context, m *PlatformTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformToken mutation op: %q", m.Op())
+	}
+}
+
 // PlatformUserClient is a client for the PlatformUser schema.
 type PlatformUserClient struct {
 	config
@@ -1602,15 +2312,47 @@ func (c *PlatformUserClient) GetX(ctx context.Context, id int) *PlatformUser {
 	return obj
 }
 
-// QueryAssignments queries the assignments edge of a PlatformUser.
-func (c *PlatformUserClient) QueryAssignments(pu *PlatformUser) *UserAppRoleQuery {
-	query := (&UserAppRoleClient{config: c.config}).Query()
+// QueryUserRoleAssignments queries the user_role_assignments edge of a PlatformUser.
+func (c *PlatformUserClient) QueryUserRoleAssignments(pu *PlatformUser) *PlatformUserRoleAssignmentQuery {
+	query := (&PlatformUserRoleAssignmentClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pu.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(platformuser.Table, platformuser.FieldID, id),
-			sqlgraph.To(userapprole.Table, userapprole.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.AssignmentsTable, platformuser.AssignmentsColumn),
+			sqlgraph.To(platformuserroleassignment.Table, platformuserroleassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.UserRoleAssignmentsTable, platformuser.UserRoleAssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFederatedIdentities queries the federated_identities edge of a PlatformUser.
+func (c *PlatformUserClient) QueryFederatedIdentities(pu *PlatformUser) *PlatformFederatedIdentityQuery {
+	query := (&PlatformFederatedIdentityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuser.Table, platformuser.FieldID, id),
+			sqlgraph.To(platformfederatedidentity.Table, platformfederatedidentity.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.FederatedIdentitiesTable, platformuser.FederatedIdentitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCreatedTokens queries the created_tokens edge of a PlatformUser.
+func (c *PlatformUserClient) QueryCreatedTokens(pu *PlatformUser) *PlatformTokenQuery {
+	query := (&PlatformTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuser.Table, platformuser.FieldID, id),
+			sqlgraph.To(platformtoken.Table, platformtoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.CreatedTokensTable, platformuser.CreatedTokensColumn),
 		)
 		fromV = sqlgraph.Neighbors(pu.driver.Dialect(), step)
 		return fromV, nil
@@ -1640,6 +2382,171 @@ func (c *PlatformUserClient) mutate(ctx context.Context, m *PlatformUserMutation
 		return (&PlatformUserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown PlatformUser mutation op: %q", m.Op())
+	}
+}
+
+// PlatformUserRoleAssignmentClient is a client for the PlatformUserRoleAssignment schema.
+type PlatformUserRoleAssignmentClient struct {
+	config
+}
+
+// NewPlatformUserRoleAssignmentClient returns a client for the PlatformUserRoleAssignment from the given config.
+func NewPlatformUserRoleAssignmentClient(c config) *PlatformUserRoleAssignmentClient {
+	return &PlatformUserRoleAssignmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformuserroleassignment.Hooks(f(g(h())))`.
+func (c *PlatformUserRoleAssignmentClient) Use(hooks ...Hook) {
+	c.hooks.PlatformUserRoleAssignment = append(c.hooks.PlatformUserRoleAssignment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformuserroleassignment.Intercept(f(g(h())))`.
+func (c *PlatformUserRoleAssignmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformUserRoleAssignment = append(c.inters.PlatformUserRoleAssignment, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformUserRoleAssignment entity.
+func (c *PlatformUserRoleAssignmentClient) Create() *PlatformUserRoleAssignmentCreate {
+	mutation := newPlatformUserRoleAssignmentMutation(c.config, OpCreate)
+	return &PlatformUserRoleAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformUserRoleAssignment entities.
+func (c *PlatformUserRoleAssignmentClient) CreateBulk(builders ...*PlatformUserRoleAssignmentCreate) *PlatformUserRoleAssignmentCreateBulk {
+	return &PlatformUserRoleAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformUserRoleAssignmentClient) MapCreateBulk(slice any, setFunc func(*PlatformUserRoleAssignmentCreate, int)) *PlatformUserRoleAssignmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformUserRoleAssignmentCreateBulk{err: fmt.Errorf("calling to PlatformUserRoleAssignmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformUserRoleAssignmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformUserRoleAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformUserRoleAssignment.
+func (c *PlatformUserRoleAssignmentClient) Update() *PlatformUserRoleAssignmentUpdate {
+	mutation := newPlatformUserRoleAssignmentMutation(c.config, OpUpdate)
+	return &PlatformUserRoleAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformUserRoleAssignmentClient) UpdateOne(pura *PlatformUserRoleAssignment) *PlatformUserRoleAssignmentUpdateOne {
+	mutation := newPlatformUserRoleAssignmentMutation(c.config, OpUpdateOne, withPlatformUserRoleAssignment(pura))
+	return &PlatformUserRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformUserRoleAssignmentClient) UpdateOneID(id int) *PlatformUserRoleAssignmentUpdateOne {
+	mutation := newPlatformUserRoleAssignmentMutation(c.config, OpUpdateOne, withPlatformUserRoleAssignmentID(id))
+	return &PlatformUserRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformUserRoleAssignment.
+func (c *PlatformUserRoleAssignmentClient) Delete() *PlatformUserRoleAssignmentDelete {
+	mutation := newPlatformUserRoleAssignmentMutation(c.config, OpDelete)
+	return &PlatformUserRoleAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformUserRoleAssignmentClient) DeleteOne(pura *PlatformUserRoleAssignment) *PlatformUserRoleAssignmentDeleteOne {
+	return c.DeleteOneID(pura.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformUserRoleAssignmentClient) DeleteOneID(id int) *PlatformUserRoleAssignmentDeleteOne {
+	builder := c.Delete().Where(platformuserroleassignment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformUserRoleAssignmentDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformUserRoleAssignment.
+func (c *PlatformUserRoleAssignmentClient) Query() *PlatformUserRoleAssignmentQuery {
+	return &PlatformUserRoleAssignmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformUserRoleAssignment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformUserRoleAssignment entity by its id.
+func (c *PlatformUserRoleAssignmentClient) Get(ctx context.Context, id int) (*PlatformUserRoleAssignment, error) {
+	return c.Query().Where(platformuserroleassignment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformUserRoleAssignmentClient) GetX(ctx context.Context, id int) *PlatformUserRoleAssignment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a PlatformUserRoleAssignment.
+func (c *PlatformUserRoleAssignmentClient) QueryUser(pura *PlatformUserRoleAssignment) *PlatformUserQuery {
+	query := (&PlatformUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pura.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuserroleassignment.Table, platformuserroleassignment.FieldID, id),
+			sqlgraph.To(platformuser.Table, platformuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformuserroleassignment.UserTable, platformuserroleassignment.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(pura.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRole queries the role edge of a PlatformUserRoleAssignment.
+func (c *PlatformUserRoleAssignmentClient) QueryRole(pura *PlatformUserRoleAssignment) *PlatformAppRoleQuery {
+	query := (&PlatformAppRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pura.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuserroleassignment.Table, platformuserroleassignment.FieldID, id),
+			sqlgraph.To(platformapprole.Table, platformapprole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, platformuserroleassignment.RoleTable, platformuserroleassignment.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(pura.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformUserRoleAssignmentClient) Hooks() []Hook {
+	return c.hooks.PlatformUserRoleAssignment
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformUserRoleAssignmentClient) Interceptors() []Interceptor {
+	return c.inters.PlatformUserRoleAssignment
+}
+
+func (c *PlatformUserRoleAssignmentClient) mutate(ctx context.Context, m *PlatformUserRoleAssignmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformUserRoleAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformUserRoleAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformUserRoleAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformUserRoleAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformUserRoleAssignment mutation op: %q", m.Op())
 	}
 }
 
@@ -1776,149 +2683,18 @@ func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation
 	}
 }
 
-// UserAppRoleClient is a client for the UserAppRole schema.
-type UserAppRoleClient struct {
-	config
-}
-
-// NewUserAppRoleClient returns a client for the UserAppRole from the given config.
-func NewUserAppRoleClient(c config) *UserAppRoleClient {
-	return &UserAppRoleClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `userapprole.Hooks(f(g(h())))`.
-func (c *UserAppRoleClient) Use(hooks ...Hook) {
-	c.hooks.UserAppRole = append(c.hooks.UserAppRole, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `userapprole.Intercept(f(g(h())))`.
-func (c *UserAppRoleClient) Intercept(interceptors ...Interceptor) {
-	c.inters.UserAppRole = append(c.inters.UserAppRole, interceptors...)
-}
-
-// Create returns a builder for creating a UserAppRole entity.
-func (c *UserAppRoleClient) Create() *UserAppRoleCreate {
-	mutation := newUserAppRoleMutation(c.config, OpCreate)
-	return &UserAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of UserAppRole entities.
-func (c *UserAppRoleClient) CreateBulk(builders ...*UserAppRoleCreate) *UserAppRoleCreateBulk {
-	return &UserAppRoleCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *UserAppRoleClient) MapCreateBulk(slice any, setFunc func(*UserAppRoleCreate, int)) *UserAppRoleCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &UserAppRoleCreateBulk{err: fmt.Errorf("calling to UserAppRoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*UserAppRoleCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &UserAppRoleCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for UserAppRole.
-func (c *UserAppRoleClient) Update() *UserAppRoleUpdate {
-	mutation := newUserAppRoleMutation(c.config, OpUpdate)
-	return &UserAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *UserAppRoleClient) UpdateOne(uar *UserAppRole) *UserAppRoleUpdateOne {
-	mutation := newUserAppRoleMutation(c.config, OpUpdateOne, withUserAppRole(uar))
-	return &UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *UserAppRoleClient) UpdateOneID(id int) *UserAppRoleUpdateOne {
-	mutation := newUserAppRoleMutation(c.config, OpUpdateOne, withUserAppRoleID(id))
-	return &UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for UserAppRole.
-func (c *UserAppRoleClient) Delete() *UserAppRoleDelete {
-	mutation := newUserAppRoleMutation(c.config, OpDelete)
-	return &UserAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *UserAppRoleClient) DeleteOne(uar *UserAppRole) *UserAppRoleDeleteOne {
-	return c.DeleteOneID(uar.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserAppRoleClient) DeleteOneID(id int) *UserAppRoleDeleteOne {
-	builder := c.Delete().Where(userapprole.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &UserAppRoleDeleteOne{builder}
-}
-
-// Query returns a query builder for UserAppRole.
-func (c *UserAppRoleClient) Query() *UserAppRoleQuery {
-	return &UserAppRoleQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeUserAppRole},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a UserAppRole entity by its id.
-func (c *UserAppRoleClient) Get(ctx context.Context, id int) (*UserAppRole, error) {
-	return c.Query().Where(userapprole.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *UserAppRoleClient) GetX(ctx context.Context, id int) *UserAppRole {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *UserAppRoleClient) Hooks() []Hook {
-	return c.hooks.UserAppRole
-}
-
-// Interceptors returns the client interceptors.
-func (c *UserAppRoleClient) Interceptors() []Interceptor {
-	return c.inters.UserAppRole
-}
-
-func (c *UserAppRoleClient) mutate(ctx context.Context, m *UserAppRoleMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&UserAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&UserAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&UserAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("db: unknown UserAppRole mutation op: %q", m.Op())
-	}
-}
-
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		AuthCode, AuthRequest, Connector, DeviceRequest, DeviceToken, Keys,
-		OAuth2Client, OfflineSession, Password, PlatformUser, RefreshToken,
-		UserAppRole []ent.Hook
+		OAuth2Client, OfflineSession, Password, PlatformAppRole,
+		PlatformFederatedIdentity, PlatformIdentityRoleAssignment, PlatformToken,
+		PlatformUser, PlatformUserRoleAssignment, RefreshToken []ent.Hook
 	}
 	inters struct {
 		AuthCode, AuthRequest, Connector, DeviceRequest, DeviceToken, Keys,
-		OAuth2Client, OfflineSession, Password, PlatformUser, RefreshToken,
-		UserAppRole []ent.Interceptor
+		OAuth2Client, OfflineSession, Password, PlatformAppRole,
+		PlatformFederatedIdentity, PlatformIdentityRoleAssignment, PlatformToken,
+		PlatformUser, PlatformUserRoleAssignment, RefreshToken []ent.Interceptor
 	}
 )

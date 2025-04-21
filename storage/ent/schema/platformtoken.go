@@ -76,13 +76,14 @@ func (PlatformToken) Edges() []ent.Edge {
 // Indexes of the PlatformToken.
 func (PlatformToken) Indexes() []ent.Index {
 	return []ent.Index{
-		// Index foreign keys for performance (Ent likely creates these from edges)
-		index.Fields("creator_id"),
-		index.Fields("app_role_id"), // Index for the direct FK to roles
+		// CORRECTED: Index foreign keys using edge names
+		index.Edges("creator"), // Index for the creator_id column
+		index.Edges("role"),    // Index for the app_role_id column
 
 		// Other useful indexes
 		index.Fields("is_active"),
 		index.Fields("expires_at"),
 		// Note: Unique index on public_id is created by the field definition's Unique()
+		// Note: Unique index on {creator_id, app_role_id} if needed would be index.Edges("creator", "role").Unique()
 	}
 }

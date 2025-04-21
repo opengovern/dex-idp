@@ -169,6 +169,170 @@ var (
 		Columns:    PasswordsColumns,
 		PrimaryKey: []*schema.Column{PasswordsColumns[0]},
 	}
+	// PlatformAppRolesColumns holds the columns for the "platform_app_roles" table.
+	PlatformAppRolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "app_id", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "weight", Type: field.TypeInt, Default: 0},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+	}
+	// PlatformAppRolesTable holds the schema information for the "platform_app_roles" table.
+	PlatformAppRolesTable = &schema.Table{
+		Name:       "platform_app_roles",
+		Columns:    PlatformAppRolesColumns,
+		PrimaryKey: []*schema.Column{PlatformAppRolesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformapprole_app_id_title",
+				Unique:  true,
+				Columns: []*schema.Column{PlatformAppRolesColumns[3], PlatformAppRolesColumns[4]},
+			},
+			{
+				Name:    "platformapprole_app_id",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformAppRolesColumns[3]},
+			},
+			{
+				Name:    "platformapprole_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformAppRolesColumns[7]},
+			},
+		},
+	}
+	// PlatformFederatedIdentitiesColumns holds the columns for the "platform_federated_identities" table.
+	PlatformFederatedIdentitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "connector_id", Type: field.TypeString},
+		{Name: "federated_user_id", Type: field.TypeString},
+		{Name: "platform_user_federated_identities", Type: field.TypeInt},
+	}
+	// PlatformFederatedIdentitiesTable holds the schema information for the "platform_federated_identities" table.
+	PlatformFederatedIdentitiesTable = &schema.Table{
+		Name:       "platform_federated_identities",
+		Columns:    PlatformFederatedIdentitiesColumns,
+		PrimaryKey: []*schema.Column{PlatformFederatedIdentitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "platform_federated_identities_platform_users_federated_identities",
+				Columns:    []*schema.Column{PlatformFederatedIdentitiesColumns[5]},
+				RefColumns: []*schema.Column{PlatformUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformfederatedidentity_connector_id_federated_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{PlatformFederatedIdentitiesColumns[3], PlatformFederatedIdentitiesColumns[4]},
+			},
+			{
+				Name:    "platformfederatedidentity_platform_user_federated_identities",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformFederatedIdentitiesColumns[5]},
+			},
+		},
+	}
+	// PlatformIdentityRoleAssignmentsColumns holds the columns for the "platform_identity_role_assignments" table.
+	PlatformIdentityRoleAssignmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "assigned_at", Type: field.TypeTime},
+		{Name: "platform_app_role_identity_assignments", Type: field.TypeInt},
+		{Name: "platform_federated_identity_role_assignments", Type: field.TypeInt},
+	}
+	// PlatformIdentityRoleAssignmentsTable holds the schema information for the "platform_identity_role_assignments" table.
+	PlatformIdentityRoleAssignmentsTable = &schema.Table{
+		Name:       "platform_identity_role_assignments",
+		Columns:    PlatformIdentityRoleAssignmentsColumns,
+		PrimaryKey: []*schema.Column{PlatformIdentityRoleAssignmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "platform_identity_role_assignments_platform_app_roles_identity_assignments",
+				Columns:    []*schema.Column{PlatformIdentityRoleAssignmentsColumns[4]},
+				RefColumns: []*schema.Column{PlatformAppRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "platform_identity_role_assignments_platform_federated_identities_role_assignments",
+				Columns:    []*schema.Column{PlatformIdentityRoleAssignmentsColumns[5]},
+				RefColumns: []*schema.Column{PlatformFederatedIdentitiesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformidentityroleassignment_platform_federated_identity_role_assignments_platform_app_role_identity_assignments",
+				Unique:  true,
+				Columns: []*schema.Column{PlatformIdentityRoleAssignmentsColumns[5], PlatformIdentityRoleAssignmentsColumns[4]},
+			},
+			{
+				Name:    "platformidentityroleassignment_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformIdentityRoleAssignmentsColumns[2]},
+			},
+		},
+	}
+	// PlatformTokensColumns holds the columns for the "platform_tokens" table.
+	PlatformTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "public_id", Type: field.TypeString, Unique: true},
+		{Name: "secret_hash", Type: field.TypeString},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "platform_app_role_tokens", Type: field.TypeInt},
+		{Name: "platform_user_created_tokens", Type: field.TypeInt},
+	}
+	// PlatformTokensTable holds the schema information for the "platform_tokens" table.
+	PlatformTokensTable = &schema.Table{
+		Name:       "platform_tokens",
+		Columns:    PlatformTokensColumns,
+		PrimaryKey: []*schema.Column{PlatformTokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "platform_tokens_platform_app_roles_tokens",
+				Columns:    []*schema.Column{PlatformTokensColumns[7]},
+				RefColumns: []*schema.Column{PlatformAppRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "platform_tokens_platform_users_created_tokens",
+				Columns:    []*schema.Column{PlatformTokensColumns[8]},
+				RefColumns: []*schema.Column{PlatformUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformtoken_platform_user_created_tokens",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformTokensColumns[8]},
+			},
+			{
+				Name:    "platformtoken_platform_app_role_tokens",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformTokensColumns[7]},
+			},
+			{
+				Name:    "platformtoken_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformTokensColumns[5]},
+			},
+			{
+				Name:    "platformtoken_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformTokensColumns[6]},
+			},
+		},
+	}
 	// PlatformUsersColumns holds the columns for the "platform_users" table.
 	PlatformUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -177,8 +341,6 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString, Nullable: true},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
-		{Name: "first_connector_id", Type: field.TypeString, Nullable: true},
-		{Name: "first_federated_user_id", Type: field.TypeString, Nullable: true},
 		{Name: "last_login", Type: field.TypeTime, Nullable: true},
 	}
 	// PlatformUsersTable holds the schema information for the "platform_users" table.
@@ -189,8 +351,54 @@ var (
 		Indexes: []*schema.Index{
 			{
 				Name:    "platformuser_email",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{PlatformUsersColumns[3]},
+			},
+			{
+				Name:    "platformuser_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformUsersColumns[5]},
+			},
+		},
+	}
+	// PlatformUserRoleAssignmentsColumns holds the columns for the "platform_user_role_assignments" table.
+	PlatformUserRoleAssignmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "assigned_at", Type: field.TypeTime},
+		{Name: "platform_app_role_user_assignments", Type: field.TypeInt},
+		{Name: "platform_user_user_role_assignments", Type: field.TypeInt},
+	}
+	// PlatformUserRoleAssignmentsTable holds the schema information for the "platform_user_role_assignments" table.
+	PlatformUserRoleAssignmentsTable = &schema.Table{
+		Name:       "platform_user_role_assignments",
+		Columns:    PlatformUserRoleAssignmentsColumns,
+		PrimaryKey: []*schema.Column{PlatformUserRoleAssignmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "platform_user_role_assignments_platform_app_roles_user_assignments",
+				Columns:    []*schema.Column{PlatformUserRoleAssignmentsColumns[4]},
+				RefColumns: []*schema.Column{PlatformAppRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "platform_user_role_assignments_platform_users_user_role_assignments",
+				Columns:    []*schema.Column{PlatformUserRoleAssignmentsColumns[5]},
+				RefColumns: []*schema.Column{PlatformUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformuserroleassignment_platform_user_user_role_assignments_platform_app_role_user_assignments",
+				Unique:  true,
+				Columns: []*schema.Column{PlatformUserRoleAssignmentsColumns[5], PlatformUserRoleAssignmentsColumns[4]},
+			},
+			{
+				Name:    "platformuserroleassignment_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformUserRoleAssignmentsColumns[2]},
 			},
 		},
 	}
@@ -219,25 +427,6 @@ var (
 		Columns:    RefreshTokensColumns,
 		PrimaryKey: []*schema.Column{RefreshTokensColumns[0]},
 	}
-	// UserAppRolesColumns holds the columns for the "user_app_roles" table.
-	UserAppRolesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "platform_user_assignments", Type: field.TypeInt, Nullable: true},
-	}
-	// UserAppRolesTable holds the schema information for the "user_app_roles" table.
-	UserAppRolesTable = &schema.Table{
-		Name:       "user_app_roles",
-		Columns:    UserAppRolesColumns,
-		PrimaryKey: []*schema.Column{UserAppRolesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_app_roles_platform_users_assignments",
-				Columns:    []*schema.Column{UserAppRolesColumns[1]},
-				RefColumns: []*schema.Column{PlatformUsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AuthCodesTable,
@@ -249,12 +438,22 @@ var (
 		Oauth2clientsTable,
 		OfflineSessionsTable,
 		PasswordsTable,
+		PlatformAppRolesTable,
+		PlatformFederatedIdentitiesTable,
+		PlatformIdentityRoleAssignmentsTable,
+		PlatformTokensTable,
 		PlatformUsersTable,
+		PlatformUserRoleAssignmentsTable,
 		RefreshTokensTable,
-		UserAppRolesTable,
 	}
 )
 
 func init() {
-	UserAppRolesTable.ForeignKeys[0].RefTable = PlatformUsersTable
+	PlatformFederatedIdentitiesTable.ForeignKeys[0].RefTable = PlatformUsersTable
+	PlatformIdentityRoleAssignmentsTable.ForeignKeys[0].RefTable = PlatformAppRolesTable
+	PlatformIdentityRoleAssignmentsTable.ForeignKeys[1].RefTable = PlatformFederatedIdentitiesTable
+	PlatformTokensTable.ForeignKeys[0].RefTable = PlatformAppRolesTable
+	PlatformTokensTable.ForeignKeys[1].RefTable = PlatformUsersTable
+	PlatformUserRoleAssignmentsTable.ForeignKeys[0].RefTable = PlatformAppRolesTable
+	PlatformUserRoleAssignmentsTable.ForeignKeys[1].RefTable = PlatformUsersTable
 }

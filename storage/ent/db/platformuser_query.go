@@ -12,19 +12,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 	"github.com/dexidp/dex/storage/ent/db/predicate"
-	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // PlatformUserQuery is the builder for querying PlatformUser entities.
 type PlatformUserQuery struct {
 	config
-	ctx             *QueryContext
-	order           []platformuser.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.PlatformUser
-	withAssignments *UserAppRoleQuery
+	ctx                     *QueryContext
+	order                   []platformuser.OrderOption
+	inters                  []Interceptor
+	predicates              []predicate.PlatformUser
+	withUserRoleAssignments *PlatformUserRoleAssignmentQuery
+	withFederatedIdentities *PlatformFederatedIdentityQuery
+	withCreatedTokens       *PlatformTokenQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +65,9 @@ func (puq *PlatformUserQuery) Order(o ...platformuser.OrderOption) *PlatformUser
 	return puq
 }
 
-// QueryAssignments chains the current query on the "assignments" edge.
-func (puq *PlatformUserQuery) QueryAssignments() *UserAppRoleQuery {
-	query := (&UserAppRoleClient{config: puq.config}).Query()
+// QueryUserRoleAssignments chains the current query on the "user_role_assignments" edge.
+func (puq *PlatformUserQuery) QueryUserRoleAssignments() *PlatformUserRoleAssignmentQuery {
+	query := (&PlatformUserRoleAssignmentClient{config: puq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := puq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +78,52 @@ func (puq *PlatformUserQuery) QueryAssignments() *UserAppRoleQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(platformuser.Table, platformuser.FieldID, selector),
-			sqlgraph.To(userapprole.Table, userapprole.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.AssignmentsTable, platformuser.AssignmentsColumn),
+			sqlgraph.To(platformuserroleassignment.Table, platformuserroleassignment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.UserRoleAssignmentsTable, platformuser.UserRoleAssignmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(puq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFederatedIdentities chains the current query on the "federated_identities" edge.
+func (puq *PlatformUserQuery) QueryFederatedIdentities() *PlatformFederatedIdentityQuery {
+	query := (&PlatformFederatedIdentityClient{config: puq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := puq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := puq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuser.Table, platformuser.FieldID, selector),
+			sqlgraph.To(platformfederatedidentity.Table, platformfederatedidentity.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.FederatedIdentitiesTable, platformuser.FederatedIdentitiesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(puq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedTokens chains the current query on the "created_tokens" edge.
+func (puq *PlatformUserQuery) QueryCreatedTokens() *PlatformTokenQuery {
+	query := (&PlatformTokenClient{config: puq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := puq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := puq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuser.Table, platformuser.FieldID, selector),
+			sqlgraph.To(platformtoken.Table, platformtoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.CreatedTokensTable, platformuser.CreatedTokensColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(puq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,26 +318,50 @@ func (puq *PlatformUserQuery) Clone() *PlatformUserQuery {
 		return nil
 	}
 	return &PlatformUserQuery{
-		config:          puq.config,
-		ctx:             puq.ctx.Clone(),
-		order:           append([]platformuser.OrderOption{}, puq.order...),
-		inters:          append([]Interceptor{}, puq.inters...),
-		predicates:      append([]predicate.PlatformUser{}, puq.predicates...),
-		withAssignments: puq.withAssignments.Clone(),
+		config:                  puq.config,
+		ctx:                     puq.ctx.Clone(),
+		order:                   append([]platformuser.OrderOption{}, puq.order...),
+		inters:                  append([]Interceptor{}, puq.inters...),
+		predicates:              append([]predicate.PlatformUser{}, puq.predicates...),
+		withUserRoleAssignments: puq.withUserRoleAssignments.Clone(),
+		withFederatedIdentities: puq.withFederatedIdentities.Clone(),
+		withCreatedTokens:       puq.withCreatedTokens.Clone(),
 		// clone intermediate query.
 		sql:  puq.sql.Clone(),
 		path: puq.path,
 	}
 }
 
-// WithAssignments tells the query-builder to eager-load the nodes that are connected to
-// the "assignments" edge. The optional arguments are used to configure the query builder of the edge.
-func (puq *PlatformUserQuery) WithAssignments(opts ...func(*UserAppRoleQuery)) *PlatformUserQuery {
-	query := (&UserAppRoleClient{config: puq.config}).Query()
+// WithUserRoleAssignments tells the query-builder to eager-load the nodes that are connected to
+// the "user_role_assignments" edge. The optional arguments are used to configure the query builder of the edge.
+func (puq *PlatformUserQuery) WithUserRoleAssignments(opts ...func(*PlatformUserRoleAssignmentQuery)) *PlatformUserQuery {
+	query := (&PlatformUserRoleAssignmentClient{config: puq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	puq.withAssignments = query
+	puq.withUserRoleAssignments = query
+	return puq
+}
+
+// WithFederatedIdentities tells the query-builder to eager-load the nodes that are connected to
+// the "federated_identities" edge. The optional arguments are used to configure the query builder of the edge.
+func (puq *PlatformUserQuery) WithFederatedIdentities(opts ...func(*PlatformFederatedIdentityQuery)) *PlatformUserQuery {
+	query := (&PlatformFederatedIdentityClient{config: puq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	puq.withFederatedIdentities = query
+	return puq
+}
+
+// WithCreatedTokens tells the query-builder to eager-load the nodes that are connected to
+// the "created_tokens" edge. The optional arguments are used to configure the query builder of the edge.
+func (puq *PlatformUserQuery) WithCreatedTokens(opts ...func(*PlatformTokenQuery)) *PlatformUserQuery {
+	query := (&PlatformTokenClient{config: puq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	puq.withCreatedTokens = query
 	return puq
 }
 
@@ -371,8 +443,10 @@ func (puq *PlatformUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*PlatformUser{}
 		_spec       = puq.querySpec()
-		loadedTypes = [1]bool{
-			puq.withAssignments != nil,
+		loadedTypes = [3]bool{
+			puq.withUserRoleAssignments != nil,
+			puq.withFederatedIdentities != nil,
+			puq.withCreatedTokens != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -393,17 +467,35 @@ func (puq *PlatformUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := puq.withAssignments; query != nil {
-		if err := puq.loadAssignments(ctx, query, nodes,
-			func(n *PlatformUser) { n.Edges.Assignments = []*UserAppRole{} },
-			func(n *PlatformUser, e *UserAppRole) { n.Edges.Assignments = append(n.Edges.Assignments, e) }); err != nil {
+	if query := puq.withUserRoleAssignments; query != nil {
+		if err := puq.loadUserRoleAssignments(ctx, query, nodes,
+			func(n *PlatformUser) { n.Edges.UserRoleAssignments = []*PlatformUserRoleAssignment{} },
+			func(n *PlatformUser, e *PlatformUserRoleAssignment) {
+				n.Edges.UserRoleAssignments = append(n.Edges.UserRoleAssignments, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := puq.withFederatedIdentities; query != nil {
+		if err := puq.loadFederatedIdentities(ctx, query, nodes,
+			func(n *PlatformUser) { n.Edges.FederatedIdentities = []*PlatformFederatedIdentity{} },
+			func(n *PlatformUser, e *PlatformFederatedIdentity) {
+				n.Edges.FederatedIdentities = append(n.Edges.FederatedIdentities, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := puq.withCreatedTokens; query != nil {
+		if err := puq.loadCreatedTokens(ctx, query, nodes,
+			func(n *PlatformUser) { n.Edges.CreatedTokens = []*PlatformToken{} },
+			func(n *PlatformUser, e *PlatformToken) { n.Edges.CreatedTokens = append(n.Edges.CreatedTokens, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (puq *PlatformUserQuery) loadAssignments(ctx context.Context, query *UserAppRoleQuery, nodes []*PlatformUser, init func(*PlatformUser), assign func(*PlatformUser, *UserAppRole)) error {
+func (puq *PlatformUserQuery) loadUserRoleAssignments(ctx context.Context, query *PlatformUserRoleAssignmentQuery, nodes []*PlatformUser, init func(*PlatformUser), assign func(*PlatformUser, *PlatformUserRoleAssignment)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*PlatformUser)
 	for i := range nodes {
@@ -414,21 +506,83 @@ func (puq *PlatformUserQuery) loadAssignments(ctx context.Context, query *UserAp
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.UserAppRole(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(platformuser.AssignmentsColumn), fks...))
+	query.Where(predicate.PlatformUserRoleAssignment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(platformuser.UserRoleAssignmentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.platform_user_assignments
+		fk := n.platform_user_user_role_assignments
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "platform_user_assignments" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "platform_user_user_role_assignments" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "platform_user_assignments" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "platform_user_user_role_assignments" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (puq *PlatformUserQuery) loadFederatedIdentities(ctx context.Context, query *PlatformFederatedIdentityQuery, nodes []*PlatformUser, init func(*PlatformUser), assign func(*PlatformUser, *PlatformFederatedIdentity)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*PlatformUser)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PlatformFederatedIdentity(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(platformuser.FederatedIdentitiesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.platform_user_federated_identities
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "platform_user_federated_identities" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "platform_user_federated_identities" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (puq *PlatformUserQuery) loadCreatedTokens(ctx context.Context, query *PlatformTokenQuery, nodes []*PlatformUser, init func(*PlatformUser), assign func(*PlatformUser, *PlatformToken)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*PlatformUser)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.PlatformToken(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(platformuser.CreatedTokensColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.platform_user_created_tokens
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "platform_user_created_tokens" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "platform_user_created_tokens" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

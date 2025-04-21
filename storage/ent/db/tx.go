@@ -30,12 +30,20 @@ type Tx struct {
 	OfflineSession *OfflineSessionClient
 	// Password is the client for interacting with the Password builders.
 	Password *PasswordClient
+	// PlatformAppRole is the client for interacting with the PlatformAppRole builders.
+	PlatformAppRole *PlatformAppRoleClient
+	// PlatformFederatedIdentity is the client for interacting with the PlatformFederatedIdentity builders.
+	PlatformFederatedIdentity *PlatformFederatedIdentityClient
+	// PlatformIdentityRoleAssignment is the client for interacting with the PlatformIdentityRoleAssignment builders.
+	PlatformIdentityRoleAssignment *PlatformIdentityRoleAssignmentClient
+	// PlatformToken is the client for interacting with the PlatformToken builders.
+	PlatformToken *PlatformTokenClient
 	// PlatformUser is the client for interacting with the PlatformUser builders.
 	PlatformUser *PlatformUserClient
+	// PlatformUserRoleAssignment is the client for interacting with the PlatformUserRoleAssignment builders.
+	PlatformUserRoleAssignment *PlatformUserRoleAssignmentClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
-	// UserAppRole is the client for interacting with the UserAppRole builders.
-	UserAppRole *UserAppRoleClient
 
 	// lazily loaded.
 	client     *Client
@@ -176,9 +184,13 @@ func (tx *Tx) init() {
 	tx.OAuth2Client = NewOAuth2ClientClient(tx.config)
 	tx.OfflineSession = NewOfflineSessionClient(tx.config)
 	tx.Password = NewPasswordClient(tx.config)
+	tx.PlatformAppRole = NewPlatformAppRoleClient(tx.config)
+	tx.PlatformFederatedIdentity = NewPlatformFederatedIdentityClient(tx.config)
+	tx.PlatformIdentityRoleAssignment = NewPlatformIdentityRoleAssignmentClient(tx.config)
+	tx.PlatformToken = NewPlatformTokenClient(tx.config)
 	tx.PlatformUser = NewPlatformUserClient(tx.config)
+	tx.PlatformUserRoleAssignment = NewPlatformUserRoleAssignmentClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
-	tx.UserAppRole = NewUserAppRoleClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

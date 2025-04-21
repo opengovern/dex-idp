@@ -27,12 +27,8 @@ type PlatformUser struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// Indicates whether the user account is active and allowed to log in.
 	IsActive bool `json:"is_active,omitempty"`
-	// Optional: Connector ID used when the user was first seen by the system.
-	FirstConnectorID string `json:"first_connector_id,omitempty"`
-	// Optional: User ID from the federated provider when the user was first seen.
-	FirstFederatedUserID string `json:"first_federated_user_id,omitempty"`
 	// Timestamp of the user's last known login recorded by this system.
-	LastLogin time.Time `json:"last_login,omitempty"`
+	LastLogin *time.Time `json:"last_login,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlatformUserQuery when eager-loading is set.
 	Edges        PlatformUserEdges `json:"edges"`
@@ -42,19 +38,41 @@ type PlatformUser struct {
 // PlatformUserEdges holds the relations/edges for other nodes in the graph.
 type PlatformUserEdges struct {
 	// Holds the individual application role assignments for this user.
-	Assignments []*UserAppRole `json:"assignments,omitempty"`
+	UserRoleAssignments []*PlatformUserRoleAssignment `json:"user_role_assignments,omitempty"`
+	// Holds the external identities (e.g., from Google, LDAP) linked to this user.
+	FederatedIdentities []*PlatformFederatedIdentity `json:"federated_identities,omitempty"`
+	// Holds the platform tokens created by this user.
+	CreatedTokens []*PlatformToken `json:"created_tokens,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
-// AssignmentsOrErr returns the Assignments value or an error if the edge
+// UserRoleAssignmentsOrErr returns the UserRoleAssignments value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlatformUserEdges) AssignmentsOrErr() ([]*UserAppRole, error) {
+func (e PlatformUserEdges) UserRoleAssignmentsOrErr() ([]*PlatformUserRoleAssignment, error) {
 	if e.loadedTypes[0] {
-		return e.Assignments, nil
+		return e.UserRoleAssignments, nil
 	}
-	return nil, &NotLoadedError{edge: "assignments"}
+	return nil, &NotLoadedError{edge: "user_role_assignments"}
+}
+
+// FederatedIdentitiesOrErr returns the FederatedIdentities value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlatformUserEdges) FederatedIdentitiesOrErr() ([]*PlatformFederatedIdentity, error) {
+	if e.loadedTypes[1] {
+		return e.FederatedIdentities, nil
+	}
+	return nil, &NotLoadedError{edge: "federated_identities"}
+}
+
+// CreatedTokensOrErr returns the CreatedTokens value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlatformUserEdges) CreatedTokensOrErr() ([]*PlatformToken, error) {
+	if e.loadedTypes[2] {
+		return e.CreatedTokens, nil
+	}
+	return nil, &NotLoadedError{edge: "created_tokens"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -66,7 +84,7 @@ func (*PlatformUser) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case platformuser.FieldID:
 			values[i] = new(sql.NullInt64)
-		case platformuser.FieldEmail, platformuser.FieldDisplayName, platformuser.FieldFirstConnectorID, platformuser.FieldFirstFederatedUserID:
+		case platformuser.FieldEmail, platformuser.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case platformuser.FieldCreateTime, platformuser.FieldUpdateTime, platformuser.FieldLastLogin:
 			values[i] = new(sql.NullTime)
@@ -121,23 +139,12 @@ func (pu *PlatformUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pu.IsActive = value.Bool
 			}
-		case platformuser.FieldFirstConnectorID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field first_connector_id", values[i])
-			} else if value.Valid {
-				pu.FirstConnectorID = value.String
-			}
-		case platformuser.FieldFirstFederatedUserID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field first_federated_user_id", values[i])
-			} else if value.Valid {
-				pu.FirstFederatedUserID = value.String
-			}
 		case platformuser.FieldLastLogin:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_login", values[i])
 			} else if value.Valid {
-				pu.LastLogin = value.Time
+				pu.LastLogin = new(time.Time)
+				*pu.LastLogin = value.Time
 			}
 		default:
 			pu.selectValues.Set(columns[i], values[i])
@@ -152,9 +159,19 @@ func (pu *PlatformUser) Value(name string) (ent.Value, error) {
 	return pu.selectValues.Get(name)
 }
 
-// QueryAssignments queries the "assignments" edge of the PlatformUser entity.
-func (pu *PlatformUser) QueryAssignments() *UserAppRoleQuery {
-	return NewPlatformUserClient(pu.config).QueryAssignments(pu)
+// QueryUserRoleAssignments queries the "user_role_assignments" edge of the PlatformUser entity.
+func (pu *PlatformUser) QueryUserRoleAssignments() *PlatformUserRoleAssignmentQuery {
+	return NewPlatformUserClient(pu.config).QueryUserRoleAssignments(pu)
+}
+
+// QueryFederatedIdentities queries the "federated_identities" edge of the PlatformUser entity.
+func (pu *PlatformUser) QueryFederatedIdentities() *PlatformFederatedIdentityQuery {
+	return NewPlatformUserClient(pu.config).QueryFederatedIdentities(pu)
+}
+
+// QueryCreatedTokens queries the "created_tokens" edge of the PlatformUser entity.
+func (pu *PlatformUser) QueryCreatedTokens() *PlatformTokenQuery {
+	return NewPlatformUserClient(pu.config).QueryCreatedTokens(pu)
 }
 
 // Update returns a builder for updating this PlatformUser.
@@ -195,14 +212,10 @@ func (pu *PlatformUser) String() string {
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", pu.IsActive))
 	builder.WriteString(", ")
-	builder.WriteString("first_connector_id=")
-	builder.WriteString(pu.FirstConnectorID)
-	builder.WriteString(", ")
-	builder.WriteString("first_federated_user_id=")
-	builder.WriteString(pu.FirstFederatedUserID)
-	builder.WriteString(", ")
-	builder.WriteString("last_login=")
-	builder.WriteString(pu.LastLogin.Format(time.ANSIC))
+	if v := pu.LastLogin; v != nil {
+		builder.WriteString("last_login=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

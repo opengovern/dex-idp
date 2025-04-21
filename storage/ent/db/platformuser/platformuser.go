@@ -24,23 +24,37 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
-	// FieldFirstConnectorID holds the string denoting the first_connector_id field in the database.
-	FieldFirstConnectorID = "first_connector_id"
-	// FieldFirstFederatedUserID holds the string denoting the first_federated_user_id field in the database.
-	FieldFirstFederatedUserID = "first_federated_user_id"
 	// FieldLastLogin holds the string denoting the last_login field in the database.
 	FieldLastLogin = "last_login"
-	// EdgeAssignments holds the string denoting the assignments edge name in mutations.
-	EdgeAssignments = "assignments"
+	// EdgeUserRoleAssignments holds the string denoting the user_role_assignments edge name in mutations.
+	EdgeUserRoleAssignments = "user_role_assignments"
+	// EdgeFederatedIdentities holds the string denoting the federated_identities edge name in mutations.
+	EdgeFederatedIdentities = "federated_identities"
+	// EdgeCreatedTokens holds the string denoting the created_tokens edge name in mutations.
+	EdgeCreatedTokens = "created_tokens"
 	// Table holds the table name of the platformuser in the database.
 	Table = "platform_users"
-	// AssignmentsTable is the table that holds the assignments relation/edge.
-	AssignmentsTable = "user_app_roles"
-	// AssignmentsInverseTable is the table name for the UserAppRole entity.
-	// It exists in this package in order to avoid circular dependency with the "userapprole" package.
-	AssignmentsInverseTable = "user_app_roles"
-	// AssignmentsColumn is the table column denoting the assignments relation/edge.
-	AssignmentsColumn = "platform_user_assignments"
+	// UserRoleAssignmentsTable is the table that holds the user_role_assignments relation/edge.
+	UserRoleAssignmentsTable = "platform_user_role_assignments"
+	// UserRoleAssignmentsInverseTable is the table name for the PlatformUserRoleAssignment entity.
+	// It exists in this package in order to avoid circular dependency with the "platformuserroleassignment" package.
+	UserRoleAssignmentsInverseTable = "platform_user_role_assignments"
+	// UserRoleAssignmentsColumn is the table column denoting the user_role_assignments relation/edge.
+	UserRoleAssignmentsColumn = "platform_user_user_role_assignments"
+	// FederatedIdentitiesTable is the table that holds the federated_identities relation/edge.
+	FederatedIdentitiesTable = "platform_federated_identities"
+	// FederatedIdentitiesInverseTable is the table name for the PlatformFederatedIdentity entity.
+	// It exists in this package in order to avoid circular dependency with the "platformfederatedidentity" package.
+	FederatedIdentitiesInverseTable = "platform_federated_identities"
+	// FederatedIdentitiesColumn is the table column denoting the federated_identities relation/edge.
+	FederatedIdentitiesColumn = "platform_user_federated_identities"
+	// CreatedTokensTable is the table that holds the created_tokens relation/edge.
+	CreatedTokensTable = "platform_tokens"
+	// CreatedTokensInverseTable is the table name for the PlatformToken entity.
+	// It exists in this package in order to avoid circular dependency with the "platformtoken" package.
+	CreatedTokensInverseTable = "platform_tokens"
+	// CreatedTokensColumn is the table column denoting the created_tokens relation/edge.
+	CreatedTokensColumn = "platform_user_created_tokens"
 )
 
 // Columns holds all SQL columns for platformuser fields.
@@ -51,8 +65,6 @@ var Columns = []string{
 	FieldEmail,
 	FieldDisplayName,
 	FieldIsActive,
-	FieldFirstConnectorID,
-	FieldFirstFederatedUserID,
 	FieldLastLogin,
 }
 
@@ -112,38 +124,70 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
 }
 
-// ByFirstConnectorID orders the results by the first_connector_id field.
-func ByFirstConnectorID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFirstConnectorID, opts...).ToFunc()
-}
-
-// ByFirstFederatedUserID orders the results by the first_federated_user_id field.
-func ByFirstFederatedUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFirstFederatedUserID, opts...).ToFunc()
-}
-
 // ByLastLogin orders the results by the last_login field.
 func ByLastLogin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastLogin, opts...).ToFunc()
 }
 
-// ByAssignmentsCount orders the results by assignments count.
-func ByAssignmentsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByUserRoleAssignmentsCount orders the results by user_role_assignments count.
+func ByUserRoleAssignmentsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAssignmentsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newUserRoleAssignmentsStep(), opts...)
 	}
 }
 
-// ByAssignments orders the results by assignments terms.
-func ByAssignments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByUserRoleAssignments orders the results by user_role_assignments terms.
+func ByUserRoleAssignments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAssignmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUserRoleAssignmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newAssignmentsStep() *sqlgraph.Step {
+
+// ByFederatedIdentitiesCount orders the results by federated_identities count.
+func ByFederatedIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFederatedIdentitiesStep(), opts...)
+	}
+}
+
+// ByFederatedIdentities orders the results by federated_identities terms.
+func ByFederatedIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFederatedIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCreatedTokensCount orders the results by created_tokens count.
+func ByCreatedTokensCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCreatedTokensStep(), opts...)
+	}
+}
+
+// ByCreatedTokens orders the results by created_tokens terms.
+func ByCreatedTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedTokensStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newUserRoleAssignmentsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AssignmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AssignmentsTable, AssignmentsColumn),
+		sqlgraph.To(UserRoleAssignmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UserRoleAssignmentsTable, UserRoleAssignmentsColumn),
+	)
+}
+func newFederatedIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FederatedIdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FederatedIdentitiesTable, FederatedIdentitiesColumn),
+	)
+}
+func newCreatedTokensStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CreatedTokensInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedTokensTable, CreatedTokensColumn),
 	)
 }

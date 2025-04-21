@@ -14,7 +14,12 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformapprole"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformidentityroleassignment"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
 	"github.com/dexidp/dex/storage/ent/schema"
 )
@@ -217,6 +222,106 @@ func init() {
 	passwordDescUserID := passwordFields[3].Descriptor()
 	// password.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	password.UserIDValidator = passwordDescUserID.Validators[0].(func(string) error)
+	platformapproleMixin := schema.PlatformAppRole{}.Mixin()
+	platformapproleMixinFields0 := platformapproleMixin[0].Fields()
+	_ = platformapproleMixinFields0
+	platformapproleFields := schema.PlatformAppRole{}.Fields()
+	_ = platformapproleFields
+	// platformapproleDescCreateTime is the schema descriptor for create_time field.
+	platformapproleDescCreateTime := platformapproleMixinFields0[0].Descriptor()
+	// platformapprole.DefaultCreateTime holds the default value on creation for the create_time field.
+	platformapprole.DefaultCreateTime = platformapproleDescCreateTime.Default.(func() time.Time)
+	// platformapproleDescUpdateTime is the schema descriptor for update_time field.
+	platformapproleDescUpdateTime := platformapproleMixinFields0[1].Descriptor()
+	// platformapprole.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformapprole.DefaultUpdateTime = platformapproleDescUpdateTime.Default.(func() time.Time)
+	// platformapprole.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformapprole.UpdateDefaultUpdateTime = platformapproleDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformapproleDescAppID is the schema descriptor for app_id field.
+	platformapproleDescAppID := platformapproleFields[0].Descriptor()
+	// platformapprole.AppIDValidator is a validator for the "app_id" field. It is called by the builders before save.
+	platformapprole.AppIDValidator = platformapproleDescAppID.Validators[0].(func(string) error)
+	// platformapproleDescTitle is the schema descriptor for title field.
+	platformapproleDescTitle := platformapproleFields[1].Descriptor()
+	// platformapprole.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	platformapprole.TitleValidator = platformapproleDescTitle.Validators[0].(func(string) error)
+	// platformapproleDescWeight is the schema descriptor for weight field.
+	platformapproleDescWeight := platformapproleFields[3].Descriptor()
+	// platformapprole.DefaultWeight holds the default value on creation for the weight field.
+	platformapprole.DefaultWeight = platformapproleDescWeight.Default.(int)
+	// platformapproleDescIsActive is the schema descriptor for is_active field.
+	platformapproleDescIsActive := platformapproleFields[4].Descriptor()
+	// platformapprole.DefaultIsActive holds the default value on creation for the is_active field.
+	platformapprole.DefaultIsActive = platformapproleDescIsActive.Default.(bool)
+	platformfederatedidentityMixin := schema.PlatformFederatedIdentity{}.Mixin()
+	platformfederatedidentityMixinFields0 := platformfederatedidentityMixin[0].Fields()
+	_ = platformfederatedidentityMixinFields0
+	platformfederatedidentityFields := schema.PlatformFederatedIdentity{}.Fields()
+	_ = platformfederatedidentityFields
+	// platformfederatedidentityDescCreateTime is the schema descriptor for create_time field.
+	platformfederatedidentityDescCreateTime := platformfederatedidentityMixinFields0[0].Descriptor()
+	// platformfederatedidentity.DefaultCreateTime holds the default value on creation for the create_time field.
+	platformfederatedidentity.DefaultCreateTime = platformfederatedidentityDescCreateTime.Default.(func() time.Time)
+	// platformfederatedidentityDescUpdateTime is the schema descriptor for update_time field.
+	platformfederatedidentityDescUpdateTime := platformfederatedidentityMixinFields0[1].Descriptor()
+	// platformfederatedidentity.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformfederatedidentity.DefaultUpdateTime = platformfederatedidentityDescUpdateTime.Default.(func() time.Time)
+	// platformfederatedidentity.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformfederatedidentity.UpdateDefaultUpdateTime = platformfederatedidentityDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformfederatedidentityDescConnectorID is the schema descriptor for connector_id field.
+	platformfederatedidentityDescConnectorID := platformfederatedidentityFields[0].Descriptor()
+	// platformfederatedidentity.ConnectorIDValidator is a validator for the "connector_id" field. It is called by the builders before save.
+	platformfederatedidentity.ConnectorIDValidator = platformfederatedidentityDescConnectorID.Validators[0].(func(string) error)
+	// platformfederatedidentityDescFederatedUserID is the schema descriptor for federated_user_id field.
+	platformfederatedidentityDescFederatedUserID := platformfederatedidentityFields[1].Descriptor()
+	// platformfederatedidentity.FederatedUserIDValidator is a validator for the "federated_user_id" field. It is called by the builders before save.
+	platformfederatedidentity.FederatedUserIDValidator = platformfederatedidentityDescFederatedUserID.Validators[0].(func(string) error)
+	platformidentityroleassignmentMixin := schema.PlatformIdentityRoleAssignment{}.Mixin()
+	platformidentityroleassignmentMixinFields0 := platformidentityroleassignmentMixin[0].Fields()
+	_ = platformidentityroleassignmentMixinFields0
+	platformidentityroleassignmentFields := schema.PlatformIdentityRoleAssignment{}.Fields()
+	_ = platformidentityroleassignmentFields
+	// platformidentityroleassignmentDescUpdateTime is the schema descriptor for update_time field.
+	platformidentityroleassignmentDescUpdateTime := platformidentityroleassignmentMixinFields0[0].Descriptor()
+	// platformidentityroleassignment.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformidentityroleassignment.DefaultUpdateTime = platformidentityroleassignmentDescUpdateTime.Default.(func() time.Time)
+	// platformidentityroleassignment.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformidentityroleassignment.UpdateDefaultUpdateTime = platformidentityroleassignmentDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformidentityroleassignmentDescIsActive is the schema descriptor for is_active field.
+	platformidentityroleassignmentDescIsActive := platformidentityroleassignmentFields[0].Descriptor()
+	// platformidentityroleassignment.DefaultIsActive holds the default value on creation for the is_active field.
+	platformidentityroleassignment.DefaultIsActive = platformidentityroleassignmentDescIsActive.Default.(bool)
+	// platformidentityroleassignmentDescAssignedAt is the schema descriptor for assigned_at field.
+	platformidentityroleassignmentDescAssignedAt := platformidentityroleassignmentFields[1].Descriptor()
+	// platformidentityroleassignment.DefaultAssignedAt holds the default value on creation for the assigned_at field.
+	platformidentityroleassignment.DefaultAssignedAt = platformidentityroleassignmentDescAssignedAt.Default.(func() time.Time)
+	platformtokenMixin := schema.PlatformToken{}.Mixin()
+	platformtokenMixinFields0 := platformtokenMixin[0].Fields()
+	_ = platformtokenMixinFields0
+	platformtokenFields := schema.PlatformToken{}.Fields()
+	_ = platformtokenFields
+	// platformtokenDescCreateTime is the schema descriptor for create_time field.
+	platformtokenDescCreateTime := platformtokenMixinFields0[0].Descriptor()
+	// platformtoken.DefaultCreateTime holds the default value on creation for the create_time field.
+	platformtoken.DefaultCreateTime = platformtokenDescCreateTime.Default.(func() time.Time)
+	// platformtokenDescUpdateTime is the schema descriptor for update_time field.
+	platformtokenDescUpdateTime := platformtokenMixinFields0[1].Descriptor()
+	// platformtoken.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformtoken.DefaultUpdateTime = platformtokenDescUpdateTime.Default.(func() time.Time)
+	// platformtoken.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformtoken.UpdateDefaultUpdateTime = platformtokenDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformtokenDescPublicID is the schema descriptor for public_id field.
+	platformtokenDescPublicID := platformtokenFields[0].Descriptor()
+	// platformtoken.PublicIDValidator is a validator for the "public_id" field. It is called by the builders before save.
+	platformtoken.PublicIDValidator = platformtokenDescPublicID.Validators[0].(func(string) error)
+	// platformtokenDescSecretHash is the schema descriptor for secret_hash field.
+	platformtokenDescSecretHash := platformtokenFields[1].Descriptor()
+	// platformtoken.SecretHashValidator is a validator for the "secret_hash" field. It is called by the builders before save.
+	platformtoken.SecretHashValidator = platformtokenDescSecretHash.Validators[0].(func(string) error)
+	// platformtokenDescIsActive is the schema descriptor for is_active field.
+	platformtokenDescIsActive := platformtokenFields[2].Descriptor()
+	// platformtoken.DefaultIsActive holds the default value on creation for the is_active field.
+	platformtoken.DefaultIsActive = platformtokenDescIsActive.Default.(bool)
 	platformuserMixin := schema.PlatformUser{}.Mixin()
 	platformuserMixinFields0 := platformuserMixin[0].Fields()
 	_ = platformuserMixinFields0
@@ -240,6 +345,25 @@ func init() {
 	platformuserDescIsActive := platformuserFields[2].Descriptor()
 	// platformuser.DefaultIsActive holds the default value on creation for the is_active field.
 	platformuser.DefaultIsActive = platformuserDescIsActive.Default.(bool)
+	platformuserroleassignmentMixin := schema.PlatformUserRoleAssignment{}.Mixin()
+	platformuserroleassignmentMixinFields0 := platformuserroleassignmentMixin[0].Fields()
+	_ = platformuserroleassignmentMixinFields0
+	platformuserroleassignmentFields := schema.PlatformUserRoleAssignment{}.Fields()
+	_ = platformuserroleassignmentFields
+	// platformuserroleassignmentDescUpdateTime is the schema descriptor for update_time field.
+	platformuserroleassignmentDescUpdateTime := platformuserroleassignmentMixinFields0[0].Descriptor()
+	// platformuserroleassignment.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformuserroleassignment.DefaultUpdateTime = platformuserroleassignmentDescUpdateTime.Default.(func() time.Time)
+	// platformuserroleassignment.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformuserroleassignment.UpdateDefaultUpdateTime = platformuserroleassignmentDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformuserroleassignmentDescIsActive is the schema descriptor for is_active field.
+	platformuserroleassignmentDescIsActive := platformuserroleassignmentFields[0].Descriptor()
+	// platformuserroleassignment.DefaultIsActive holds the default value on creation for the is_active field.
+	platformuserroleassignment.DefaultIsActive = platformuserroleassignmentDescIsActive.Default.(bool)
+	// platformuserroleassignmentDescAssignedAt is the schema descriptor for assigned_at field.
+	platformuserroleassignmentDescAssignedAt := platformuserroleassignmentFields[1].Descriptor()
+	// platformuserroleassignment.DefaultAssignedAt holds the default value on creation for the assigned_at field.
+	platformuserroleassignment.DefaultAssignedAt = platformuserroleassignmentDescAssignedAt.Default.(func() time.Time)
 	refreshtokenFields := schema.RefreshToken{}.Fields()
 	_ = refreshtokenFields
 	// refreshtokenDescClientID is the schema descriptor for client_id field.

@@ -684,10 +684,11 @@ var Dex_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlatformUserServiceClient interface {
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
-	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
-	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
-	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
+	CreateUser(ctx context.Context, in *CreatePlatformUserRequest, opts ...grpc.CallOption) (*CreatePlatformUserResponse, error)
+	GetUser(ctx context.Context, in *GetPlatformUserRequest, opts ...grpc.CallOption) (*GetPlatformUserResponse, error)
+	ListUsers(ctx context.Context, in *ListPlatformUsersRequest, opts ...grpc.CallOption) (*ListPlatformUsersResponse, error)
+	UpdateUser(ctx context.Context, in *UpdatePlatformUserRequest, opts ...grpc.CallOption) (*UpdatePlatformUserResponse, error)
+	DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*DeletePlatformUserResponse, error)
 }
 
 type platformUserServiceClient struct {
@@ -698,8 +699,8 @@ func NewPlatformUserServiceClient(cc grpc.ClientConnInterface) PlatformUserServi
 	return &platformUserServiceClient{cc}
 }
 
-func (c *platformUserServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
-	out := new(CreateUserResponse)
+func (c *platformUserServiceClient) CreateUser(ctx context.Context, in *CreatePlatformUserRequest, opts ...grpc.CallOption) (*CreatePlatformUserResponse, error) {
+	out := new(CreatePlatformUserResponse)
 	err := c.cc.Invoke(ctx, "/api.PlatformUserService/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -707,8 +708,8 @@ func (c *platformUserServiceClient) CreateUser(ctx context.Context, in *CreateUs
 	return out, nil
 }
 
-func (c *platformUserServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
-	out := new(GetUserResponse)
+func (c *platformUserServiceClient) GetUser(ctx context.Context, in *GetPlatformUserRequest, opts ...grpc.CallOption) (*GetPlatformUserResponse, error) {
+	out := new(GetPlatformUserResponse)
 	err := c.cc.Invoke(ctx, "/api.PlatformUserService/GetUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -716,8 +717,17 @@ func (c *platformUserServiceClient) GetUser(ctx context.Context, in *GetUserRequ
 	return out, nil
 }
 
-func (c *platformUserServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
-	out := new(UpdateUserResponse)
+func (c *platformUserServiceClient) ListUsers(ctx context.Context, in *ListPlatformUsersRequest, opts ...grpc.CallOption) (*ListPlatformUsersResponse, error) {
+	out := new(ListPlatformUsersResponse)
+	err := c.cc.Invoke(ctx, "/api.PlatformUserService/ListUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformUserServiceClient) UpdateUser(ctx context.Context, in *UpdatePlatformUserRequest, opts ...grpc.CallOption) (*UpdatePlatformUserResponse, error) {
+	out := new(UpdatePlatformUserResponse)
 	err := c.cc.Invoke(ctx, "/api.PlatformUserService/UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -725,8 +735,8 @@ func (c *platformUserServiceClient) UpdateUser(ctx context.Context, in *UpdateUs
 	return out, nil
 }
 
-func (c *platformUserServiceClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error) {
-	out := new(DeleteUserResponse)
+func (c *platformUserServiceClient) DeleteUser(ctx context.Context, in *DeletePlatformUserRequest, opts ...grpc.CallOption) (*DeletePlatformUserResponse, error) {
+	out := new(DeletePlatformUserResponse)
 	err := c.cc.Invoke(ctx, "/api.PlatformUserService/DeleteUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -738,10 +748,11 @@ func (c *platformUserServiceClient) DeleteUser(ctx context.Context, in *DeleteUs
 // All implementations must embed UnimplementedPlatformUserServiceServer
 // for forward compatibility
 type PlatformUserServiceServer interface {
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
-	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
-	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
-	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+	CreateUser(context.Context, *CreatePlatformUserRequest) (*CreatePlatformUserResponse, error)
+	GetUser(context.Context, *GetPlatformUserRequest) (*GetPlatformUserResponse, error)
+	ListUsers(context.Context, *ListPlatformUsersRequest) (*ListPlatformUsersResponse, error)
+	UpdateUser(context.Context, *UpdatePlatformUserRequest) (*UpdatePlatformUserResponse, error)
+	DeleteUser(context.Context, *DeletePlatformUserRequest) (*DeletePlatformUserResponse, error)
 	mustEmbedUnimplementedPlatformUserServiceServer()
 }
 
@@ -749,16 +760,19 @@ type PlatformUserServiceServer interface {
 type UnimplementedPlatformUserServiceServer struct {
 }
 
-func (UnimplementedPlatformUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+func (UnimplementedPlatformUserServiceServer) CreateUser(context.Context, *CreatePlatformUserRequest) (*CreatePlatformUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedPlatformUserServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
+func (UnimplementedPlatformUserServiceServer) GetUser(context.Context, *GetPlatformUserRequest) (*GetPlatformUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedPlatformUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error) {
+func (UnimplementedPlatformUserServiceServer) ListUsers(context.Context, *ListPlatformUsersRequest) (*ListPlatformUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+}
+func (UnimplementedPlatformUserServiceServer) UpdateUser(context.Context, *UpdatePlatformUserRequest) (*UpdatePlatformUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedPlatformUserServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
+func (UnimplementedPlatformUserServiceServer) DeleteUser(context.Context, *DeletePlatformUserRequest) (*DeletePlatformUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedPlatformUserServiceServer) mustEmbedUnimplementedPlatformUserServiceServer() {}
@@ -775,7 +789,7 @@ func RegisterPlatformUserServiceServer(s grpc.ServiceRegistrar, srv PlatformUser
 }
 
 func _PlatformUserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateUserRequest)
+	in := new(CreatePlatformUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -787,13 +801,13 @@ func _PlatformUserService_CreateUser_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/api.PlatformUserService/CreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformUserServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
+		return srv.(PlatformUserServiceServer).CreateUser(ctx, req.(*CreatePlatformUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PlatformUserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserRequest)
+	in := new(GetPlatformUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -805,13 +819,31 @@ func _PlatformUserService_GetUser_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: "/api.PlatformUserService/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformUserServiceServer).GetUser(ctx, req.(*GetUserRequest))
+		return srv.(PlatformUserServiceServer).GetUser(ctx, req.(*GetPlatformUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformUserService_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlatformUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformUserServiceServer).ListUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.PlatformUserService/ListUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformUserServiceServer).ListUsers(ctx, req.(*ListPlatformUsersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PlatformUserService_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateUserRequest)
+	in := new(UpdatePlatformUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -823,13 +855,13 @@ func _PlatformUserService_UpdateUser_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/api.PlatformUserService/UpdateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformUserServiceServer).UpdateUser(ctx, req.(*UpdateUserRequest))
+		return srv.(PlatformUserServiceServer).UpdateUser(ctx, req.(*UpdatePlatformUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _PlatformUserService_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteUserRequest)
+	in := new(DeletePlatformUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -841,7 +873,7 @@ func _PlatformUserService_DeleteUser_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/api.PlatformUserService/DeleteUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlatformUserServiceServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+		return srv.(PlatformUserServiceServer).DeleteUser(ctx, req.(*DeletePlatformUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -860,6 +892,10 @@ var PlatformUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _PlatformUserService_GetUser_Handler,
+		},
+		{
+			MethodName: "ListUsers",
+			Handler:    _PlatformUserService_ListUsers_Handler,
 		},
 		{
 			MethodName: "UpdateUser",

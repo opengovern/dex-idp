@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/dexidp/dex/storage/ent/db/platformfederatedidentity"
+	"github.com/dexidp/dex/storage/ent/db/platformtoken"
 	"github.com/dexidp/dex/storage/ent/db/platformuser"
-	"github.com/dexidp/dex/storage/ent/db/userapprole"
+	"github.com/dexidp/dex/storage/ent/db/platformuserroleassignment"
 )
 
 // PlatformUserCreate is the builder for creating a PlatformUser entity.
@@ -83,34 +85,6 @@ func (puc *PlatformUserCreate) SetNillableIsActive(b *bool) *PlatformUserCreate 
 	return puc
 }
 
-// SetFirstConnectorID sets the "first_connector_id" field.
-func (puc *PlatformUserCreate) SetFirstConnectorID(s string) *PlatformUserCreate {
-	puc.mutation.SetFirstConnectorID(s)
-	return puc
-}
-
-// SetNillableFirstConnectorID sets the "first_connector_id" field if the given value is not nil.
-func (puc *PlatformUserCreate) SetNillableFirstConnectorID(s *string) *PlatformUserCreate {
-	if s != nil {
-		puc.SetFirstConnectorID(*s)
-	}
-	return puc
-}
-
-// SetFirstFederatedUserID sets the "first_federated_user_id" field.
-func (puc *PlatformUserCreate) SetFirstFederatedUserID(s string) *PlatformUserCreate {
-	puc.mutation.SetFirstFederatedUserID(s)
-	return puc
-}
-
-// SetNillableFirstFederatedUserID sets the "first_federated_user_id" field if the given value is not nil.
-func (puc *PlatformUserCreate) SetNillableFirstFederatedUserID(s *string) *PlatformUserCreate {
-	if s != nil {
-		puc.SetFirstFederatedUserID(*s)
-	}
-	return puc
-}
-
 // SetLastLogin sets the "last_login" field.
 func (puc *PlatformUserCreate) SetLastLogin(t time.Time) *PlatformUserCreate {
 	puc.mutation.SetLastLogin(t)
@@ -125,19 +99,49 @@ func (puc *PlatformUserCreate) SetNillableLastLogin(t *time.Time) *PlatformUserC
 	return puc
 }
 
-// AddAssignmentIDs adds the "assignments" edge to the UserAppRole entity by IDs.
-func (puc *PlatformUserCreate) AddAssignmentIDs(ids ...int) *PlatformUserCreate {
-	puc.mutation.AddAssignmentIDs(ids...)
+// AddUserRoleAssignmentIDs adds the "user_role_assignments" edge to the PlatformUserRoleAssignment entity by IDs.
+func (puc *PlatformUserCreate) AddUserRoleAssignmentIDs(ids ...int) *PlatformUserCreate {
+	puc.mutation.AddUserRoleAssignmentIDs(ids...)
 	return puc
 }
 
-// AddAssignments adds the "assignments" edges to the UserAppRole entity.
-func (puc *PlatformUserCreate) AddAssignments(u ...*UserAppRole) *PlatformUserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// AddUserRoleAssignments adds the "user_role_assignments" edges to the PlatformUserRoleAssignment entity.
+func (puc *PlatformUserCreate) AddUserRoleAssignments(p ...*PlatformUserRoleAssignment) *PlatformUserCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return puc.AddAssignmentIDs(ids...)
+	return puc.AddUserRoleAssignmentIDs(ids...)
+}
+
+// AddFederatedIdentityIDs adds the "federated_identities" edge to the PlatformFederatedIdentity entity by IDs.
+func (puc *PlatformUserCreate) AddFederatedIdentityIDs(ids ...int) *PlatformUserCreate {
+	puc.mutation.AddFederatedIdentityIDs(ids...)
+	return puc
+}
+
+// AddFederatedIdentities adds the "federated_identities" edges to the PlatformFederatedIdentity entity.
+func (puc *PlatformUserCreate) AddFederatedIdentities(p ...*PlatformFederatedIdentity) *PlatformUserCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puc.AddFederatedIdentityIDs(ids...)
+}
+
+// AddCreatedTokenIDs adds the "created_tokens" edge to the PlatformToken entity by IDs.
+func (puc *PlatformUserCreate) AddCreatedTokenIDs(ids ...int) *PlatformUserCreate {
+	puc.mutation.AddCreatedTokenIDs(ids...)
+	return puc
+}
+
+// AddCreatedTokens adds the "created_tokens" edges to the PlatformToken entity.
+func (puc *PlatformUserCreate) AddCreatedTokens(p ...*PlatformToken) *PlatformUserCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puc.AddCreatedTokenIDs(ids...)
 }
 
 // Mutation returns the PlatformUserMutation object of the builder.
@@ -254,27 +258,51 @@ func (puc *PlatformUserCreate) createSpec() (*PlatformUser, *sqlgraph.CreateSpec
 		_spec.SetField(platformuser.FieldIsActive, field.TypeBool, value)
 		_node.IsActive = value
 	}
-	if value, ok := puc.mutation.FirstConnectorID(); ok {
-		_spec.SetField(platformuser.FieldFirstConnectorID, field.TypeString, value)
-		_node.FirstConnectorID = value
-	}
-	if value, ok := puc.mutation.FirstFederatedUserID(); ok {
-		_spec.SetField(platformuser.FieldFirstFederatedUserID, field.TypeString, value)
-		_node.FirstFederatedUserID = value
-	}
 	if value, ok := puc.mutation.LastLogin(); ok {
 		_spec.SetField(platformuser.FieldLastLogin, field.TypeTime, value)
-		_node.LastLogin = value
+		_node.LastLogin = &value
 	}
-	if nodes := puc.mutation.AssignmentsIDs(); len(nodes) > 0 {
+	if nodes := puc.mutation.UserRoleAssignmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   platformuser.AssignmentsTable,
-			Columns: []string{platformuser.AssignmentsColumn},
+			Table:   platformuser.UserRoleAssignmentsTable,
+			Columns: []string{platformuser.UserRoleAssignmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userapprole.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(platformuserroleassignment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := puc.mutation.FederatedIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.FederatedIdentitiesTable,
+			Columns: []string{platformuser.FederatedIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformfederatedidentity.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := puc.mutation.CreatedTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   platformuser.CreatedTokensTable,
+			Columns: []string{platformuser.CreatedTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(platformtoken.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
