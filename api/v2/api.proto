@@ -1,9 +1,19 @@
 syntax = "proto3";
 
-package api;
+package api; // Keep package name as 'api'
 
-option java_package = "com.coreos.dex.api";
+// Change Go package alias to apiV2 for consistency with Go code
 option go_package = "github.com/dexidp/dex/api/v2;api";
+option java_package = "com.coreos.dex.api";
+
+// Import standard types
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto"; // Needed for Delete response potentially
+
+// -------------------------------------------------------------
+// Existing Dex Messages (Clients, Passwords, Connectors, etc.)
+// -------------------------------------------------------------
 
 // Client represents an OAuth2 client.
 message Client {
@@ -18,7 +28,6 @@ message Client {
 
 // GetClientReq is a request to retrieve client details.
 message GetClientReq {
-  // The ID of the client.
   string id = 1;
 }
 
@@ -40,7 +49,6 @@ message CreateClientResp {
 
 // DeleteClientReq is a request to delete a client.
 message DeleteClientReq {
-  // The ID of the client.
   string id = 1;
 }
 
@@ -63,13 +71,9 @@ message UpdateClientResp {
     bool not_found = 1;
 }
 
-// TODO(ericchiang): expand this.
-
 // Password is an email for password mapping managed by the storage.
 message Password {
   string email = 1;
-
-  // Currently we do not accept plain text passwords. Could be an option in the future.
   bytes hash = 2;
   string username = 3;
   string user_id = 4;
@@ -87,7 +91,6 @@ message CreatePasswordResp {
 
 // UpdatePasswordReq is a request to modify an existing password.
 message UpdatePasswordReq {
-  // The email used to lookup the password. This field cannot be modified
   string email = 1;
   bytes new_hash = 2;
   string new_username = 3;
@@ -136,7 +139,6 @@ message CreateConnectorResp {
 
 // UpdateConnectorReq is a request to modify an existing connector.
 message UpdateConnectorReq {
-  // The id used to lookup the connector. This field cannot be modified
   string id = 1;
   string new_type = 2;
   string new_name = 3;
@@ -171,10 +173,7 @@ message VersionReq {}
 
 // VersionResp holds the version info of components.
 message VersionResp {
-  // Semantic version of the server.
   string server = 1;
-  // Numeric version of the API. It increases every time a new call is added to the API.
-  // Clients should use this info to determine if the server supports specific features.
   int32 api = 2;
 }
 
@@ -202,16 +201,14 @@ message DiscoveryResp {
 
 // RefreshTokenRef contains the metadata for a refresh token that is managed by the storage.
 message RefreshTokenRef {
-  // ID of the refresh token.
   string id = 1;
   string client_id = 2;
-  int64 created_at = 5;
-  int64 last_used = 6;
+  int64 created_at = 5; // Consider changing to google.protobuf.Timestamp if appropriate elsewhere
+  int64 last_used = 6;  // Consider changing to google.protobuf.Timestamp
 }
 
 // ListRefreshReq is a request to enumerate the refresh tokens of a user.
 message ListRefreshReq {
-  // The "sub" claim returned in the ID Token.
   string user_id = 1;
 }
 
@@ -222,14 +219,12 @@ message ListRefreshResp {
 
 // RevokeRefreshReq is a request to revoke the refresh token of the user-client pair.
 message RevokeRefreshReq {
-  // The "sub" claim returned in the ID Token.
   string user_id = 1;
   string client_id = 2;
 }
 
 // RevokeRefreshResp determines if the refresh token is revoked successfully.
 message RevokeRefreshResp {
-  // Set to true is refresh token was not found and token could not be revoked.
   bool not_found = 1;
 }
 
@@ -243,42 +238,91 @@ message VerifyPasswordResp {
   bool not_found = 2;
 }
 
-// Dex represents the dex gRPC service.
+// -------------------------------------------------------------
+// NEW PlatformUser Messages and Service
+// -------------------------------------------------------------
+
+// PlatformUser message - mirrors the Ent schema PlatformUser entity.
+message PlatformUser {
+  string id = 1; // String ID for gRPC API consistency
+  string email = 2;
+  google.protobuf.StringValue display_name = 3; // Optional
+  bool is_active = 4;
+  google.protobuf.Timestamp create_time = 5; // Corresponds to Ent CreateTime
+  google.protobuf.Timestamp update_time = 6; // Corresponds to Ent UpdateTime
+  google.protobuf.Timestamp last_login = 7;  // Optional
+  google.protobuf.StringValue first_connector_id = 8; // Optional
+  google.protobuf.StringValue first_federated_user_id = 9; // Optional
+}
+
+// CreateUser messages
+message CreateUserRequest {
+  string email = 1; // Required
+  google.protobuf.StringValue display_name = 2; // Optional
+  // google.protobuf.BoolValue is_active = 3; // Optional: set initial state explicitly?
+}
+message CreateUserResponse {
+  PlatformUser platform_user = 1; // Contains the created PlatformUser
+}
+
+// GetUser messages
+message GetUserRequest {
+  string id = 1; // ID of the user to retrieve
+}
+message GetUserResponse {
+  PlatformUser platform_user = 1; // Contains the retrieved PlatformUser
+}
+
+// UpdateUser messages
+message UpdateUserRequest {
+  string id = 1; // ID of the user to update
+  // Use wrappers for optional fields to indicate presence
+  google.protobuf.StringValue display_name = 2;
+  google.protobuf.BoolValue is_active = 3;
+  // Add other updatable fields as needed
+}
+message UpdateUserResponse {
+  PlatformUser platform_user = 1; // Contains the updated PlatformUser
+}
+
+// DeleteUser messages
+message DeleteUserRequest {
+  string id = 1; // ID of the user to delete
+}
+message DeleteUserResponse {
+  // Can be empty or return confirmation
+  google.protobuf.Empty placeholder = 1; // Using Empty is common
+}
+
+// -------------------------------------------------------------
+// Service Definitions
+// -------------------------------------------------------------
+
+// Dex represents the main dex gRPC service.
 service Dex {
-  // GetClient gets a client.
   rpc GetClient(GetClientReq) returns (GetClientResp) {};
-  // CreateClient creates a client.
   rpc CreateClient(CreateClientReq) returns (CreateClientResp) {};
-  // UpdateClient updates an existing client
   rpc UpdateClient(UpdateClientReq) returns (UpdateClientResp) {};
-  // DeleteClient deletes the provided client.
   rpc DeleteClient(DeleteClientReq) returns (DeleteClientResp) {};
-  // CreatePassword creates a password.
   rpc CreatePassword(CreatePasswordReq) returns (CreatePasswordResp) {};
-  // UpdatePassword modifies existing password.
   rpc UpdatePassword(UpdatePasswordReq) returns (UpdatePasswordResp) {};
-  // DeletePassword deletes the password.
   rpc DeletePassword(DeletePasswordReq) returns (DeletePasswordResp) {};
-  // ListPassword lists all password entries.
   rpc ListPasswords(ListPasswordReq) returns (ListPasswordResp) {};
-  // CreateConnector creates a connector.
   rpc CreateConnector(CreateConnectorReq) returns (CreateConnectorResp) {};
-  // UpdateConnector modifies existing connector.
   rpc UpdateConnector(UpdateConnectorReq) returns (UpdateConnectorResp) {};
-  // DeleteConnector deletes the connector.
   rpc DeleteConnector(DeleteConnectorReq) returns (DeleteConnectorResp) {};
-  // ListConnectors lists all connector entries.
   rpc ListConnectors(ListConnectorReq) returns (ListConnectorResp) {};
-  // GetVersion returns version information of the server.
   rpc GetVersion(VersionReq) returns (VersionResp) {};
-  // GetDiscovery returns discovery information of the server.
   rpc GetDiscovery(DiscoveryReq) returns (DiscoveryResp) {};
-  // ListRefresh lists all the refresh token entries for a particular user.
   rpc ListRefresh(ListRefreshReq) returns (ListRefreshResp) {};
-  // RevokeRefresh revokes the refresh token for the provided user-client pair.
-  //
-  // Note that each user-client pair can have only one refresh token at a time.
   rpc RevokeRefresh(RevokeRefreshReq) returns (RevokeRefreshResp) {};
-  // VerifyPassword returns whether a password matches a hash for a specific email or not.
   rpc VerifyPassword(VerifyPasswordReq) returns (VerifyPasswordResp) {};
+}
+
+// NEW: PlatformUserService defines RPCs for managing platform users.
+service PlatformUserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse); // Using DeleteUserResponse with Empty
 }

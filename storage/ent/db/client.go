@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/dexidp/dex/storage/ent/db/authcode"
 	"github.com/dexidp/dex/storage/ent/db/authrequest"
 	"github.com/dexidp/dex/storage/ent/db/connector"
@@ -23,7 +24,9 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformuser"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
+	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // Client is the client that holds all ent builders.
@@ -49,8 +52,12 @@ type Client struct {
 	OfflineSession *OfflineSessionClient
 	// Password is the client for interacting with the Password builders.
 	Password *PasswordClient
+	// PlatformUser is the client for interacting with the PlatformUser builders.
+	PlatformUser *PlatformUserClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// UserAppRole is the client for interacting with the UserAppRole builders.
+	UserAppRole *UserAppRoleClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -71,7 +78,9 @@ func (c *Client) init() {
 	c.OAuth2Client = NewOAuth2ClientClient(c.config)
 	c.OfflineSession = NewOfflineSessionClient(c.config)
 	c.Password = NewPasswordClient(c.config)
+	c.PlatformUser = NewPlatformUserClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
+	c.UserAppRole = NewUserAppRoleClient(c.config)
 }
 
 type (
@@ -173,7 +182,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		OAuth2Client:   NewOAuth2ClientClient(cfg),
 		OfflineSession: NewOfflineSessionClient(cfg),
 		Password:       NewPasswordClient(cfg),
+		PlatformUser:   NewPlatformUserClient(cfg),
 		RefreshToken:   NewRefreshTokenClient(cfg),
+		UserAppRole:    NewUserAppRoleClient(cfg),
 	}, nil
 }
 
@@ -202,7 +213,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		OAuth2Client:   NewOAuth2ClientClient(cfg),
 		OfflineSession: NewOfflineSessionClient(cfg),
 		Password:       NewPasswordClient(cfg),
+		PlatformUser:   NewPlatformUserClient(cfg),
 		RefreshToken:   NewRefreshTokenClient(cfg),
+		UserAppRole:    NewUserAppRoleClient(cfg),
 	}, nil
 }
 
@@ -233,7 +246,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthCode, c.AuthRequest, c.Connector, c.DeviceRequest, c.DeviceToken, c.Keys,
-		c.OAuth2Client, c.OfflineSession, c.Password, c.RefreshToken,
+		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformUser, c.RefreshToken,
+		c.UserAppRole,
 	} {
 		n.Use(hooks...)
 	}
@@ -244,7 +258,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthCode, c.AuthRequest, c.Connector, c.DeviceRequest, c.DeviceToken, c.Keys,
-		c.OAuth2Client, c.OfflineSession, c.Password, c.RefreshToken,
+		c.OAuth2Client, c.OfflineSession, c.Password, c.PlatformUser, c.RefreshToken,
+		c.UserAppRole,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -271,8 +286,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OfflineSession.mutate(ctx, m)
 	case *PasswordMutation:
 		return c.Password.mutate(ctx, m)
+	case *PlatformUserMutation:
+		return c.PlatformUser.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
+	case *UserAppRoleMutation:
+		return c.UserAppRole.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("db: unknown mutation type %T", m)
 	}
@@ -1475,6 +1494,155 @@ func (c *PasswordClient) mutate(ctx context.Context, m *PasswordMutation) (Value
 	}
 }
 
+// PlatformUserClient is a client for the PlatformUser schema.
+type PlatformUserClient struct {
+	config
+}
+
+// NewPlatformUserClient returns a client for the PlatformUser from the given config.
+func NewPlatformUserClient(c config) *PlatformUserClient {
+	return &PlatformUserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `platformuser.Hooks(f(g(h())))`.
+func (c *PlatformUserClient) Use(hooks ...Hook) {
+	c.hooks.PlatformUser = append(c.hooks.PlatformUser, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `platformuser.Intercept(f(g(h())))`.
+func (c *PlatformUserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlatformUser = append(c.inters.PlatformUser, interceptors...)
+}
+
+// Create returns a builder for creating a PlatformUser entity.
+func (c *PlatformUserClient) Create() *PlatformUserCreate {
+	mutation := newPlatformUserMutation(c.config, OpCreate)
+	return &PlatformUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlatformUser entities.
+func (c *PlatformUserClient) CreateBulk(builders ...*PlatformUserCreate) *PlatformUserCreateBulk {
+	return &PlatformUserCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlatformUserClient) MapCreateBulk(slice any, setFunc func(*PlatformUserCreate, int)) *PlatformUserCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlatformUserCreateBulk{err: fmt.Errorf("calling to PlatformUserClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlatformUserCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlatformUserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlatformUser.
+func (c *PlatformUserClient) Update() *PlatformUserUpdate {
+	mutation := newPlatformUserMutation(c.config, OpUpdate)
+	return &PlatformUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlatformUserClient) UpdateOne(pu *PlatformUser) *PlatformUserUpdateOne {
+	mutation := newPlatformUserMutation(c.config, OpUpdateOne, withPlatformUser(pu))
+	return &PlatformUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlatformUserClient) UpdateOneID(id int) *PlatformUserUpdateOne {
+	mutation := newPlatformUserMutation(c.config, OpUpdateOne, withPlatformUserID(id))
+	return &PlatformUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlatformUser.
+func (c *PlatformUserClient) Delete() *PlatformUserDelete {
+	mutation := newPlatformUserMutation(c.config, OpDelete)
+	return &PlatformUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlatformUserClient) DeleteOne(pu *PlatformUser) *PlatformUserDeleteOne {
+	return c.DeleteOneID(pu.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlatformUserClient) DeleteOneID(id int) *PlatformUserDeleteOne {
+	builder := c.Delete().Where(platformuser.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlatformUserDeleteOne{builder}
+}
+
+// Query returns a query builder for PlatformUser.
+func (c *PlatformUserClient) Query() *PlatformUserQuery {
+	return &PlatformUserQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlatformUser},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlatformUser entity by its id.
+func (c *PlatformUserClient) Get(ctx context.Context, id int) (*PlatformUser, error) {
+	return c.Query().Where(platformuser.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlatformUserClient) GetX(ctx context.Context, id int) *PlatformUser {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAssignments queries the assignments edge of a PlatformUser.
+func (c *PlatformUserClient) QueryAssignments(pu *PlatformUser) *UserAppRoleQuery {
+	query := (&UserAppRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(platformuser.Table, platformuser.FieldID, id),
+			sqlgraph.To(userapprole.Table, userapprole.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, platformuser.AssignmentsTable, platformuser.AssignmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlatformUserClient) Hooks() []Hook {
+	return c.hooks.PlatformUser
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlatformUserClient) Interceptors() []Interceptor {
+	return c.inters.PlatformUser
+}
+
+func (c *PlatformUserClient) mutate(ctx context.Context, m *PlatformUserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlatformUserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlatformUserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlatformUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlatformUserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown PlatformUser mutation op: %q", m.Op())
+	}
+}
+
 // RefreshTokenClient is a client for the RefreshToken schema.
 type RefreshTokenClient struct {
 	config
@@ -1608,14 +1776,149 @@ func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation
 	}
 }
 
+// UserAppRoleClient is a client for the UserAppRole schema.
+type UserAppRoleClient struct {
+	config
+}
+
+// NewUserAppRoleClient returns a client for the UserAppRole from the given config.
+func NewUserAppRoleClient(c config) *UserAppRoleClient {
+	return &UserAppRoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userapprole.Hooks(f(g(h())))`.
+func (c *UserAppRoleClient) Use(hooks ...Hook) {
+	c.hooks.UserAppRole = append(c.hooks.UserAppRole, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userapprole.Intercept(f(g(h())))`.
+func (c *UserAppRoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserAppRole = append(c.inters.UserAppRole, interceptors...)
+}
+
+// Create returns a builder for creating a UserAppRole entity.
+func (c *UserAppRoleClient) Create() *UserAppRoleCreate {
+	mutation := newUserAppRoleMutation(c.config, OpCreate)
+	return &UserAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserAppRole entities.
+func (c *UserAppRoleClient) CreateBulk(builders ...*UserAppRoleCreate) *UserAppRoleCreateBulk {
+	return &UserAppRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserAppRoleClient) MapCreateBulk(slice any, setFunc func(*UserAppRoleCreate, int)) *UserAppRoleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserAppRoleCreateBulk{err: fmt.Errorf("calling to UserAppRoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserAppRoleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserAppRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserAppRole.
+func (c *UserAppRoleClient) Update() *UserAppRoleUpdate {
+	mutation := newUserAppRoleMutation(c.config, OpUpdate)
+	return &UserAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserAppRoleClient) UpdateOne(uar *UserAppRole) *UserAppRoleUpdateOne {
+	mutation := newUserAppRoleMutation(c.config, OpUpdateOne, withUserAppRole(uar))
+	return &UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserAppRoleClient) UpdateOneID(id int) *UserAppRoleUpdateOne {
+	mutation := newUserAppRoleMutation(c.config, OpUpdateOne, withUserAppRoleID(id))
+	return &UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserAppRole.
+func (c *UserAppRoleClient) Delete() *UserAppRoleDelete {
+	mutation := newUserAppRoleMutation(c.config, OpDelete)
+	return &UserAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserAppRoleClient) DeleteOne(uar *UserAppRole) *UserAppRoleDeleteOne {
+	return c.DeleteOneID(uar.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserAppRoleClient) DeleteOneID(id int) *UserAppRoleDeleteOne {
+	builder := c.Delete().Where(userapprole.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserAppRoleDeleteOne{builder}
+}
+
+// Query returns a query builder for UserAppRole.
+func (c *UserAppRoleClient) Query() *UserAppRoleQuery {
+	return &UserAppRoleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserAppRole},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserAppRole entity by its id.
+func (c *UserAppRoleClient) Get(ctx context.Context, id int) (*UserAppRole, error) {
+	return c.Query().Where(userapprole.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserAppRoleClient) GetX(ctx context.Context, id int) *UserAppRole {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserAppRoleClient) Hooks() []Hook {
+	return c.hooks.UserAppRole
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserAppRoleClient) Interceptors() []Interceptor {
+	return c.inters.UserAppRole
+}
+
+func (c *UserAppRoleClient) mutate(ctx context.Context, m *UserAppRoleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserAppRoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserAppRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserAppRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserAppRoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown UserAppRole mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		AuthCode, AuthRequest, Connector, DeviceRequest, DeviceToken, Keys,
-		OAuth2Client, OfflineSession, Password, RefreshToken []ent.Hook
+		OAuth2Client, OfflineSession, Password, PlatformUser, RefreshToken,
+		UserAppRole []ent.Hook
 	}
 	inters struct {
 		AuthCode, AuthRequest, Connector, DeviceRequest, DeviceToken, Keys,
-		OAuth2Client, OfflineSession, Password, RefreshToken []ent.Interceptor
+		OAuth2Client, OfflineSession, Password, PlatformUser, RefreshToken,
+		UserAppRole []ent.Interceptor
 	}
 )

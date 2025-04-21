@@ -34,7 +34,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/dexidp/dex/api/v2"
+	"github.com/dexidp/dex/api/v2" // Add the 'apiV2' alias here
 	"github.com/dexidp/dex/server"
 	"github.com/dexidp/dex/storage"
 )
@@ -508,6 +508,20 @@ func runServe(options serveOptions) error {
 		}
 
 		grpcSrv := grpc.NewServer(grpcOptions...)
+		// <<< --- BEGIN ADDED CODE --- <<<
+
+		// Instantiate your new Platform User Service
+		// IMPORTANT: This assumes you have modified the NewPlatformUserService constructor
+		// in server/platform_user_service.go to accept the storage.Storage interface 's'
+		// and can correctly get the *db.Client from it (as discussed previously).
+		platformUserSvc := server.NewPlatformUserService(s) // 's' is the storage.Storage instance
+
+		// Register your new service with the gRPC server
+		// Assumes the service name defined in your .proto file was "UserService"
+		api.RegisterPlatformUserServiceServer(grpcSrv, platformUserSvc)
+		logger.Info("registered Platform User gRPC service") // Log registration
+
+		// --- END ADDED CODE --- >>>
 		api.RegisterDexServer(grpcSrv, server.NewAPI(serverConfig.Storage, logger, version, serv))
 
 		grpcMetrics.InitializeMetrics(grpcSrv)

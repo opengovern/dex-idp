@@ -30,8 +30,12 @@ type Tx struct {
 	OfflineSession *OfflineSessionClient
 	// Password is the client for interacting with the Password builders.
 	Password *PasswordClient
+	// PlatformUser is the client for interacting with the PlatformUser builders.
+	PlatformUser *PlatformUserClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// UserAppRole is the client for interacting with the UserAppRole builders.
+	UserAppRole *UserAppRoleClient
 
 	// lazily loaded.
 	client     *Client
@@ -172,7 +176,9 @@ func (tx *Tx) init() {
 	tx.OAuth2Client = NewOAuth2ClientClient(tx.config)
 	tx.OfflineSession = NewOfflineSessionClient(tx.config)
 	tx.Password = NewPasswordClient(tx.config)
+	tx.PlatformUser = NewPlatformUserClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
+	tx.UserAppRole = NewUserAppRoleClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

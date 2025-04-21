@@ -21,7 +21,9 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformuser"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
+	"github.com/dexidp/dex/storage/ent/db/userapprole"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -91,7 +93,9 @@ func checkColumn(table, column string) error {
 			oauth2client.Table:   oauth2client.ValidColumn,
 			offlinesession.Table: offlinesession.ValidColumn,
 			password.Table:       password.ValidColumn,
+			platformuser.Table:   platformuser.ValidColumn,
 			refreshtoken.Table:   refreshtoken.ValidColumn,
+			userapprole.Table:    userapprole.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

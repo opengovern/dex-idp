@@ -117,6 +117,18 @@ func (f PasswordFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.PasswordMutation", m)
 }
 
+// The PlatformUserFunc type is an adapter to allow the use of ordinary
+// function as PlatformUser mutator.
+type PlatformUserFunc func(context.Context, *db.PlatformUserMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PlatformUserFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.PlatformUserMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.PlatformUserMutation", m)
+}
+
 // The RefreshTokenFunc type is an adapter to allow the use of ordinary
 // function as RefreshToken mutator.
 type RefreshTokenFunc func(context.Context, *db.RefreshTokenMutation) (db.Value, error)
@@ -127,6 +139,18 @@ func (f RefreshTokenFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.RefreshTokenMutation", m)
+}
+
+// The UserAppRoleFunc type is an adapter to allow the use of ordinary
+// function as UserAppRole mutator.
+type UserAppRoleFunc func(context.Context, *db.UserAppRoleMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAppRoleFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.UserAppRoleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.UserAppRoleMutation", m)
 }
 
 // Condition is a hook condition function.

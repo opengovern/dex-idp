@@ -14,6 +14,7 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformuser"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
 	"github.com/dexidp/dex/storage/ent/schema"
 )
@@ -216,6 +217,29 @@ func init() {
 	passwordDescUserID := passwordFields[3].Descriptor()
 	// password.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	password.UserIDValidator = passwordDescUserID.Validators[0].(func(string) error)
+	platformuserMixin := schema.PlatformUser{}.Mixin()
+	platformuserMixinFields0 := platformuserMixin[0].Fields()
+	_ = platformuserMixinFields0
+	platformuserFields := schema.PlatformUser{}.Fields()
+	_ = platformuserFields
+	// platformuserDescCreateTime is the schema descriptor for create_time field.
+	platformuserDescCreateTime := platformuserMixinFields0[0].Descriptor()
+	// platformuser.DefaultCreateTime holds the default value on creation for the create_time field.
+	platformuser.DefaultCreateTime = platformuserDescCreateTime.Default.(func() time.Time)
+	// platformuserDescUpdateTime is the schema descriptor for update_time field.
+	platformuserDescUpdateTime := platformuserMixinFields0[1].Descriptor()
+	// platformuser.DefaultUpdateTime holds the default value on creation for the update_time field.
+	platformuser.DefaultUpdateTime = platformuserDescUpdateTime.Default.(func() time.Time)
+	// platformuser.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	platformuser.UpdateDefaultUpdateTime = platformuserDescUpdateTime.UpdateDefault.(func() time.Time)
+	// platformuserDescEmail is the schema descriptor for email field.
+	platformuserDescEmail := platformuserFields[0].Descriptor()
+	// platformuser.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	platformuser.EmailValidator = platformuserDescEmail.Validators[0].(func(string) error)
+	// platformuserDescIsActive is the schema descriptor for is_active field.
+	platformuserDescIsActive := platformuserFields[2].Descriptor()
+	// platformuser.DefaultIsActive holds the default value on creation for the is_active field.
+	platformuser.DefaultIsActive = platformuserDescIsActive.Default.(bool)
 	refreshtokenFields := schema.RefreshToken{}.Fields()
 	_ = refreshtokenFields
 	// refreshtokenDescClientID is the schema descriptor for client_id field.

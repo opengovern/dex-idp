@@ -169,6 +169,31 @@ var (
 		Columns:    PasswordsColumns,
 		PrimaryKey: []*schema.Column{PasswordsColumns[0]},
 	}
+	// PlatformUsersColumns holds the columns for the "platform_users" table.
+	PlatformUsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "display_name", Type: field.TypeString, Nullable: true},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "first_connector_id", Type: field.TypeString, Nullable: true},
+		{Name: "first_federated_user_id", Type: field.TypeString, Nullable: true},
+		{Name: "last_login", Type: field.TypeTime, Nullable: true},
+	}
+	// PlatformUsersTable holds the schema information for the "platform_users" table.
+	PlatformUsersTable = &schema.Table{
+		Name:       "platform_users",
+		Columns:    PlatformUsersColumns,
+		PrimaryKey: []*schema.Column{PlatformUsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platformuser_email",
+				Unique:  false,
+				Columns: []*schema.Column{PlatformUsersColumns[3]},
+			},
+		},
+	}
 	// RefreshTokensColumns holds the columns for the "refresh_tokens" table.
 	RefreshTokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 2147483647, SchemaType: map[string]string{"mysql": "varchar(384)", "postgres": "text", "sqlite3": "text"}},
@@ -194,6 +219,25 @@ var (
 		Columns:    RefreshTokensColumns,
 		PrimaryKey: []*schema.Column{RefreshTokensColumns[0]},
 	}
+	// UserAppRolesColumns holds the columns for the "user_app_roles" table.
+	UserAppRolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "platform_user_assignments", Type: field.TypeInt, Nullable: true},
+	}
+	// UserAppRolesTable holds the schema information for the "user_app_roles" table.
+	UserAppRolesTable = &schema.Table{
+		Name:       "user_app_roles",
+		Columns:    UserAppRolesColumns,
+		PrimaryKey: []*schema.Column{UserAppRolesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_app_roles_platform_users_assignments",
+				Columns:    []*schema.Column{UserAppRolesColumns[1]},
+				RefColumns: []*schema.Column{PlatformUsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AuthCodesTable,
@@ -205,9 +249,12 @@ var (
 		Oauth2clientsTable,
 		OfflineSessionsTable,
 		PasswordsTable,
+		PlatformUsersTable,
 		RefreshTokensTable,
+		UserAppRolesTable,
 	}
 )
 
 func init() {
+	UserAppRolesTable.ForeignKeys[0].RefTable = PlatformUsersTable
 }

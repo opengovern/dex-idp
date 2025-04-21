@@ -33,5 +33,11 @@ type OfflineSession func(*sql.Selector)
 // Password is the predicate function for password builders.
 type Password func(*sql.Selector)
 
+// PlatformUser is the predicate function for platformuser builders.
+type PlatformUser func(*sql.Selector)
+
 // RefreshToken is the predicate function for refreshtoken builders.
 type RefreshToken func(*sql.Selector)
+
+// UserAppRole is the predicate function for userapprole builders.
+type UserAppRole func(*sql.Selector)

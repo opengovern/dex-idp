@@ -21,6 +21,7 @@ import (
 	"github.com/dexidp/dex/storage/ent/db/oauth2client"
 	"github.com/dexidp/dex/storage/ent/db/offlinesession"
 	"github.com/dexidp/dex/storage/ent/db/password"
+	"github.com/dexidp/dex/storage/ent/db/platformuser"
 	"github.com/dexidp/dex/storage/ent/db/predicate"
 	"github.com/dexidp/dex/storage/ent/db/refreshtoken"
 	jose "github.com/go-jose/go-jose/v4"
@@ -44,7 +45,9 @@ const (
 	TypeOAuth2Client   = "OAuth2Client"
 	TypeOfflineSession = "OfflineSession"
 	TypePassword       = "Password"
+	TypePlatformUser   = "PlatformUser"
 	TypeRefreshToken   = "RefreshToken"
+	TypeUserAppRole    = "UserAppRole"
 )
 
 // AuthCodeMutation represents an operation that mutates the AuthCode nodes in the graph.
@@ -6799,6 +6802,882 @@ func (m *PasswordMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Password edge %s", name)
 }
 
+// PlatformUserMutation represents an operation that mutates the PlatformUser nodes in the graph.
+type PlatformUserMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *int
+	create_time             *time.Time
+	update_time             *time.Time
+	email                   *string
+	display_name            *string
+	is_active               *bool
+	first_connector_id      *string
+	first_federated_user_id *string
+	last_login              *time.Time
+	clearedFields           map[string]struct{}
+	assignments             map[int]struct{}
+	removedassignments      map[int]struct{}
+	clearedassignments      bool
+	done                    bool
+	oldValue                func(context.Context) (*PlatformUser, error)
+	predicates              []predicate.PlatformUser
+}
+
+var _ ent.Mutation = (*PlatformUserMutation)(nil)
+
+// platformuserOption allows management of the mutation configuration using functional options.
+type platformuserOption func(*PlatformUserMutation)
+
+// newPlatformUserMutation creates new mutation for the PlatformUser entity.
+func newPlatformUserMutation(c config, op Op, opts ...platformuserOption) *PlatformUserMutation {
+	m := &PlatformUserMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePlatformUser,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPlatformUserID sets the ID field of the mutation.
+func withPlatformUserID(id int) platformuserOption {
+	return func(m *PlatformUserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PlatformUser
+		)
+		m.oldValue = func(ctx context.Context) (*PlatformUser, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PlatformUser.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPlatformUser sets the old PlatformUser of the mutation.
+func withPlatformUser(node *PlatformUser) platformuserOption {
+	return func(m *PlatformUserMutation) {
+		m.oldValue = func(context.Context) (*PlatformUser, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PlatformUserMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PlatformUserMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PlatformUserMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PlatformUserMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PlatformUser.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *PlatformUserMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *PlatformUserMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *PlatformUserMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *PlatformUserMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *PlatformUserMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *PlatformUserMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetEmail sets the "email" field.
+func (m *PlatformUserMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *PlatformUserMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldEmail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *PlatformUserMutation) ResetEmail() {
+	m.email = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *PlatformUserMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *PlatformUserMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (m *PlatformUserMutation) ClearDisplayName() {
+	m.display_name = nil
+	m.clearedFields[platformuser.FieldDisplayName] = struct{}{}
+}
+
+// DisplayNameCleared returns if the "display_name" field was cleared in this mutation.
+func (m *PlatformUserMutation) DisplayNameCleared() bool {
+	_, ok := m.clearedFields[platformuser.FieldDisplayName]
+	return ok
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *PlatformUserMutation) ResetDisplayName() {
+	m.display_name = nil
+	delete(m.clearedFields, platformuser.FieldDisplayName)
+}
+
+// SetIsActive sets the "is_active" field.
+func (m *PlatformUserMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *PlatformUserMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *PlatformUserMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
+// SetFirstConnectorID sets the "first_connector_id" field.
+func (m *PlatformUserMutation) SetFirstConnectorID(s string) {
+	m.first_connector_id = &s
+}
+
+// FirstConnectorID returns the value of the "first_connector_id" field in the mutation.
+func (m *PlatformUserMutation) FirstConnectorID() (r string, exists bool) {
+	v := m.first_connector_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstConnectorID returns the old "first_connector_id" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldFirstConnectorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstConnectorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstConnectorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstConnectorID: %w", err)
+	}
+	return oldValue.FirstConnectorID, nil
+}
+
+// ClearFirstConnectorID clears the value of the "first_connector_id" field.
+func (m *PlatformUserMutation) ClearFirstConnectorID() {
+	m.first_connector_id = nil
+	m.clearedFields[platformuser.FieldFirstConnectorID] = struct{}{}
+}
+
+// FirstConnectorIDCleared returns if the "first_connector_id" field was cleared in this mutation.
+func (m *PlatformUserMutation) FirstConnectorIDCleared() bool {
+	_, ok := m.clearedFields[platformuser.FieldFirstConnectorID]
+	return ok
+}
+
+// ResetFirstConnectorID resets all changes to the "first_connector_id" field.
+func (m *PlatformUserMutation) ResetFirstConnectorID() {
+	m.first_connector_id = nil
+	delete(m.clearedFields, platformuser.FieldFirstConnectorID)
+}
+
+// SetFirstFederatedUserID sets the "first_federated_user_id" field.
+func (m *PlatformUserMutation) SetFirstFederatedUserID(s string) {
+	m.first_federated_user_id = &s
+}
+
+// FirstFederatedUserID returns the value of the "first_federated_user_id" field in the mutation.
+func (m *PlatformUserMutation) FirstFederatedUserID() (r string, exists bool) {
+	v := m.first_federated_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstFederatedUserID returns the old "first_federated_user_id" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldFirstFederatedUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstFederatedUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstFederatedUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstFederatedUserID: %w", err)
+	}
+	return oldValue.FirstFederatedUserID, nil
+}
+
+// ClearFirstFederatedUserID clears the value of the "first_federated_user_id" field.
+func (m *PlatformUserMutation) ClearFirstFederatedUserID() {
+	m.first_federated_user_id = nil
+	m.clearedFields[platformuser.FieldFirstFederatedUserID] = struct{}{}
+}
+
+// FirstFederatedUserIDCleared returns if the "first_federated_user_id" field was cleared in this mutation.
+func (m *PlatformUserMutation) FirstFederatedUserIDCleared() bool {
+	_, ok := m.clearedFields[platformuser.FieldFirstFederatedUserID]
+	return ok
+}
+
+// ResetFirstFederatedUserID resets all changes to the "first_federated_user_id" field.
+func (m *PlatformUserMutation) ResetFirstFederatedUserID() {
+	m.first_federated_user_id = nil
+	delete(m.clearedFields, platformuser.FieldFirstFederatedUserID)
+}
+
+// SetLastLogin sets the "last_login" field.
+func (m *PlatformUserMutation) SetLastLogin(t time.Time) {
+	m.last_login = &t
+}
+
+// LastLogin returns the value of the "last_login" field in the mutation.
+func (m *PlatformUserMutation) LastLogin() (r time.Time, exists bool) {
+	v := m.last_login
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastLogin returns the old "last_login" field's value of the PlatformUser entity.
+// If the PlatformUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlatformUserMutation) OldLastLogin(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastLogin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastLogin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastLogin: %w", err)
+	}
+	return oldValue.LastLogin, nil
+}
+
+// ClearLastLogin clears the value of the "last_login" field.
+func (m *PlatformUserMutation) ClearLastLogin() {
+	m.last_login = nil
+	m.clearedFields[platformuser.FieldLastLogin] = struct{}{}
+}
+
+// LastLoginCleared returns if the "last_login" field was cleared in this mutation.
+func (m *PlatformUserMutation) LastLoginCleared() bool {
+	_, ok := m.clearedFields[platformuser.FieldLastLogin]
+	return ok
+}
+
+// ResetLastLogin resets all changes to the "last_login" field.
+func (m *PlatformUserMutation) ResetLastLogin() {
+	m.last_login = nil
+	delete(m.clearedFields, platformuser.FieldLastLogin)
+}
+
+// AddAssignmentIDs adds the "assignments" edge to the UserAppRole entity by ids.
+func (m *PlatformUserMutation) AddAssignmentIDs(ids ...int) {
+	if m.assignments == nil {
+		m.assignments = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.assignments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAssignments clears the "assignments" edge to the UserAppRole entity.
+func (m *PlatformUserMutation) ClearAssignments() {
+	m.clearedassignments = true
+}
+
+// AssignmentsCleared reports if the "assignments" edge to the UserAppRole entity was cleared.
+func (m *PlatformUserMutation) AssignmentsCleared() bool {
+	return m.clearedassignments
+}
+
+// RemoveAssignmentIDs removes the "assignments" edge to the UserAppRole entity by IDs.
+func (m *PlatformUserMutation) RemoveAssignmentIDs(ids ...int) {
+	if m.removedassignments == nil {
+		m.removedassignments = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.assignments, ids[i])
+		m.removedassignments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAssignments returns the removed IDs of the "assignments" edge to the UserAppRole entity.
+func (m *PlatformUserMutation) RemovedAssignmentsIDs() (ids []int) {
+	for id := range m.removedassignments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AssignmentsIDs returns the "assignments" edge IDs in the mutation.
+func (m *PlatformUserMutation) AssignmentsIDs() (ids []int) {
+	for id := range m.assignments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAssignments resets all changes to the "assignments" edge.
+func (m *PlatformUserMutation) ResetAssignments() {
+	m.assignments = nil
+	m.clearedassignments = false
+	m.removedassignments = nil
+}
+
+// Where appends a list predicates to the PlatformUserMutation builder.
+func (m *PlatformUserMutation) Where(ps ...predicate.PlatformUser) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PlatformUserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PlatformUserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PlatformUser, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PlatformUserMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PlatformUserMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PlatformUser).
+func (m *PlatformUserMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PlatformUserMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.create_time != nil {
+		fields = append(fields, platformuser.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, platformuser.FieldUpdateTime)
+	}
+	if m.email != nil {
+		fields = append(fields, platformuser.FieldEmail)
+	}
+	if m.display_name != nil {
+		fields = append(fields, platformuser.FieldDisplayName)
+	}
+	if m.is_active != nil {
+		fields = append(fields, platformuser.FieldIsActive)
+	}
+	if m.first_connector_id != nil {
+		fields = append(fields, platformuser.FieldFirstConnectorID)
+	}
+	if m.first_federated_user_id != nil {
+		fields = append(fields, platformuser.FieldFirstFederatedUserID)
+	}
+	if m.last_login != nil {
+		fields = append(fields, platformuser.FieldLastLogin)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PlatformUserMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case platformuser.FieldCreateTime:
+		return m.CreateTime()
+	case platformuser.FieldUpdateTime:
+		return m.UpdateTime()
+	case platformuser.FieldEmail:
+		return m.Email()
+	case platformuser.FieldDisplayName:
+		return m.DisplayName()
+	case platformuser.FieldIsActive:
+		return m.IsActive()
+	case platformuser.FieldFirstConnectorID:
+		return m.FirstConnectorID()
+	case platformuser.FieldFirstFederatedUserID:
+		return m.FirstFederatedUserID()
+	case platformuser.FieldLastLogin:
+		return m.LastLogin()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PlatformUserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case platformuser.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case platformuser.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case platformuser.FieldEmail:
+		return m.OldEmail(ctx)
+	case platformuser.FieldDisplayName:
+		return m.OldDisplayName(ctx)
+	case platformuser.FieldIsActive:
+		return m.OldIsActive(ctx)
+	case platformuser.FieldFirstConnectorID:
+		return m.OldFirstConnectorID(ctx)
+	case platformuser.FieldFirstFederatedUserID:
+		return m.OldFirstFederatedUserID(ctx)
+	case platformuser.FieldLastLogin:
+		return m.OldLastLogin(ctx)
+	}
+	return nil, fmt.Errorf("unknown PlatformUser field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PlatformUserMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case platformuser.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case platformuser.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case platformuser.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
+	case platformuser.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
+		return nil
+	case platformuser.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
+		return nil
+	case platformuser.FieldFirstConnectorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstConnectorID(v)
+		return nil
+	case platformuser.FieldFirstFederatedUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstFederatedUserID(v)
+		return nil
+	case platformuser.FieldLastLogin:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastLogin(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PlatformUser field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PlatformUserMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PlatformUserMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PlatformUserMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PlatformUser numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PlatformUserMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(platformuser.FieldDisplayName) {
+		fields = append(fields, platformuser.FieldDisplayName)
+	}
+	if m.FieldCleared(platformuser.FieldFirstConnectorID) {
+		fields = append(fields, platformuser.FieldFirstConnectorID)
+	}
+	if m.FieldCleared(platformuser.FieldFirstFederatedUserID) {
+		fields = append(fields, platformuser.FieldFirstFederatedUserID)
+	}
+	if m.FieldCleared(platformuser.FieldLastLogin) {
+		fields = append(fields, platformuser.FieldLastLogin)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PlatformUserMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PlatformUserMutation) ClearField(name string) error {
+	switch name {
+	case platformuser.FieldDisplayName:
+		m.ClearDisplayName()
+		return nil
+	case platformuser.FieldFirstConnectorID:
+		m.ClearFirstConnectorID()
+		return nil
+	case platformuser.FieldFirstFederatedUserID:
+		m.ClearFirstFederatedUserID()
+		return nil
+	case platformuser.FieldLastLogin:
+		m.ClearLastLogin()
+		return nil
+	}
+	return fmt.Errorf("unknown PlatformUser nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PlatformUserMutation) ResetField(name string) error {
+	switch name {
+	case platformuser.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case platformuser.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case platformuser.FieldEmail:
+		m.ResetEmail()
+		return nil
+	case platformuser.FieldDisplayName:
+		m.ResetDisplayName()
+		return nil
+	case platformuser.FieldIsActive:
+		m.ResetIsActive()
+		return nil
+	case platformuser.FieldFirstConnectorID:
+		m.ResetFirstConnectorID()
+		return nil
+	case platformuser.FieldFirstFederatedUserID:
+		m.ResetFirstFederatedUserID()
+		return nil
+	case platformuser.FieldLastLogin:
+		m.ResetLastLogin()
+		return nil
+	}
+	return fmt.Errorf("unknown PlatformUser field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PlatformUserMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.assignments != nil {
+		edges = append(edges, platformuser.EdgeAssignments)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PlatformUserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case platformuser.EdgeAssignments:
+		ids := make([]ent.Value, 0, len(m.assignments))
+		for id := range m.assignments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PlatformUserMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedassignments != nil {
+		edges = append(edges, platformuser.EdgeAssignments)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PlatformUserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case platformuser.EdgeAssignments:
+		ids := make([]ent.Value, 0, len(m.removedassignments))
+		for id := range m.removedassignments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PlatformUserMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedassignments {
+		edges = append(edges, platformuser.EdgeAssignments)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PlatformUserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case platformuser.EdgeAssignments:
+		return m.clearedassignments
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PlatformUserMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PlatformUser unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PlatformUserMutation) ResetEdge(name string) error {
+	switch name {
+	case platformuser.EdgeAssignments:
+		m.ResetAssignments()
+		return nil
+	}
+	return fmt.Errorf("unknown PlatformUser edge %s", name)
+}
+
 // RefreshTokenMutation represents an operation that mutates the RefreshToken nodes in the graph.
 type RefreshTokenMutation struct {
 	config
@@ -7979,4 +8858,268 @@ func (m *RefreshTokenMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *RefreshTokenMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown RefreshToken edge %s", name)
+}
+
+// UserAppRoleMutation represents an operation that mutates the UserAppRole nodes in the graph.
+type UserAppRoleMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*UserAppRole, error)
+	predicates    []predicate.UserAppRole
+}
+
+var _ ent.Mutation = (*UserAppRoleMutation)(nil)
+
+// userapproleOption allows management of the mutation configuration using functional options.
+type userapproleOption func(*UserAppRoleMutation)
+
+// newUserAppRoleMutation creates new mutation for the UserAppRole entity.
+func newUserAppRoleMutation(c config, op Op, opts ...userapproleOption) *UserAppRoleMutation {
+	m := &UserAppRoleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUserAppRole,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserAppRoleID sets the ID field of the mutation.
+func withUserAppRoleID(id int) userapproleOption {
+	return func(m *UserAppRoleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *UserAppRole
+		)
+		m.oldValue = func(ctx context.Context) (*UserAppRole, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().UserAppRole.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUserAppRole sets the old UserAppRole of the mutation.
+func withUserAppRole(node *UserAppRole) userapproleOption {
+	return func(m *UserAppRoleMutation) {
+		m.oldValue = func(context.Context) (*UserAppRole, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UserAppRoleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UserAppRoleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UserAppRoleMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UserAppRoleMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().UserAppRole.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// Where appends a list predicates to the UserAppRoleMutation builder.
+func (m *UserAppRoleMutation) Where(ps ...predicate.UserAppRole) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UserAppRoleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserAppRoleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.UserAppRole, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UserAppRoleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserAppRoleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (UserAppRole).
+func (m *UserAppRoleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UserAppRoleMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UserAppRoleMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UserAppRoleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown UserAppRole field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserAppRoleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown UserAppRole field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UserAppRoleMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UserAppRoleMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserAppRoleMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown UserAppRole numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UserAppRoleMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UserAppRoleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UserAppRoleMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown UserAppRole nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UserAppRoleMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown UserAppRole field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UserAppRoleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UserAppRoleMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UserAppRoleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UserAppRoleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UserAppRoleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UserAppRoleMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UserAppRoleMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown UserAppRole unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UserAppRoleMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown UserAppRole edge %s", name)
 }
