@@ -1,3 +1,4 @@
+// server/server.go
 package server
 
 import (

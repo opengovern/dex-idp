@@ -438,8 +438,11 @@ func runServe(options serveOptions) error {
 
 		// Register CUSTOM Platform User Service (uses separate entClient)
 		if entClient != nil { // Only register if Ent client was successfully initialized
-			platformUserSvc := server.NewPlatformUserService(entClient)     // Pass direct Ent client
-			api.RegisterPlatformUserServiceServer(grpcSrv, platformUserSvc) // Use correct registration name
+			platformStorage := server.NewEntStorage(entClient)                // Use the constructor from platform_storage_impl.go
+			platformUserSvc := server.NewPlatformUserService(platformStorage) // Pass the implementation
+
+			api.RegisterPlatformUserServiceServer(grpcSrv, platformUserSvc)
+
 			logger.Info("registered Platform User gRPC service")
 			// TODO: Add registration for other custom services (Roles, Tokens, etc.) here if needed
 		} else {
