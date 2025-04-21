@@ -1,0 +1,3 @@
+2025-04-21 17:05:56,730 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_04_note_public_id_reuse_check - INFO - --- Starting test: test_scenario_04_note_public_id_reuse_check ---
+2025-04-21 17:05:56,730 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_04_note_public_id_reuse_check - INFO - Skipping Test Scenario 04: Public ID Prefix Reuse (requires specific server logic knowledge)
+2025-04-21 17:05:56,730 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_04_note_public_id_reuse_check - INFO - --- Finished test: test_scenario_04_note_public_id_reuse_check ---

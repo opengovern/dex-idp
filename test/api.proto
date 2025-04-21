@@ -1,0 +1,479 @@
+syntax = "proto3";
+
+package api; // Package name set to 'api' as requested
+
+// Use 'api' alias for Go package for compatibility with existing code
+option go_package = "github.com/dexidp/dex/api/v2;api";
+option java_package = "com.coreos.dex.api";
+
+// Import standard types
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+// -------------------------------------------------------------
+// Original Dex Messages
+// -------------------------------------------------------------
+
+// Client represents an OAuth2 client.
+message Client {
+  string id = 1;
+  string secret = 2;
+  repeated string redirect_uris = 3;
+  repeated string trusted_peers = 4;
+  bool public = 5;
+  string name = 6;
+  string logo_url = 7;
+}
+message GetClientReq { string id = 1; }
+message GetClientResp { Client client = 1; }
+message CreateClientReq { Client client = 1; }
+message CreateClientResp { bool already_exists = 1; Client client = 2; }
+message DeleteClientReq { string id = 1; }
+// --- ADDED BACK for compatibility with server/api.go ---
+message DeleteClientResp {
+  bool not_found = 1;
+}
+message UpdateClientReq { string id = 1; repeated string redirect_uris = 2; repeated string trusted_peers = 3; string name = 4; string logo_url = 5; }
+message UpdateClientResp { bool not_found = 1; }
+message Password { string email = 1; bytes hash = 2; string username = 3; string user_id = 4; }
+message CreatePasswordReq { Password password = 1; }
+message CreatePasswordResp { bool already_exists = 1; }
+message UpdatePasswordReq { string email = 1; bytes new_hash = 2; string new_username = 3; }
+message UpdatePasswordResp { bool not_found = 1; }
+message DeletePasswordReq { string email = 1; }
+// --- ADDED BACK for compatibility with server/api.go ---
+message DeletePasswordResp {
+  bool not_found = 1;
+}
+message ListPasswordReq {}
+message ListPasswordResp { repeated Password passwords = 1; }
+message Connector { string id = 1; string type = 2; string name = 3; bytes config = 4; }
+message CreateConnectorReq { Connector connector = 1; }
+message CreateConnectorResp { bool already_exists = 1; }
+message UpdateConnectorReq { string id = 1; string new_type = 2; string new_name = 3; bytes new_config = 4; }
+message UpdateConnectorResp { bool not_found = 1; }
+message DeleteConnectorReq { string id = 1; }
+// --- ADDED BACK for compatibility with server/api.go ---
+message DeleteConnectorResp {
+  bool not_found = 1;
+}
+message ListConnectorReq {}
+message ListConnectorResp { repeated Connector connectors = 1; }
+message VersionReq {}
+message VersionResp { string server = 1; int32 api = 2; }
+message DiscoveryReq {}
+message DiscoveryResp { string issuer = 1; string authorization_endpoint = 2; string token_endpoint = 3; string jwks_uri = 4; string userinfo_endpoint = 5; string device_authorization_endpoint = 6; string introspection_endpoint = 7; repeated string grant_types_supported = 8; repeated string response_types_supported = 9; repeated string subject_types_supported = 10; repeated string id_token_signing_alg_values_supported = 11; repeated string code_challenge_methods_supported = 12; repeated string scopes_supported = 13; repeated string token_endpoint_auth_methods_supported = 14; repeated string claims_supported = 15; }
+message RefreshTokenRef { string id = 1; string client_id = 2; int64 created_at = 5; int64 last_used = 6; }
+message ListRefreshReq { string user_id = 1; }
+message ListRefreshResp { repeated RefreshTokenRef refresh_tokens = 1; }
+message RevokeRefreshReq { string user_id = 1; string client_id = 2; }
+message RevokeRefreshResp { bool not_found = 1; }
+message VerifyPasswordReq { string email = 1; string password = 2; }
+message VerifyPasswordResp { bool verified = 1; bool not_found = 2; }
+
+
+// #############################################################
+// ## NEW Platform Entity Messages
+// #############################################################
+
+// PlatformUser message - mirrors the Ent schema PlatformUser entity.
+message PlatformUser {
+  string id = 1; // Internal DB ID, exposed as string
+  string email = 2;
+  google.protobuf.StringValue display_name = 3; // Optional
+  bool is_active = 4;
+  google.protobuf.Timestamp create_time = 5;
+  google.protobuf.Timestamp update_time = 6;
+  google.protobuf.Timestamp last_login = 7;  // Optional
+}
+
+// PlatformAppRole message - mirrors the Ent schema PlatformAppRole entity.
+message PlatformAppRole {
+  string id = 1; // Internal DB ID, exposed as string
+  string app_id = 2; // Dex client ID this role belongs to
+  string title = 3; // Unique title within the app_id
+  google.protobuf.StringValue description = 4; // Optional
+  int32 weight = 5; // Optional weight for ordering
+  bool is_active = 6;
+  google.protobuf.Timestamp create_time = 7;
+  google.protobuf.Timestamp update_time = 8;
+}
+
+// PlatformToken message - mirrors the Ent schema PlatformToken entity.
+// Used for Get/List responses. Does NOT include secret hash.
+message PlatformToken {
+  string id = 1; // Internal DB ID, exposed as string
+  string public_id = 2; // Unique public identifier
+  // Field 3 reserved for secret_hash - DO NOT ADD
+  PlatformUser owner = 4; // Nested owner info
+  PlatformAppRole role = 5; // Nested role info
+  bool is_active = 6;
+  google.protobuf.Timestamp expires_at = 7; // Optional expiry
+  google.protobuf.Timestamp create_time = 8;
+  google.protobuf.Timestamp update_time = 9;
+}
+
+// PlatformFederatedIdentity message - mirrors the Ent schema PlatformFederatedIdentity entity.
+message PlatformFederatedIdentity {
+  string id = 1; // Internal DB ID, exposed as string
+  PlatformUser user = 2; // Nested user info
+  string connector_id = 3; // Dex connector ID
+  string connector_subject = 4; // User's subject identifier within the connector
+  google.protobuf.Timestamp create_time = 5;
+  google.protobuf.Timestamp update_time = 6;
+}
+
+// PlatformTokenInfo contains non-sensitive metadata about a stored token record.
+// Used in responses where simpler token details are needed (e.g., verification).
+message PlatformTokenInfo {
+  string id = 1; // Internal storage ID
+  string public_id = 2; // Publicly visible identifier
+  string owner_id = 3; // ID of the owning user
+  string role_id = 4; // ID of the associated application role
+  bool is_active = 5; // Current status
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp expires_at = 8; // Optional: when the token expires
+}
+
+
+// #############################################################
+// ## NEW Platform Service Request/Response Messages
+// #############################################################
+
+// --- PlatformUser Service Messages ---
+
+message CreatePlatformUserRequest {
+  string email = 1;
+  google.protobuf.StringValue display_name = 2;
+  google.protobuf.BoolValue is_active = 3; // Optional initial state (defaults to active/inactive server-side)
+}
+message CreatePlatformUserResponse {
+  PlatformUser platform_user = 1;
+}
+message GetPlatformUserRequest {
+  string id = 1; // PlatformUser internal ID
+}
+message GetPlatformUserResponse {
+  PlatformUser platform_user = 1;
+}
+message ListPlatformUsersRequest {
+  int32 page_size = 1;
+  string page_token = 2; // Cursor (implementation specific, e.g., base64 encoded time+id)
+  google.protobuf.BoolValue filter_is_active = 3; // Optional filter by active status
+  string filter_email_contains = 4; // Optional filter by email content
+}
+message ListPlatformUsersResponse {
+  repeated PlatformUser users = 1;
+  string next_page_token = 2;
+  // int32 total_size = 3; // Optional: total count matching filters
+}
+message UpdatePlatformUserRequest {
+  string id = 1; // ID of user to update
+  google.protobuf.StringValue display_name = 2; // Use wrappers for optional update fields
+  google.protobuf.BoolValue is_active = 3;
+  // Consider FieldMask for more robust partial updates
+  // google.protobuf.FieldMask update_mask = 100;
+}
+message UpdatePlatformUserResponse {
+  PlatformUser platform_user = 1;
+}
+message DeletePlatformUserRequest {
+  string id = 1;
+}
+// Platform Delete response uses google.protobuf.Empty
+
+// --- PlatformAppRole Service Messages ---
+
+message CreatePlatformAppRoleRequest {
+  string app_id = 1; // Required: Associate role with a Dex client ID
+  string title = 2;  // Required: Role title (unique per app_id)
+  google.protobuf.StringValue description = 3;
+  google.protobuf.Int32Value weight = 4;   // Use wrapper if default 0 is meaningful vs not set
+  google.protobuf.BoolValue is_active = 5; // Optional initial state
+}
+message CreatePlatformAppRoleResponse {
+  PlatformAppRole platform_app_role = 1;
+}
+message GetPlatformAppRoleRequest {
+  string id = 1; // Role internal ID
+}
+message GetPlatformAppRoleResponse {
+  PlatformAppRole platform_app_role = 1;
+}
+message ListPlatformAppRolesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  // Filters
+  string filter_app_id = 3; // Likely required filter
+  google.protobuf.BoolValue filter_is_active = 4;
+  string filter_title_contains = 5;
+}
+message ListPlatformAppRolesResponse {
+  repeated PlatformAppRole roles = 1;
+  string next_page_token = 2;
+  // int32 total_size = 3;
+}
+message UpdatePlatformAppRoleRequest {
+  string id = 1; // ID of role to update
+  google.protobuf.StringValue title = 2; // Allow title update? Must maintain uniqueness with app_id
+  google.protobuf.StringValue description = 3;
+  google.protobuf.Int32Value weight = 4;
+  google.protobuf.BoolValue is_active = 5;
+  // google.protobuf.FieldMask update_mask = 100;
+}
+message UpdatePlatformAppRoleResponse {
+  PlatformAppRole platform_app_role = 1;
+}
+message DeletePlatformAppRoleRequest {
+  string id = 1;
+}
+// Platform Delete response uses google.protobuf.Empty
+
+
+// --- PlatformToken Service Messages ---
+
+message CreatePlatformTokenRequest {
+  string owner_id = 1;  // Required: ID of PlatformUser owning the token
+  string role_id = 2;   // Required: ID of PlatformAppRole assigned to token
+  google.protobuf.StringValue public_id_prefix = 3; // Optional prefix for public ID generation
+  google.protobuf.Timestamp expires_at = 4;         // Optional expiry
+  // Optional description (requires schema change to store)
+  // google.protobuf.StringValue description = 5;
+}
+message CreatePlatformTokenResponse {
+  // The created token metadata (nested owner/role info included, NO secret hash)
+  PlatformToken platform_token = 1;
+  // The actual secret token value. This is the ONLY time it's returned.
+  // The client MUST save this securely immediately.
+  string secret = 2;
+}
+message GetPlatformTokenRequest {
+  // Lookup by internal ID is preferred for consistency.
+  string id = 1;
+  // Uncomment if lookup by public_id is needed (requires unique index).
+  // string public_id = 2;
+}
+message GetPlatformTokenResponse {
+  PlatformToken platform_token = 1; // Does NOT include secret_hash or secret
+}
+message ListPlatformTokensRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  // Filters
+  string filter_owner_id = 3;    // Optional: Filter by owner user ID
+  string filter_app_role_id = 4; // Optional: Filter by assigned role ID
+  google.protobuf.BoolValue filter_is_active = 5; // Optional: Filter by active status
+  google.protobuf.BoolValue filter_exclude_expired = 6; // Optional: If true, filter out expired tokens
+}
+message ListPlatformTokensResponse {
+  repeated PlatformToken tokens = 1; // Does NOT include secret_hash or secret
+  string next_page_token = 2;
+  // int32 total_size = 3;
+}
+
+// Request message for updating ONLY the role of a Platform Token.
+message UpdatePlatformTokenRequest {
+  // The internal ID of the token record to update.
+  string id = 1; // Required field
+  // The required ID of the *new* PlatformAppRole to assign to this token.
+  // The referenced role must exist.
+  string new_role_id = 2; // Required field
+}
+message UpdatePlatformTokenResponse {
+  PlatformToken platform_token = 1; // Does NOT include secret_hash or secret
+}
+message DeletePlatformTokenRequest {
+  string id = 1;
+}
+// Platform Delete response uses google.protobuf.Empty
+
+// --- PlatformToken Verification Messages ---
+
+message VerifyPlatformTokenRequest {
+  // The publicly visible part of the token being verified.
+  string public_id = 1; // Required field
+  // The secret part of the token being presented for verification.
+  string secret = 2; // Required field
+}
+
+message VerifyPlatformTokenResponse {
+  // True if the provided secret is valid for the given public_id and the token
+  // is active and not expired; false otherwise.
+  bool verified = 1;
+  // If verification is successful (verified = true), this contains metadata
+  // about the token, which can be used for authorization decisions (e.g., owner, role).
+  // Uses the simpler Info message, not the full nested PlatformToken.
+  PlatformTokenInfo token_info = 2;
+}
+
+
+// --- PlatformFederatedIdentity Service Messages ---
+
+message GetPlatformFederatedIdentityRequest {
+  string id = 1; // Federated Identity internal ID
+}
+message GetPlatformFederatedIdentityResponse {
+  PlatformFederatedIdentity platform_federated_identity = 1;
+}
+message ListPlatformFederatedIdentitiesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  // Filters
+  string filter_platform_user_id = 3; // Optional: Filter by associated platform user ID
+  string filter_connector_id = 4;     // Optional: Filter by the connector ID
+  string filter_connector_subject = 5; // Optional: Filter by subject within the connector
+}
+message ListPlatformFederatedIdentitiesResponse {
+  repeated PlatformFederatedIdentity identities = 1;
+  string next_page_token = 2;
+  // int32 total_size = 3;
+}
+message DeletePlatformFederatedIdentityRequest {
+  string id = 1;
+}
+// Platform Delete response uses google.protobuf.Empty
+
+
+// --- Assignment Messages ---
+
+// User Role Assignments
+message AssignRoleToUserRequest {
+    string platform_user_id = 1; // Required: ID of the user
+    string platform_app_role_id = 2; // Required: ID of the role to assign
+}
+message AssignRoleToUserResponse {
+    // Return ID of the specific assignment record (e.g., user_role_assignments table PK)
+    string assignment_id = 1;
+}
+message RemoveRoleFromUserRequest {
+    string platform_user_id = 1; // Required: ID of the user
+    string platform_app_role_id = 2; // Required: ID of the role to remove
+    // OR string assignment_id = 3; // Allow removal by assignment ID? (Requires unique lookup)
+}
+// Platform Remove response uses google.protobuf.Empty
+
+message ListUserAssignmentsRequest {
+    string platform_user_id = 1; // Required: ID of the user whose roles to list
+    // Optional filters applied to the roles returned
+    string filter_app_id = 2; // Filter roles by the app they belong to
+    google.protobuf.BoolValue filter_assignment_is_active = 3; // Filter by the status of the assignment link itself
+    google.protobuf.BoolValue filter_role_is_active = 4;       // Filter by the status of the role entity
+    // Add pagination if a user can have many roles assigned across many apps
+    // int32 page_size = 101;
+    // string page_token = 102;
+}
+message ListUserAssignmentsResponse {
+    // Return full role details for assigned roles matching filters
+    repeated PlatformAppRole assigned_roles = 1;
+    // string next_page_token = 2;
+}
+
+
+// Identity Role Assignments
+message AssignRoleToIdentityRequest {
+    string platform_federated_identity_id = 1; // Required: ID of the federated identity
+    string platform_app_role_id = 2; // Required: ID of the role to assign
+}
+message AssignRoleToIdentityResponse {
+    string assignment_id = 1; // ID of the platform_identity_role_assignments record
+}
+message RemoveRoleFromIdentityRequest {
+    string platform_federated_identity_id = 1; // Required: ID of the identity
+    string platform_app_role_id = 2; // Required: ID of the role to remove
+    // OR string assignment_id = 3;
+}
+// Platform Remove response uses google.protobuf.Empty
+
+message ListIdentityAssignmentsRequest {
+    string platform_federated_identity_id = 1; // Required: ID of the identity whose roles to list
+    // Optional filters
+    string filter_app_id = 2; // Filter roles by the app they belong to
+    google.protobuf.BoolValue filter_assignment_is_active = 3; // Filter by assignment status
+    google.protobuf.BoolValue filter_role_is_active = 4;       // Filter by role status
+}
+message ListIdentityAssignmentsResponse {
+    // Return full role details for assigned roles matching filters
+    repeated PlatformAppRole assigned_roles = 1;
+}
+
+
+// #############################################################
+// ## Service Definitions
+// #############################################################
+
+// Dex represents the main dex gRPC service.
+// RPC return types use original custom Resp messages for compatibility
+// with the existing server/api.go implementation.
+service Dex {
+  rpc GetClient(GetClientReq) returns (GetClientResp) {};
+  rpc CreateClient(CreateClientReq) returns (CreateClientResp) {};
+  rpc UpdateClient(UpdateClientReq) returns (UpdateClientResp) {};
+  rpc DeleteClient(DeleteClientReq) returns (DeleteClientResp); // Uses DeleteClientResp
+  rpc CreatePassword(CreatePasswordReq) returns (CreatePasswordResp) {};
+  rpc UpdatePassword(UpdatePasswordReq) returns (UpdatePasswordResp) {};
+  rpc DeletePassword(DeletePasswordReq) returns (DeletePasswordResp); // Uses DeletePasswordResp
+  rpc ListPasswords(ListPasswordReq) returns (ListPasswordResp) {};
+  rpc CreateConnector(CreateConnectorReq) returns (CreateConnectorResp) {};
+  rpc UpdateConnector(UpdateConnectorReq) returns (UpdateConnectorResp) {};
+  rpc DeleteConnector(DeleteConnectorReq) returns (DeleteConnectorResp); // Uses DeleteConnectorResp
+  rpc ListConnectors(ListConnectorReq) returns (ListConnectorResp) {};
+  rpc GetVersion(VersionReq) returns (VersionResp) {};
+  rpc GetDiscovery(DiscoveryReq) returns (DiscoveryResp) {};
+  rpc ListRefresh(ListRefreshReq) returns (ListRefreshResp) {};
+  rpc RevokeRefresh(RevokeRefreshReq) returns (RevokeRefreshResp) {};
+  rpc VerifyPassword(VerifyPasswordReq) returns (VerifyPasswordResp) {};
+}
+
+// --- PlatformUserService --- (Combined User CRUD and User-Role Assignment Mgmt)
+// Uses google.protobuf.Empty for Delete/Remove operations following best practices for new code.
+service PlatformUserService {
+  rpc CreateUser(CreatePlatformUserRequest) returns (CreatePlatformUserResponse);
+  rpc GetUser(GetPlatformUserRequest) returns (GetPlatformUserResponse);
+  rpc ListUsers(ListPlatformUsersRequest) returns (ListPlatformUsersResponse);
+  rpc UpdateUser(UpdatePlatformUserRequest) returns (UpdatePlatformUserResponse);
+  rpc DeleteUser(DeletePlatformUserRequest) returns (google.protobuf.Empty); // Use Empty
+  // User Role Assignment Methods
+  rpc AssignRoleToUser(AssignRoleToUserRequest) returns (AssignRoleToUserResponse);
+  rpc RemoveRoleFromUser(RemoveRoleFromUserRequest) returns (google.protobuf.Empty); // Use Empty
+  rpc ListUserAssignments(ListUserAssignmentsRequest) returns (ListUserAssignmentsResponse);
+}
+
+// --- PlatformAppRoleService --- (AppRole CRUD)
+// Uses google.protobuf.Empty for Delete operation following best practices for new code.
+service PlatformAppRoleService {
+    rpc CreatePlatformAppRole(CreatePlatformAppRoleRequest) returns (CreatePlatformAppRoleResponse);
+    rpc GetPlatformAppRole(GetPlatformAppRoleRequest) returns (GetPlatformAppRoleResponse);
+    rpc ListPlatformAppRoles(ListPlatformAppRolesRequest) returns (ListPlatformAppRolesResponse);
+    rpc UpdatePlatformAppRole(UpdatePlatformAppRoleRequest) returns (UpdatePlatformAppRoleResponse);
+    rpc DeletePlatformAppRole(DeletePlatformAppRoleRequest) returns (google.protobuf.Empty); // Use Empty
+}
+
+// --- PlatformTokenService --- (Token CRUD + Verification)
+// Uses google.protobuf.Empty for Delete operation following best practices for new code.
+service PlatformTokenService {
+    // Create returns the secret ONCE. Client must store it.
+    rpc CreatePlatformToken(CreatePlatformTokenRequest) returns (CreatePlatformTokenResponse);
+    // Get/List never return the secret hash.
+    rpc GetPlatformToken(GetPlatformTokenRequest) returns (GetPlatformTokenResponse);
+    rpc ListPlatformTokens(ListPlatformTokensRequest) returns (ListPlatformTokensResponse);
+    // Update allows changing ONLY the assigned role.
+    rpc UpdatePlatformToken(UpdatePlatformTokenRequest) returns (UpdatePlatformTokenResponse); // Uses corrected request
+    rpc DeletePlatformToken(DeletePlatformTokenRequest) returns (google.protobuf.Empty); // Use Empty
+    // Verify checks a presented secret against the stored hash.
+    rpc VerifyPlatformToken(VerifyPlatformTokenRequest) returns (VerifyPlatformTokenResponse);
+}
+
+// --- PlatformFederatedIdentityService --- (Combined Identity Read/Delete and Identity-Role Assignment Mgmt)
+// Uses google.protobuf.Empty for Delete/Remove operations following best practices for new code.
+service PlatformFederatedIdentityService {
+    // Create often implicit via login flow, but Get/List/Delete useful for admin.
+    rpc GetPlatformFederatedIdentity(GetPlatformFederatedIdentityRequest) returns (GetPlatformFederatedIdentityResponse);
+    rpc ListPlatformFederatedIdentities(ListPlatformFederatedIdentitiesRequest) returns (ListPlatformFederatedIdentitiesResponse);
+    rpc DeletePlatformFederatedIdentity(DeletePlatformFederatedIdentityRequest) returns (google.protobuf.Empty); // Use Empty
+    // Identity Role Assignment Methods
+    rpc AssignRoleToIdentity(AssignRoleToIdentityRequest) returns (AssignRoleToIdentityResponse);
+    rpc RemoveRoleFromIdentity(RemoveRoleFromIdentityRequest) returns (google.protobuf.Empty); // Use Empty
+    rpc ListIdentityAssignments(ListIdentityAssignmentsRequest) returns (ListIdentityAssignmentsResponse);
+}

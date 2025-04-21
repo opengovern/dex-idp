@@ -1,0 +1,45 @@
+2025-04-21 17:07:11,746 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - INFO - --- Starting test: test_scenario_08_role_title_uniqueness_violation ---
+2025-04-21 17:07:11,746 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - INFO - Setting up Scenario 08...
+2025-04-21 17:07:11,746 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - DEBUG - Helper: Attempting to create role with title prefix UniqueAdminRoleForTest08 for app app-9ebcf289-364a-4467-9afd-35bdaff54bc5
+2025-04-21 17:07:11,746 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - ERROR - Helper _create_role failed: StatusCode.UNAVAILABLE - failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)
+Traceback (most recent call last):
+  File "/Users/anil/workspace/projects/dex/test/test_platform_services.py", line 129, in _create_role
+    resp = self.role_stub.CreatePlatformAppRole(req)
+  File "/Users/anil/workspace/projects/dex/test/venv/lib/python3.13/site-packages/grpc/_channel.py", line 1181, in __call__
+    return _end_unary_response_blocking(state, call, False, None)
+  File "/Users/anil/workspace/projects/dex/test/venv/lib/python3.13/site-packages/grpc/_channel.py", line 1006, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)", grpc_status:14, created_time:"2025-04-21T17:07:11.746635-04:00"}"
+>
+2025-04-21 17:07:11,746 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - ERROR - Unexpected exception during test_scenario_08
+Traceback (most recent call last):
+  File "/Users/anil/workspace/projects/dex/test/test_platform_services.py", line 129, in _create_role
+    resp = self.role_stub.CreatePlatformAppRole(req)
+  File "/Users/anil/workspace/projects/dex/test/venv/lib/python3.13/site-packages/grpc/_channel.py", line 1181, in __call__
+    return _end_unary_response_blocking(state, call, False, None)
+  File "/Users/anil/workspace/projects/dex/test/venv/lib/python3.13/site-packages/grpc/_channel.py", line 1006, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)", grpc_status:14, created_time:"2025-04-21T17:07:11.746635-04:00"}"
+>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/anil/workspace/projects/dex/test/test_platform_services.py", line 432, in test_scenario_08_role_title_uniqueness_violation
+    role1 = self._create_role(title_prefix=role1_title, app_id=app_id_for_test)
+  File "/Users/anil/workspace/projects/dex/test/test_platform_services.py", line 136, in _create_role
+    self.fail(f"Helper _create_role failed unexpectedly: {e.code()} - {e.details()}")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/case.py", line 732, in fail
+    raise self.failureException(msg)
+AssertionError: Helper _create_role failed unexpectedly: StatusCode.UNAVAILABLE - failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:5557: Failed to connect to remote host: connect: Connection refused (61)
+2025-04-21 17:07:11,747 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - INFO - Cleanup: Deleting test resources...
+2025-04-21 17:07:11,747 - test_platform_services.PlatformServiceIntegrationTests.test_scenario_08_role_title_uniqueness_violation - INFO - --- Finished test: test_scenario_08_role_title_uniqueness_violation ---

@@ -1,0 +1,11 @@
+# test/config.yaml (Ensure this change is made locally)
+storage:
+  type: postgres
+  config:
+    host: postgres # <--- MUST be the service name from docker-compose.yaml
+    port: 5432
+    database: dexdb
+    user: dexuser
+    password: your_secure_password_here # Match docker-compose env var
+    ssl:
+      mode: "disable"

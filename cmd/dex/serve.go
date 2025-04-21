@@ -293,12 +293,12 @@ func runServe(options serveOptions) error {
 
 			// Optional: Run Ent auto-migration on startup (Use with caution in production)
 			logger.Info("running ent auto-migration for platform tables...")
-			// if err := entClient.Schema.Create(context.Background()); err != nil {
-			//  logger.Error("failed to run ent auto-migration", "err", err)
-			//  // Decide if this should be fatal or just a warning
-			//  // return fmt.Errorf("failed running auto migration: %w", err)
-			// }
-			// logger.Info("ent auto-migration complete.")
+			if err := entClient.Schema.Create(context.Background()); err != nil {
+				logger.Error("failed to run ent auto-migration", "err", err)
+				//  // Decide if this should be fatal or just a warning
+				return fmt.Errorf("failed running auto migration: %w", err)
+			}
+			logger.Info("ent auto-migration complete.")
 		}
 
 	} else {
@@ -494,33 +494,34 @@ func runServe(options serveOptions) error {
 		grpcSrv := grpc.NewServer(grpcOptions...)
 
 		// Register CUSTOM Platform Services (using separate platformStorage)
+		// Register CUSTOM Platform Services (using separate platformStorage)
 		if platformStorage != nil { // Check if platform storage was successfully initialized
-			// *** CORRECTED Service Instantiation ***
-			platformUserSvc := platformsvc.NewPlatformUserService(platformStorage) // Use constructor from platform/service
+			// Platform User Service
+			platformUserSvc := platformsvc.NewPlatformUserService(platformStorage) // Assumes constructor exists
 			api.RegisterPlatformUserServiceServer(grpcSrv, platformUserSvc)
 			logger.Info("registered Platform User gRPC service")
 
-			// TODO: Instantiate and register other platform services here
-			// Example:
-			// platformAppRoleSvc := platformsvc.NewPlatformAppRoleService(platformStorage)
-			// api.RegisterPlatformAppRoleServiceServer(grpcSrv, platformAppRoleSvc)
-			// logger.Info("registered Platform AppRole gRPC service")
-			//
-			// platformTokenSvc := platformsvc.NewPlatformTokenService(platformStorage)
-			// api.RegisterPlatformTokenServiceServer(grpcSrv, platformTokenSvc)
-			// logger.Info("registered Platform Token gRPC service")
-			//
-			// platformFedIdSvc := platformsvc.NewPlatformFederatedIdentityService(platformStorage)
-			// api.RegisterPlatformFederatedIdentityServiceServer(grpcSrv, platformFedIdSvc)
-			// logger.Info("registered Platform Federated Identity gRPC service")
+			// *** ADDED: Platform AppRole Service ***
+			platformAppRoleSvc := platformsvc.NewPlatformAppRoleService(platformStorage) // Assumes constructor exists
+			api.RegisterPlatformAppRoleServiceServer(grpcSrv, platformAppRoleSvc)
+			logger.Info("registered Platform AppRole gRPC service")
+
+			// *** ADDED: Platform Token Service ***
+			platformTokenSvc := platformsvc.NewPlatformTokenService(platformStorage) // Assumes constructor exists
+			api.RegisterPlatformTokenServiceServer(grpcSrv, platformTokenSvc)
+			logger.Info("registered Platform Token gRPC service")
+
+			// *** ADDED: Platform Federated Identity Service ***
+			platformFedIdSvc := platformsvc.NewPlatformFederatedIdentityService(platformStorage) // Assumes constructor exists
+			api.RegisterPlatformFederatedIdentityServiceServer(grpcSrv, platformFedIdSvc)
+			logger.Info("registered Platform Federated Identity gRPC service")
 
 		} else {
 			logger.Warn("skipping registration of Platform gRPC services (requires postgres storage or platformStorage initialization failed)")
 		}
 
 		// Register STANDARD Dex Service (uses standard storage interface 's')
-		// Assume server.NewAPI exists and takes storage.Storage
-		api.RegisterDexServer(grpcSrv, server.NewAPI(s, logger, version, serv))
+		api.RegisterDexServer(grpcSrv, server.NewAPI(s, logger, version, serv)) // server.NewAPI is standard Dex
 		logger.Info("registered standard Dex gRPC service")
 
 		// --- gRPC Metrics & Reflection ---
