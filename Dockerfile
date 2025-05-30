@@ -47,13 +47,13 @@ RUN make release-binary ORG_PATH=${ORG_PATH} PROJ=${PROJ} VERSION=${VERSION}
 RUN xx-verify /go/bin/dex && xx-verify /go/bin/docker-entrypoint
 
 # 3) Stager for config & data
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS stager
+FROM alpine:3.22.0@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715 AS stager
 
 RUN mkdir -p /var/dex /etc/dex
 COPY config.docker.yaml /etc/dex/
 
 # 4) Gomplate
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS gomplate
+FROM alpine:3.22.0@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715 AS gomplate
 
 ARG TARGETOS TARGETARCH TARGETVARIANT
 ENV GOMPLATE_VERSION=v4.3.0
@@ -63,7 +63,7 @@ RUN wget -O /usr/local/bin/gomplate \
     && chmod +x /usr/local/bin/gomplate
 
 # 5) Dummy stages for Dependabot
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS alpine
+FROM alpine:3.22.0@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715 AS alpine
 FROM gcr.io/distroless/static-debian12:nonroot@sha256:c0f429e16b13e583da7e5a6ec20dd656d325d88e6819cafe0adb0828976529dc AS distroless
 
 # 6) Final image
